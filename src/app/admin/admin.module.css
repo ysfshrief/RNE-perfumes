@@ -1,0 +1,169 @@
+.shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+  background: #f2f0eb;
+}
+
+/* Sidebar */
+.sidebar {
+  background: var(--ink);
+  color: var(--paper);
+  display: flex;
+  flex-direction: column;
+  padding: 1.4rem 1rem;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.brand { padding: 0.5rem 0.8rem 1.6rem; display: flex; flex-direction: column; }
+.brandMark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: 0.05em;
+}
+.brandSub {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-top: 0.2rem;
+}
+.nav { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; }
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: var(--radius);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(247, 245, 241, 0.65);
+  transition: background 0.2s, color 0.2s;
+}
+.navLink:hover { background: rgba(247, 245, 241, 0.08); color: var(--paper); }
+.navActive { background: var(--amber); color: var(--ink); }
+.navActive:hover { background: var(--amber); color: var(--ink); }
+.navIcon { width: 18px; text-align: center; font-size: 0.9rem; }
+
+.backToSite {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(247, 245, 241, 0.5);
+  padding: 0.8rem;
+  transition: color 0.2s;
+}
+.backToSite:hover { color: var(--paper); }
+
+/* Content */
+.content { display: flex; flex-direction: column; min-width: 0; }
+.topbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.6rem;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.menuBtn { display: none; font-size: 1.4rem; }
+.topbarRight { display: flex; align-items: center; gap: 0.9rem; margin-left: auto; }
+.adminName { font-size: 0.85rem; color: var(--ink-soft); font-weight: 500; }
+.avatar {
+  width: 34px; height: 34px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.main { padding: 1.8rem; }
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 40;
+  display: none;
+}
+
+/* Shared admin components */
+.pageHead { margin-bottom: 1.6rem; }
+.pageTitle { font-size: 1.8rem; }
+.pageSub { color: var(--olive); font-size: 0.9rem; margin-top: 0.3rem; }
+
+.card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1.4rem;
+}
+
+.tableWrap { overflow-x: auto; background: var(--white); border: 1px solid var(--line); border-radius: 6px; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.88rem; min-width: 600px; }
+.table th {
+  text-align: left;
+  padding: 0.9rem 1.1rem;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--olive);
+  border-bottom: 1px solid var(--line);
+  background: #faf9f6;
+}
+.table td { padding: 0.9rem 1.1rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.table tr:last-child td { border-bottom: none; }
+.table tbody tr:hover { background: #faf9f6; }
+
+.pill {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+}
+
+.btnSm {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.btnSm:hover { border-color: var(--ink); }
+.btnSmSolid { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.btnSmSolid:hover { background: var(--amber-deep); border-color: var(--amber-deep); }
+.btnSmDanger { color: var(--danger); border-color: transparent; }
+.btnSmDanger:hover { background: #f7e7e4; border-color: transparent; }
+
+.rowActions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+@media (max-width: 880px) {
+  .shell { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0;
+    width: 240px;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.25s;
+  }
+  .sidebarOpen { transform: translateX(0); }
+  .menuBtn { display: block; }
+  .overlay { display: block; }
+}

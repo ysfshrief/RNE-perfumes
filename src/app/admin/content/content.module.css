@@ -1,0 +1,25 @@
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.secTitle { font-size: 1.1rem; margin-bottom: 1rem; }
+.field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.9rem; }
+.field label {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--olive);
+}
+.field input, .field textarea {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 0.88rem;
+  background: var(--paper);
+  resize: vertical;
+}
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--amber); }
+.saveBar { margin-top: 1.2rem; display: flex; justify-content: flex-end; }
+
+@media (max-width: 800px) {
+  .grid { grid-template-columns: 1fr; }
+}

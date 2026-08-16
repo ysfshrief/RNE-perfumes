@@ -1,0 +1,57 @@
+.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.secTitle { font-size: 1.1rem; margin-bottom: 0.4rem; }
+.secNote { font-size: 0.82rem; color: var(--olive); margin-bottom: 1.1rem; }
+
+.toggles { display: flex; flex-direction: column; gap: 0.2rem; }
+.toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+.toggle:last-child { border-bottom: none; }
+
+.switch {
+  width: 42px; height: 24px;
+  border-radius: 999px;
+  background: var(--sand-deep);
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.switchOn { background: var(--success); }
+.knob {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 18px; height: 18px;
+  border-radius: 999px;
+  background: var(--white);
+  transition: transform 0.2s;
+}
+.switchOn .knob { transform: translateX(18px); }
+
+.field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.9rem; }
+.field label {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--olive);
+}
+.field input, .field select {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 0.88rem;
+  background: var(--paper);
+}
+.field input:focus, .field select:focus { outline: none; border-color: var(--amber); }
+.hint { font-size: 0.76rem; color: var(--olive); font-style: italic; }
+.saveBar { margin-top: 1.2rem; display: flex; justify-content: flex-end; }
+
+@media (max-width: 800px) {
+  .grid { grid-template-columns: 1fr; }
+}

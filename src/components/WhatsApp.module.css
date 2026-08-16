@@ -1,0 +1,16 @@
+.wa {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 90;
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  background: #25d366;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 10px 30px -8px rgba(37, 211, 102, 0.6);
+  transition: transform 0.2s;
+}
+.wa:hover { transform: scale(1.08); }

@@ -1,0 +1,26 @@
+.list { display: flex; flex-direction: column; }
+.item { border-bottom: 1px solid var(--line); }
+.q {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.3rem 0;
+  text-align: left;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+.icon {
+  font-size: 1.3rem;
+  color: var(--amber-deep);
+  flex-shrink: 0;
+}
+.a {
+  padding-bottom: 1.4rem;
+  color: var(--ink-soft);
+  line-height: 1.8;
+  max-width: 62ch;
+}
