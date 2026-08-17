@@ -111,6 +111,8 @@ export const translations = {
     "product.noReviews": "No reviews yet. Only verified buyers can leave a review.",
     "product.reviewNote": "Reviews can only be submitted by customers who purchased this product, and appear after approval.",
     "product.related": "You may also like",
+    "product.inspiredBy": "Inspired by",
+    "product.learnMore": "Learn more about our fragrances",
 
     // Cart
     "cart.empty": "Your cart is empty",
@@ -383,6 +385,7 @@ export const translations = {
 
     // Genders / seasons (for display)
     "g.Men": "Men",
+    "g.Unisex": "Unisex",
     "g.Women": "Women",
     "s.Summer": "Summer",
     "s.Winter": "Winter",
@@ -497,6 +500,8 @@ export const translations = {
     "product.noReviews": "لا توجد تقييمات بعد. التقييم متاح فقط لمن اشترى المنتج.",
     "product.reviewNote": "التقييمات متاحة فقط للعملاء الذين اشتروا هذا المنتج، وتظهر بعد الموافقة عليها.",
     "product.related": "قد يعجبك أيضًا",
+    "product.inspiredBy": "مستوحى من",
+    "product.learnMore": "اعرف أكتر عن عطورنا",
 
     // Cart
     "cart.empty": "سلتك فارغة",
@@ -769,6 +774,7 @@ export const translations = {
 
     // Genders / seasons
     "g.Men": "رجالي",
+    "g.Unisex": "للجنسين",
     "g.Women": "حريمي",
     "s.Summer": "صيفي",
     "s.Winter": "شتوي",

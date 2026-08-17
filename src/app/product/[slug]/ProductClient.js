@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useShop } from "@/context/ShopContext";
 import { useLang } from "@/context/LangContext";
 import { reviews as allReviews, products } from "@/data/products";
-import { pName, pTagline, pDescription, pIngredients, tNote } from "@/data/productLocale";
+import { pName, pTagline, pDescription, pIngredients, tNote, tGender, tSeason } from "@/data/productLocale";
 import ProductCard from "@/components/ProductCard";
+import ProductImage from "@/components/ProductImage";
+import LearnMore from "@/components/LearnMore";
 import WhatsApp from "@/components/WhatsApp";
 import styles from "./product.module.css";
 
@@ -44,8 +46,8 @@ export default function ProductClient({ product }) {
 
       <section className={`container ${styles.top}`}>
         <div className={styles.gallery}>
-          <div className={styles.mainImg} style={{ background: product.images[imgIdx] }}>
-            <span className={`${styles.imgLabel} keep-latin`}>{product.name}</span>
+          <div className={styles.mainImg}>
+            <ProductImage product={product} index={imgIdx} />
             <div className={styles.imgBadges}>
               {size.oldPrice && <span className="badge badge--sale">{t("badge.sale")}</span>}
               {product.bestSeller && <span className="badge badge--best">{t("badge.best")}</span>}
@@ -56,21 +58,27 @@ export default function ProductClient({ product }) {
               <button
                 key={i}
                 className={`${styles.thumb} ${i === imgIdx ? styles.thumbOn : ""}`}
-                style={{ background: c }}
                 onClick={() => setImgIdx(i)}
                 aria-label={`${i + 1}`}
-              />
+              >
+                <ProductImage product={product} index={i} showLabel={false} />
+              </button>
             ))}
           </div>
         </div>
 
         <div className={styles.info}>
           <div className={styles.infoMeta}>
-            <span>{t(`g.${product.gender}`)}</span>
+            <span>{tGender(product.gender, lang)}</span>
             <span>·</span>
-            <span>{product.season.map((s) => t(`s.${s}`)).join(" / ")}</span>
+            <span>{product.season.map((s) => tSeason(s, lang)).join(" / ")}</span>
           </div>
           <h1 className={styles.name}>{pName(product, lang)}</h1>
+          {product.inspiredBy && (
+            <p className={styles.inspiredBy}>
+              {t("product.inspiredBy")} <span className="keep-latin">{product.inspiredBy}</span>
+            </p>
+          )}
           <p className={styles.tagline}>{pTagline(product, lang)}</p>
 
           <div className={styles.ratingRow}>
@@ -144,6 +152,7 @@ export default function ProductClient({ product }) {
           </button>
 
           <p className={styles.desc}>{pDescription(product, lang)}</p>
+          <LearnMore />
         </div>
       </section>
 

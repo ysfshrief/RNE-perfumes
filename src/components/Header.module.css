@@ -12,21 +12,20 @@
   align-items: center;
   justify-content: space-between;
   height: 72px;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 @media (max-width: 600px) {
   .bar { height: 60px; }
 }
 
-.logo { display: inline-flex; }
+.logo { display: inline-flex; flex-shrink: 0; }
 
 .nav {
   display: flex;
-  gap: 2rem;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  gap: 1.75rem;
+  flex: 1;
+  justify-content: center;
 }
 
 .link {
@@ -56,17 +55,22 @@
 }
 
 .langBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-family: var(--font-display);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   color: var(--ink);
-  padding: 0.35rem 0.7rem;
+  padding: 0.4rem 0.75rem;
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: 999px;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 .langBtn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.langIcon { flex-shrink: 0; }
+.langText { line-height: 1; }
 html[dir="rtl"] .langBtn { font-family: var(--font-display); }
 
 .mobileLang {
@@ -105,6 +109,15 @@ html[dir="rtl"] .langBtn { font-family: var(--font-display); }
   padding: 0 4px;
 }
 
+.leftGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+/* Desktop: the lang button inside leftGroup is hidden (shown in actions instead) */
+.leftGroup .langBtn { display: none; }
+.langBtnDesktop { display: inline-flex; }
+
 .burger {
   display: none;
   flex-direction: column;
@@ -139,10 +152,13 @@ html[dir="rtl"] .langBtn { font-family: var(--font-display); }
   .nav { display: none; }
   .burger { display: flex; }
   .logo { position: absolute; left: 50%; transform: translateX(-50%); }
-  /* Language toggle lives in the mobile menu instead, to avoid crowding */
-  .langBtn { display: none; }
+  /* On mobile the lang button sits next to the burger (left) */
+  .leftGroup .langBtn { display: inline-flex; padding: 0.3rem 0.5rem; font-size: 0.72rem; }
+  .langBtnDesktop { display: none; }
+  .langText { display: inline; }
   .actions { gap: 0.9rem; }
 }
+html[dir="rtl"] .logo { left: auto; right: 50%; transform: translateX(50%); }
 @media (max-width: 600px) {
   .actions { gap: 0.75rem; }
   .iconLink svg { width: 19px; height: 19px; }

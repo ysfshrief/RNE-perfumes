@@ -86,6 +86,18 @@
   font-weight: 600;
 }
 .name { font-size: 1.15rem; margin-top: 0.15rem; }
+.inspired {
+  font-size: 0.72rem;
+  color: var(--olive);
+  margin-top: 0.1rem;
+}
+.inspiredLabel {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.62rem;
+  color: var(--amber-deep);
+}
 .tag { font-size: 0.85rem; color: var(--olive); min-height: 2.4em; }
 .foot {
   display: flex;

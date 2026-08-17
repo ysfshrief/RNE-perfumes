@@ -1,0 +1,175 @@
+/* Floating trigger */
+.trigger {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  z-index: 90;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--amber);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  justify-content: center;
+  transition: transform 0.2s;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+.trigger:hover { transform: scale(1.08); }
+.triggerText {
+  font-family: var(--font-display);
+  font-size: 0.5rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--paper);
+}
+html[dir="rtl"] .trigger { right: auto; left: 20px; }
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 6px 20px rgba(184, 134, 59, 0.25); }
+  50% { box-shadow: 0 6px 28px rgba(184, 134, 59, 0.6); }
+}
+
+/* Overlay + modal */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.72);
+  backdrop-filter: blur(6px);
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  animation: fadeIn 0.25s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: var(--paper);
+  border-radius: 20px;
+  padding: 2rem 1.75rem;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+.close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 1.8rem;
+  line-height: 1;
+  color: var(--olive);
+  transition: color 0.2s;
+}
+.close:hover { color: var(--ink); }
+html[dir="rtl"] .close { right: auto; left: 16px; }
+
+.title {
+  font-size: 1.5rem;
+  margin-bottom: 0.35rem;
+}
+.subtitle {
+  color: var(--olive);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Wheel */
+.wheelBox {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  margin: 0 auto 1.5rem;
+  max-width: 100%;
+}
+.pointer {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 24px solid var(--amber-deep);
+  z-index: 5;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+}
+.wheelSpin {
+  width: 300px;
+  height: 300px;
+  max-width: 100%;
+  border-radius: 50%;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+.canvas {
+  width: 300px;
+  height: 300px;
+  max-width: 100%;
+  border-radius: 50%;
+  display: block;
+}
+
+/* Spin button */
+.spinBtn {
+  width: 100%;
+  padding: 0.95rem;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: var(--radius);
+  transition: background 0.2s;
+}
+.spinBtn:hover:not(:disabled) { background: var(--amber-deep); }
+.spinBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Result */
+.result { animation: fadeIn 0.4s ease; }
+.resultWon { font-size: 0.9rem; color: var(--olive); }
+.resultPrize {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--amber-deep);
+  margin: 0.2rem 0 1rem;
+  font-family: var(--font-display);
+}
+.codeBox {
+  background: var(--white);
+  border: 2px dashed var(--amber);
+  border-radius: var(--radius);
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.codeLabel {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--olive);
+}
+.code {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+}
+.resultHint {
+  font-size: 0.8rem;
+  color: var(--olive);
+  margin-top: 0.8rem;
+}
+
+@media (max-width: 400px) {
+  .wheelBox, .wheelSpin, .canvas { width: 260px; height: 260px; }
+}

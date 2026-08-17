@@ -109,17 +109,18 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className={styles.bottom}>
-          <div className={styles.copy}>
+          <div className={styles.logosRow}>
             {/* Secret admin trigger: tap RNE 3× then enter 000 */}
             <FooterAdminTrigger />
-            <div className={styles.copyText}>
-              <p className={styles.copyright} dir="rtl">{t("footer.copyright")}</p>
-              <p className={styles.dev} dir="ltr">{t("footer.developedBy")}</p>
+            <span className={styles.logoDivider} aria-hidden="true" />
+            <div className={styles.developer} aria-label="Developed by JOE INDUSTRIES">
+              <LogoJoe height={30} />
             </div>
           </div>
 
-          <div className={styles.developer} aria-label="Developed by JOE INDUSTRIES">
-            <LogoJoe height={34} />
+          <div className={styles.copyText}>
+            <p className={styles.copyright} dir="rtl">{t("footer.copyright")}</p>
+            <p className={styles.dev} dir="ltr">{t("footer.developedBy")}</p>
           </div>
         </div>
       </div>

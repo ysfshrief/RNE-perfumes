@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useShop } from "@/context/ShopContext";
 import { useLang } from "@/context/LangContext";
 import { getMinPrice, isInStock } from "@/data/products";
-import { pName, pTagline } from "@/data/productLocale";
+import { pName, pTagline, tGender } from "@/data/productLocale";
+import ProductImage from "./ProductImage";
 import styles from "./ProductCard.module.css";
 
 export default function ProductCard({ product }) {
@@ -18,9 +19,7 @@ export default function ProductCard({ product }) {
   return (
     <article className={styles.card}>
       <Link href={`/product/${product.slug}`} className={styles.media} aria-label={pName(product, lang)}>
-        <div className={styles.bottle} style={{ background: product.images[0] }}>
-          <span className={`${styles.bottleLabel} keep-latin`}>{product.name}</span>
-        </div>
+        <ProductImage product={product} index={0} />
         <div className={styles.badges}>
           {!inStock && <span className="badge badge--out">{t("badge.soldOut")}</span>}
           {inStock && hasSale && <span className="badge badge--sale">{t("badge.sale")}</span>}
@@ -44,22 +43,22 @@ export default function ProductCard({ product }) {
 
       <div className={styles.body}>
         <div className={styles.meta}>
-          <span>{t(`g.${product.gender}`)}</span>
-          <span className="stars" aria-label={`${product.rating} / 5`}>
-            ★ {product.rating}
-          </span>
+          <span>{tGender(product.gender, lang)}</span>
+          <span className="stars" aria-label={`${product.rating} / 5`}>★ {product.rating}</span>
         </div>
         <h3 className={styles.name}>
           <Link href={`/product/${product.slug}`}>{pName(product, lang)}</Link>
         </h3>
+        {product.inspiredBy && (
+          <p className={styles.inspired}>
+            <span className={styles.inspiredLabel}>{t("product.inspiredBy")}</span>{" "}
+            <span className="keep-latin">{product.inspiredBy}</span>
+          </p>
+        )}
         <p className={styles.tag}>{pTagline(product, lang)}</p>
         <div className={styles.foot}>
-          <span className="price">
-            {minPrice} {t("common.currency")}
-          </span>
-          <Link href={`/product/${product.slug}`} className={styles.view}>
-            {t("common.view")}
-          </Link>
+          <span className="price">{minPrice} {t("common.currency")}</span>
+          <Link href={`/product/${product.slug}`} className={styles.view}>{t("common.view")}</Link>
         </div>
       </div>
     </article>

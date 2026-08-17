@@ -200,3 +200,13 @@
   .relatedGrid { grid-template-columns: 1fr; }
   .noteRow { grid-template-columns: 1fr; gap: 0.6rem; }
 }
+
+/* Inspired-by line on detail page */
+.inspiredBy {
+  margin-top: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--olive);
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+}
+.inspiredBy span { color: var(--amber-deep); font-weight: 600; }

@@ -69,23 +69,34 @@
 
 /* ---- Bottom bar ---- */
 .bottom {
-  padding-block: 1.6rem;
+  padding-block: 1.8rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.copy {
-  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 1.1rem;
+  text-align: center;
 }
+
+.logosRow {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+}
+.logoDivider {
+  width: 1px;
+  height: 34px;
+  background: rgba(247, 245, 241, 0.2);
+}
+.developer {
+  display: inline-flex;
+  align-items: center;
+  opacity: 0.92;
+}
+
 .copyText {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.25rem;
 }
 .copyright {
   font-size: 0.82rem;
@@ -97,12 +108,7 @@
   font-size: 0.76rem;
   color: rgba(247, 245, 241, 0.45);
 }
-
-.developer {
-  display: inline-flex;
-  align-items: center;
-  opacity: 0.92;
-}
+html[dir="rtl"] .dev { direction: ltr; }
 
 /* ---- Tablet ---- */
 @media (max-width: 900px) {
@@ -122,14 +128,9 @@
   .tag { max-width: 34ch; }
 
   .bottom {
-    flex-direction: column-reverse;
-    align-items: center;
-    text-align: center;
-    gap: 1.5rem;
     padding-top: 2rem;
     border-top: 1px solid rgba(247, 245, 241, 0.12);
   }
-  .copy { flex-direction: column; gap: 0.9rem; }
   .copyText { align-items: center; }
 }
 

@@ -24,14 +24,23 @@ export default function Header() {
   return (
     <header className={styles.header}>
       <div className={`container ${styles.bar}`}>
-        <button
-          className={styles.burger}
-          aria-label="Menu"
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-        >
-          <span /><span /><span />
-        </button>
+        <div className={styles.leftGroup}>
+          <button
+            className={styles.burger}
+            aria-label="Menu"
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+          >
+            <span /><span /><span />
+          </button>
+          <button className={styles.langBtn} onClick={toggle} aria-label="Switch language">
+            <svg className={styles.langIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" />
+            </svg>
+            <span className={styles.langText}>{lang === "ar" ? "EN" : "ع"}</span>
+          </button>
+        </div>
 
         <Link href="/" className={styles.logo}>
           <Logo compact />
@@ -46,8 +55,12 @@ export default function Header() {
         </nav>
 
         <div className={styles.actions}>
-          <button className={styles.langBtn} onClick={toggle} aria-label="Switch language">
-            {t("lang.toggle")}
+          <button className={`${styles.langBtn} ${styles.langBtnDesktop}`} onClick={toggle} aria-label="Switch language">
+            <svg className={styles.langIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" />
+            </svg>
+            <span className={styles.langText}>{lang === "ar" ? "EN" : "ع"}</span>
           </button>
           <Link href="/account" aria-label={t("nav.account")} className={styles.iconLink}>
             <UserIcon />
@@ -71,9 +84,6 @@ export default function Header() {
             </Link>
           ))}
           <Link href="/account" onClick={() => setOpen(false)}>{t("nav.myAccount")}</Link>
-          <button className={styles.mobileLang} onClick={() => { toggle(); setOpen(false); }}>
-            {t("lang.toggle")}
-          </button>
         </nav>
       )}
     </header>

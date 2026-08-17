@@ -1,0 +1,24 @@
+.learn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+  padding: 0.85rem 1.3rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  background: var(--white);
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.1s;
+}
+.learn:hover {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.learn:active { transform: translateY(1px); }
+.icon { display: inline-flex; color: var(--amber-deep); transition: color 0.2s; }
+.learn:hover .icon { color: var(--amber); }

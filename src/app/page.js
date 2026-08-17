@@ -3,6 +3,8 @@
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import WhatsApp from "@/components/WhatsApp";
+import AdSlider from "@/components/AdSlider";
+import SpinWheel from "@/components/SpinWheel";
 import { products } from "@/data/products";
 import { useLang } from "@/context/LangContext";
 import styles from "./home.module.css";
@@ -36,6 +38,8 @@ export default function HomePage() {
         </div>
         <div className={`${styles.heroMark} keep-latin`} aria-hidden="true">RNE</div>
       </section>
+
+      <AdSlider />
 
       <section className={styles.catStrip}>
         <div className="container">
@@ -109,6 +113,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      <SpinWheel />
       <WhatsApp />
     </>
   );
