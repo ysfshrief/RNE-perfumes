@@ -5,12 +5,14 @@ import ProductCard from "@/components/ProductCard";
 import WhatsApp from "@/components/WhatsApp";
 import AdSlider from "@/components/AdSlider";
 import SpinWheel from "@/components/SpinWheel";
-import { products } from "@/data/products";
+import { useProducts } from "@/context/ProductContext";
 import { useLang } from "@/context/LangContext";
 import styles from "./home.module.css";
 
 export default function HomePage() {
   const { t } = useLang();
+  const { visibleProducts } = useProducts();
+  const products = visibleProducts;
   const featured = products.filter((p) => p.bestSeller).slice(0, 3);
   const fresh = products.slice(0, 4);
 

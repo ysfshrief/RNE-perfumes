@@ -113,6 +113,7 @@ export const translations = {
     "product.related": "You may also like",
     "product.inspiredBy": "Inspired by",
     "product.learnMore": "Learn more about our fragrances",
+    "product.contactDetails": "Contact us for details",
 
     // Cart
     "cart.empty": "Your cart is empty",
@@ -502,6 +503,7 @@ export const translations = {
     "product.related": "قد يعجبك أيضًا",
     "product.inspiredBy": "مستوحى من",
     "product.learnMore": "اعرف أكتر عن عطورنا",
+    "product.contactDetails": "تواصل معانا للتفاصيل",
 
     // Cart
     "cart.empty": "سلتك فارغة",

@@ -3,14 +3,15 @@
 import Link from "next/link";
 import { useShop } from "@/context/ShopContext";
 import { useLang } from "@/context/LangContext";
-import { products } from "@/data/products";
+import { useProducts } from "@/context/ProductContext";
 import ProductCard from "@/components/ProductCard";
 import styles from "./wishlist.module.css";
 
 export default function WishlistPage() {
   const { state } = useShop();
   const { t } = useLang();
-  const saved = products.filter((p) => state.wishlist.includes(p.id));
+  const { allProducts } = useProducts();
+  const saved = allProducts.filter((p) => state.wishlist.includes(p.id));
 
   return (
     <div className="container">

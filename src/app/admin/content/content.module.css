@@ -1,25 +1,170 @@
-.grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-.secTitle { font-size: 1.1rem; margin-bottom: 1rem; }
-.field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.9rem; }
-.field label {
-  font-family: var(--font-display);
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--olive);
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
 }
-.field input, .field textarea {
-  padding: 0.6rem 0.8rem;
+.savedFlash {
+  background: #e4efe4;
+  color: var(--success);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+.langTabs {
+  display: inline-flex;
+  background: #eceae4;
+  border-radius: 10px;
+  padding: 4px;
+  gap: 4px;
+}
+.langTab {
+  padding: 0.55rem 1.1rem;
+  border-radius: 7px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--olive);
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+.langTabOn {
+  background: var(--white);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.search {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.7rem 1rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  font-family: inherit;
-  font-size: 0.88rem;
-  background: var(--paper);
-  resize: vertical;
+  font-size: 0.9rem;
+  background: var(--white);
 }
-.field input:focus, .field textarea:focus { outline: none; border-color: var(--amber); }
-.saveBar { margin-top: 1.2rem; display: flex; justify-content: flex-end; }
+.search:focus { outline: none; border-color: var(--amber); }
 
-@media (max-width: 800px) {
-  .grid { grid-template-columns: 1fr; }
+.overrideBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  background: #f6ecd8;
+  border: 1px solid #e8d5ad;
+  border-radius: var(--radius);
+  padding: 0.7rem 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.85rem;
+  color: var(--amber-deep);
+  flex-wrap: wrap;
+}
+.resetBtn {
+  color: var(--danger);
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-decoration: underline;
+}
+
+/* Sections */
+.sections { display: flex; flex-direction: column; gap: 0.7rem; }
+.section {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--white);
+}
+.sectionHead {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.2rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: start;
+  transition: background 0.15s;
+}
+.sectionHead:hover { background: var(--paper); }
+.sectionName { display: inline-flex; align-items: center; gap: 0.6rem; }
+.sectionCount {
+  background: #eceae4;
+  color: var(--olive);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-family: var(--font-body);
+}
+.editedDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+}
+.chevron { font-size: 1.3rem; color: var(--olive); line-height: 1; }
+
+.fields {
+  padding: 0.5rem 1.2rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-top: 1px solid var(--line);
+}
+.field { display: flex; flex-direction: column; gap: 0.35rem; }
+.fieldLabel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+.keyName {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  color: var(--olive);
+  letter-spacing: 0.02em;
+  opacity: 0.8;
+  word-break: break-all;
+}
+.revert {
+  font-size: 0.72rem;
+  color: var(--amber-deep);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.input {
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: 0.92rem;
+  font-family: inherit;
+  background: var(--paper);
+  transition: border-color 0.2s, background 0.2s;
+  resize: vertical;
+  line-height: 1.6;
+}
+.input:focus { outline: none; border-color: var(--amber); background: var(--white); }
+.inputEdited { border-color: var(--amber); background: #fffdf8; }
+
+.empty { color: var(--olive); padding: 2rem; text-align: center; }
+
+@media (max-width: 600px) {
+  .controls { flex-direction: column; align-items: stretch; }
+  .langTabs { width: 100%; }
+  .langTab { flex: 1; text-align: center; }
+  .search { width: 100%; }
+  .sectionHead { padding: 0.9rem 1rem; font-size: 0.9rem; }
+  .fields { padding: 0.5rem 1rem 1rem; }
 }

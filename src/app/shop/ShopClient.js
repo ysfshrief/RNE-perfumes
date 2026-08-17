@@ -4,9 +4,10 @@ import { useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import WhatsApp from "@/components/WhatsApp";
-import { products, categories, getMinPrice } from "@/data/products";
+import { products as baseProducts, categories, getMinPrice } from "@/data/products";
 import { pName, pTagline } from "@/data/productLocale";
 import { useLang } from "@/context/LangContext";
+import { useProducts } from "@/context/ProductContext";
 import styles from "./shop.module.css";
 
 const SIZES = ["30ml", "50ml"];
@@ -14,6 +15,8 @@ const SIZES = ["30ml", "50ml"];
 export default function ShopClient() {
   const params = useSearchParams();
   const { t, lang } = useLang();
+  const { visibleProducts } = useProducts();
+  const products = visibleProducts;
   const initialCat = params.get("category");
   const offersOnly = params.get("offers") === "true";
 

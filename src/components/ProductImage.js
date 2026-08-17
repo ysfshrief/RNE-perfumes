@@ -1,11 +1,13 @@
 "use client";
 
 import { isPhoto } from "@/data/products";
+import { normalizeImageUrl } from "@/context/ProductContext";
 
 // Renders a real product photo when `image` is a URL,
 // otherwise an elegant placeholder "bottle" using the color.
 export default function ProductImage({ product, index = 0, className = "", showLabel = true }) {
-  const val = product.images?.[index] ?? product.image;
+  const raw = product.images?.[index] ?? product.image;
+  const val = isPhoto(raw) ? normalizeImageUrl(raw) : raw;
   const alt = product.name;
 
   if (isPhoto(val)) {

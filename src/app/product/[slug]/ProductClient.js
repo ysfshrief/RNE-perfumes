@@ -10,11 +10,14 @@ import ProductCard from "@/components/ProductCard";
 import ProductImage from "@/components/ProductImage";
 import LearnMore from "@/components/LearnMore";
 import WhatsApp from "@/components/WhatsApp";
+import { useProducts } from "@/context/ProductContext";
 import styles from "./product.module.css";
 
-export default function ProductClient({ product }) {
+export default function ProductClient({ product: baseProduct }) {
   const { dispatch, state } = useShop();
   const { t, lang } = useLang();
+  const { mergeProduct } = useProducts();
+  const product = mergeProduct(baseProduct);
   const [sizeIdx, setSizeIdx] = useState(
     product.sizes.findIndex((s) => s.stock > 0) === -1
       ? 0
@@ -152,7 +155,7 @@ export default function ProductClient({ product }) {
           </button>
 
           <p className={styles.desc}>{pDescription(product, lang)}</p>
-          <LearnMore />
+          <LearnMore product={product} />
         </div>
       </section>
 

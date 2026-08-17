@@ -2,6 +2,7 @@ import "./globals.css";
 import { ShopProvider } from "@/context/ShopContext";
 import { LangProvider } from "@/context/LangContext";
 import { ConfigProvider } from "@/context/ConfigContext";
+import { ProductProvider } from "@/context/ProductContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -26,11 +27,13 @@ export default function RootLayout({ children }) {
       <body>
         <LangProvider>
           <ConfigProvider>
-            <ShopProvider>
-              <Header />
-              <main>{children}</main>
-              <Footer />
-            </ShopProvider>
+            <ProductProvider>
+              <ShopProvider>
+                <Header />
+                <main>{children}</main>
+                <Footer />
+              </ShopProvider>
+            </ProductProvider>
           </ConfigProvider>
         </LangProvider>
       </body>

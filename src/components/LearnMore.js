@@ -1,33 +1,31 @@
 "use client";
 
-import { useConfig } from "@/context/ConfigContext";
 import { useLang } from "@/context/LangContext";
+import { contact } from "@/data/brand";
 import styles from "./LearnMore.module.css";
 
-export default function LearnMore() {
-  const { config } = useConfig();
-  const { t } = useLang();
-  const lm = config.learnMore;
+// "Contact us for details" — opens WhatsApp chat.
+export default function LearnMore({ product }) {
+  const { t, lang } = useLang();
 
-  if (!lm?.enabled || !lm.url) return null;
+  const msg =
+    lang === "ar"
+      ? `مرحبًا RNE Perfumes، أريد تفاصيل أكثر${product ? ` عن ${product.name}` : ""}.`
+      : `Hi RNE Perfumes, I'd like more details${product ? ` about ${product.name}` : ""}.`;
 
   return (
     <a
       className={styles.learn}
-      href={lm.url}
+      href={`https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(msg)}`}
       target="_blank"
       rel="noopener noreferrer"
     >
       <span className={styles.icon} aria-hidden="true">
-        {lm.type === "youtube" ? (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10 15l5.2-3L10 9v6zm12-3c0 2.2-.2 3.8-.5 4.7-.3 1-.9 1.6-1.9 1.9-.9.2-3.1.4-6.6.4s-5.7-.2-6.6-.4c-1-.3-1.6-.9-1.9-1.9C4.2 15.8 4 14.2 4 12s.2-3.8.5-4.7c.3-1 .9-1.6 1.9-1.9C7.3 5.2 9.5 5 13 5s5.7.2 6.6.4c1 .3 1.6.9 1.9 1.9.3.9.5 2.5.5 4.7z"/></svg>
-        ) : lm.type === "drive" ? (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 3l6 10H8L2 13 8 3zm2 11h12l-3 5H7l3-5zm5.5-1L9.5 3H16l6 10h-6.5z"/></svg>
-        ) : (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
-        )}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 1 1 12 20zm4.5-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-1.9-1.2 7.3 7.3 0 0 1-1.3-1.7c-.1-.2 0-.4.1-.5l.4-.5c.1-.1.1-.3.2-.4a.5.5 0 0 0 0-.5l-.8-1.8c-.2-.4-.4-.4-.5-.4h-.5a.9.9 0 0 0-.7.3 2.8 2.8 0 0 0-.9 2.1c0 1.2.9 2.4 1 2.6a9.5 9.5 0 0 0 3.7 3.3c1.4.6 1.9.6 2.6.5a2.4 2.4 0 0 0 1.6-1.1 2 2 0 0 0 .1-1.1c0-.1-.2-.2-.4-.3z" />
+        </svg>
       </span>
-      {t("product.learnMore")}
+      {t("product.contactDetails")}
     </a>
   );
 }
