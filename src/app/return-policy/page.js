@@ -1,31 +1,20 @@
-import PageShell from "@/components/PageShell";
+"use client";
 
-export const metadata = { title: "Return & Refund Policy — RNE Perfumes" };
+import PageShell from "@/components/PageShell";
+import { useLang } from "@/context/LangContext";
+import { returnPolicy } from "@/data/content";
 
 export default function ReturnPolicyPage() {
+  const { t, lang } = useLang();
+  const items = returnPolicy[lang] || returnPolicy.en;
   return (
-    <PageShell eyebrow="Policies" title="Return & refund policy">
-      <h2>Eligibility</h2>
-      <p>
-        If something isn&apos;t right with your order, contact us as soon as
-        possible. Products should be unused and in their original packaging to be
-        eligible for a return.
-      </p>
-      <h2>How to start a return</h2>
-      <ul>
-        <li>Reach out via our contact page or WhatsApp with your order number.</li>
-        <li>Let us know the reason for the return.</li>
-        <li>We&apos;ll guide you through the next steps.</li>
-      </ul>
-      <h2>Refunds</h2>
-      <p>
-        Once a return is received and approved, your refund is processed to your
-        original payment method. Timing depends on your payment provider.
-      </p>
-      <p>
-        Have a question first? <a href="/contact">Contact us</a> — we&apos;re happy
-        to help.
-      </p>
+    <PageShell eyebrow={t("policy.policies")} title={t("return.title")}>
+      {items.map((s, i) => (
+        <div key={i}>
+          <h2>{s.h}</h2>
+          <p>{s.p}</p>
+        </div>
+      ))}
     </PageShell>
   );
 }

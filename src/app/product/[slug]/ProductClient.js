@@ -3,13 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useShop } from "@/context/ShopContext";
+import { useLang } from "@/context/LangContext";
 import { reviews as allReviews, products } from "@/data/products";
+import { pName, pTagline, pDescription, pIngredients, tNote } from "@/data/productLocale";
 import ProductCard from "@/components/ProductCard";
 import WhatsApp from "@/components/WhatsApp";
 import styles from "./product.module.css";
 
 export default function ProductClient({ product }) {
   const { dispatch, state } = useShop();
+  const { t, lang } = useLang();
   const [sizeIdx, setSizeIdx] = useState(
     product.sizes.findIndex((s) => s.stock > 0) === -1
       ? 0
@@ -23,6 +26,7 @@ export default function ProductClient({ product }) {
   const saved = state.wishlist.includes(product.id);
   const reviews = allReviews[product.id] || [];
   const related = products.filter((p) => p.id !== product.id && p.gender === product.gender).slice(0, 3);
+  const cur = t("common.currency");
 
   const addToCart = () => {
     if (size.stock <= 0) return;
@@ -34,18 +38,17 @@ export default function ProductClient({ product }) {
   return (
     <>
       <div className={`container ${styles.crumbs}`}>
-        <Link href="/">Home</Link> / <Link href="/shop">Shop</Link> /{" "}
-        <span>{product.name}</span>
+        <Link href="/">{t("product.home")}</Link> / <Link href="/shop">{t("product.shop")}</Link> /{" "}
+        <span>{pName(product, lang)}</span>
       </div>
 
       <section className={`container ${styles.top}`}>
-        {/* Gallery */}
         <div className={styles.gallery}>
           <div className={styles.mainImg} style={{ background: product.images[imgIdx] }}>
-            <span className={styles.imgLabel}>{product.name}</span>
+            <span className={`${styles.imgLabel} keep-latin`}>{product.name}</span>
             <div className={styles.imgBadges}>
-              {size.oldPrice && <span className="badge badge--sale">Sale</span>}
-              {product.bestSeller && <span className="badge badge--best">Best Seller</span>}
+              {size.oldPrice && <span className="badge badge--sale">{t("badge.sale")}</span>}
+              {product.bestSeller && <span className="badge badge--best">{t("badge.best")}</span>}
             </div>
           </div>
           <div className={styles.thumbs}>
@@ -55,36 +58,35 @@ export default function ProductClient({ product }) {
                 className={`${styles.thumb} ${i === imgIdx ? styles.thumbOn : ""}`}
                 style={{ background: c }}
                 onClick={() => setImgIdx(i)}
-                aria-label={`Image ${i + 1}`}
+                aria-label={`${i + 1}`}
               />
             ))}
           </div>
         </div>
 
-        {/* Info */}
         <div className={styles.info}>
           <div className={styles.infoMeta}>
-            <span>{product.gender}</span>
+            <span>{t(`g.${product.gender}`)}</span>
             <span>·</span>
-            <span>{product.season.join(" / ")}</span>
+            <span>{product.season.map((s) => t(`s.${s}`)).join(" / ")}</span>
           </div>
-          <h1 className={styles.name}>{product.name}</h1>
-          <p className={styles.tagline}>{product.tagline}</p>
+          <h1 className={styles.name}>{pName(product, lang)}</h1>
+          <p className={styles.tagline}>{pTagline(product, lang)}</p>
 
           <div className={styles.ratingRow}>
             <span className="stars">{"★".repeat(Math.round(product.rating))}</span>
             <span className={styles.ratingText}>
-              {product.rating} · {product.reviewCount} reviews
+              {product.rating} · {product.reviewCount} {t("product.reviews")}
             </span>
           </div>
 
           <div className={styles.priceRow}>
-            <span className="price">{size.price} EGP</span>
-            {size.oldPrice && <span className="price__old">{size.oldPrice} EGP</span>}
+            <span className="price">{size.price} {cur}</span>
+            {size.oldPrice && <span className="price__old">{size.oldPrice} {cur}</span>}
           </div>
 
           <div className={styles.block}>
-            <h4>Size</h4>
+            <h4>{t("product.size")}</h4>
             <div className={styles.sizes}>
               {product.sizes.map((s, i) => (
                 <button
@@ -96,7 +98,7 @@ export default function ProductClient({ product }) {
                   disabled={s.stock <= 0}
                 >
                   {s.size}
-                  {s.stock <= 0 && <span className={styles.outTag}>Sold out</span>}
+                  {s.stock <= 0 && <span className={styles.outTag}>{t("badge.soldOut")}</span>}
                 </button>
               ))}
             </div>
@@ -105,23 +107,23 @@ export default function ProductClient({ product }) {
           <div className={styles.stockNote}>
             {size.stock > 0 ? (
               size.stock <= 5 ? (
-                <span className={styles.low}>● Only {size.stock} left in stock</span>
+                <span className={styles.low}>● {t("product.onlyLeft", { n: size.stock })}</span>
               ) : (
-                <span className={styles.avail}>● In stock</span>
+                <span className={styles.avail}>● {t("product.inStock")}</span>
               )
             ) : (
-              <span className={styles.soldout}>● Currently unavailable</span>
+              <span className={styles.soldout}>● {t("product.unavailable")}</span>
             )}
           </div>
 
           <div className={styles.buyRow}>
             <div className={styles.qty}>
-              <button onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="Decrease">−</button>
+              <button onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="-">−</button>
               <span>{qty}</span>
               <button
                 onClick={() => setQty((q) => Math.min(size.stock, q + 1))}
                 disabled={qty >= size.stock}
-                aria-label="Increase"
+                aria-label="+"
               >+</button>
             </div>
             <button
@@ -130,7 +132,7 @@ export default function ProductClient({ product }) {
               onClick={addToCart}
               disabled={size.stock <= 0}
             >
-              {added ? "Added ✓" : size.stock > 0 ? "Add to cart" : "Sold out"}
+              {added ? t("product.added") : size.stock > 0 ? t("product.addToCart") : t("product.soldOut")}
             </button>
           </div>
 
@@ -138,51 +140,47 @@ export default function ProductClient({ product }) {
             className={`btn btn--ghost btn--full ${styles.wishBtn}`}
             onClick={() => dispatch({ type: "TOGGLE_WISHLIST", payload: product.id })}
           >
-            {saved ? "♥ Saved to wishlist" : "♡ Add to wishlist"}
+            {saved ? t("product.savedWishlist") : t("product.addWishlist")}
           </button>
 
-          <p className={styles.desc}>{product.description}</p>
+          <p className={styles.desc}>{pDescription(product, lang)}</p>
         </div>
       </section>
 
-      {/* Notes pyramid — signature element */}
       <section className={styles.notesSection}>
         <div className="container">
-          <div className="rule">Fragrance Notes</div>
+          <div className="rule">{t("product.fragranceNotes")}</div>
           <div className={styles.pyramid}>
             <div className={styles.noteRow}>
-              <span className={styles.noteTier}>Top</span>
+              <span className={styles.noteTier}>{t("product.top")}</span>
               <div className={styles.noteChips}>
-                {product.notes.top.map((n) => <span key={n} className={styles.chip}>{n}</span>)}
+                {product.notes.top.map((n) => <span key={n} className={styles.chip}>{tNote(n, lang)}</span>)}
               </div>
             </div>
             <div className={styles.noteRow}>
-              <span className={styles.noteTier}>Heart</span>
+              <span className={styles.noteTier}>{t("product.heart")}</span>
               <div className={styles.noteChips}>
-                {product.notes.heart.map((n) => <span key={n} className={styles.chip}>{n}</span>)}
+                {product.notes.heart.map((n) => <span key={n} className={styles.chip}>{tNote(n, lang)}</span>)}
               </div>
             </div>
             <div className={styles.noteRow}>
-              <span className={styles.noteTier}>Base</span>
+              <span className={styles.noteTier}>{t("product.base")}</span>
               <div className={styles.noteChips}>
-                {product.notes.base.map((n) => <span key={n} className={styles.chip}>{n}</span>)}
+                {product.notes.base.map((n) => <span key={n} className={styles.chip}>{tNote(n, lang)}</span>)}
               </div>
             </div>
           </div>
           <div className={styles.ingredients}>
-            <h4>Ingredients / Composition</h4>
-            <p>{product.ingredients}</p>
+            <h4>{t("product.ingredients")}</h4>
+            <p>{pIngredients(product, lang)}</p>
           </div>
         </div>
       </section>
 
-      {/* Reviews */}
       <section className={`container ${styles.reviews}`}>
-        <div className="rule rule--short">Reviews</div>
+        <div className="rule rule--short">{t("product.reviewsHead")}</div>
         {reviews.length === 0 ? (
-          <p className={styles.noReviews}>
-            No reviews yet. Only verified buyers can leave a review.
-          </p>
+          <p className={styles.noReviews}>{t("product.noReviews")}</p>
         ) : (
           <div className={styles.reviewList}>
             {reviews.map((r, i) => (
@@ -197,16 +195,12 @@ export default function ProductClient({ product }) {
             ))}
           </div>
         )}
-        <p className={styles.reviewNote}>
-          Reviews can only be submitted by customers who purchased this product,
-          and appear after approval.
-        </p>
+        <p className={styles.reviewNote}>{t("product.reviewNote")}</p>
       </section>
 
-      {/* Related */}
       {related.length > 0 && (
         <section className={`container section ${styles.related}`}>
-          <h2 className={styles.relatedTitle}>You may also like</h2>
+          <h2 className={styles.relatedTitle}>{t("product.related")}</h2>
           <div className={styles.relatedGrid}>
             {related.map((p) => <ProductCard key={p.id} product={p} />)}
           </div>

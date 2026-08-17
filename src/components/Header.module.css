@@ -51,6 +51,31 @@
   gap: 1.1rem;
 }
 
+.langBtn {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.langBtn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+html[dir="rtl"] .langBtn { font-family: var(--font-display); }
+
+.mobileLang {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.85rem;
+  padding: 0.7rem 0;
+  text-align: start;
+  color: var(--amber-deep);
+}
+
 .iconLink {
   position: relative;
   display: inline-flex;
@@ -111,3 +136,7 @@
   .burger { display: flex; }
   .logo { position: absolute; left: 50%; transform: translateX(-50%); }
 }
+
+/* RTL adjustments */
+html[dir="rtl"] .count { right: auto; left: -9px; }
+html[dir="rtl"] .link::after { left: auto; right: 0; }

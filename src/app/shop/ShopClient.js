@@ -4,19 +4,16 @@ import { useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import WhatsApp from "@/components/WhatsApp";
-import { products, categories, getMinPrice, isInStock } from "@/data/products";
+import { products, categories, getMinPrice } from "@/data/products";
+import { pName, pTagline } from "@/data/productLocale";
+import { useLang } from "@/context/LangContext";
 import styles from "./shop.module.css";
 
 const SIZES = ["30ml", "50ml"];
-const SORTS = [
-  { v: "featured", l: "Featured" },
-  { v: "price-asc", l: "Price: Low to High" },
-  { v: "price-desc", l: "Price: High to Low" },
-  { v: "rating", l: "Top Rated" },
-];
 
 export default function ShopClient() {
   const params = useSearchParams();
+  const { t, lang } = useLang();
   const initialCat = params.get("category");
   const offersOnly = params.get("offers") === "true";
 
@@ -30,6 +27,14 @@ export default function ShopClient() {
   const [sort, setSort] = useState("featured");
   const [drawer, setDrawer] = useState(false);
 
+  const SORTS = [
+    { v: "featured", l: t("sort.featured") },
+    { v: "price-asc", l: t("sort.priceAsc") },
+    { v: "price-desc", l: t("sort.priceDesc") },
+    { v: "rating", l: t("sort.rating") },
+  ];
+  const catLabels = { Men: t("g.Men"), Women: t("g.Women"), Summer: t("s.Summer"), Winter: t("s.Winter") };
+
   useEffect(() => {
     if (initialCat) setActiveCats([initialCat]);
     if (offersOnly) setSaleOnly(true);
@@ -40,8 +45,8 @@ export default function ShopClient() {
 
   const filtered = useMemo(() => {
     let out = products.filter((p) => {
-      if (search && !`${p.name} ${p.tagline} ${p.gender}`.toLowerCase().includes(search.toLowerCase()))
-        return false;
+      const haystack = `${p.name} ${p.tagline} ${p.gender} ${pName(p, "ar")} ${pTagline(p, "ar")}`.toLowerCase();
+      if (search && !haystack.includes(search.toLowerCase())) return false;
       if (activeCats.length) {
         const inCat = activeCats.some((c) => p.gender === c || p.season.includes(c));
         if (!inCat) return false;
@@ -74,28 +79,28 @@ export default function ShopClient() {
   const Filters = (
     <>
       <div className={styles.filterGroup}>
-        <h4>Search</h4>
+        <h4>{t("common.search")}</h4>
         <input
           className={styles.searchInput}
           type="search"
-          placeholder="Search fragrances…"
+          placeholder={t("shop.searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
       <div className={styles.filterGroup}>
-        <h4>Category</h4>
+        <h4>{t("shop.category")}</h4>
         {categories.map((c) => (
           <label key={c} className={styles.check}>
             <input type="checkbox" checked={activeCats.includes(c)} onChange={() => toggle(activeCats, setActiveCats, c)} />
-            <span>{c}</span>
+            <span>{catLabels[c]}</span>
           </label>
         ))}
       </div>
 
       <div className={styles.filterGroup}>
-        <h4>Size</h4>
+        <h4>{t("shop.size")}</h4>
         <div className={styles.pills}>
           {SIZES.map((s) => (
             <button
@@ -110,7 +115,7 @@ export default function ShopClient() {
       </div>
 
       <div className={styles.filterGroup}>
-        <h4>Max Price — {maxPrice} EGP</h4>
+        <h4>{t("shop.maxPrice")} — {maxPrice} {t("common.currency")}</h4>
         <input
           type="range" min="600" max="1400" step="50"
           value={maxPrice}
@@ -120,7 +125,7 @@ export default function ShopClient() {
       </div>
 
       <div className={styles.filterGroup}>
-        <h4>Minimum Rating</h4>
+        <h4>{t("shop.minRating")}</h4>
         <div className={styles.pills}>
           {[0, 4, 4.5].map((r) => (
             <button
@@ -128,7 +133,7 @@ export default function ShopClient() {
               className={`${styles.pill} ${minRating === r ? styles.pillOn : ""}`}
               onClick={() => setMinRating(r)}
             >
-              {r === 0 ? "Any" : `${r}★+`}
+              {r === 0 ? t("shop.any") : `${r}★+`}
             </button>
           ))}
         </div>
@@ -137,15 +142,15 @@ export default function ShopClient() {
       <div className={styles.filterGroup}>
         <label className={styles.check}>
           <input type="checkbox" checked={bestOnly} onChange={() => setBestOnly((v) => !v)} />
-          <span>Best Sellers only</span>
+          <span>{t("shop.bestOnly")}</span>
         </label>
         <label className={styles.check}>
           <input type="checkbox" checked={saleOnly} onChange={() => setSaleOnly((v) => !v)} />
-          <span>On Offer only</span>
+          <span>{t("shop.saleOnly")}</span>
         </label>
       </div>
 
-      <button className="btn btn--ghost btn--full" onClick={clearAll}>Clear filters</button>
+      <button className="btn btn--ghost btn--full" onClick={clearAll}>{t("shop.clearFilters")}</button>
     </>
   );
 
@@ -153,9 +158,9 @@ export default function ShopClient() {
     <>
       <div className={styles.header}>
         <div className="container">
-          <p className="eyebrow">The Collection</p>
-          <h1 className={styles.title}>Shop all fragrances</h1>
-          <p className={styles.sub}>{filtered.length} of {products.length} products</p>
+          <p className="eyebrow">{t("shop.eyebrow")}</p>
+          <h1 className={styles.title}>{t("shop.title")}</h1>
+          <p className={styles.sub}>{t("shop.count", { shown: filtered.length, total: products.length })}</p>
         </div>
       </div>
 
@@ -165,7 +170,7 @@ export default function ShopClient() {
         <div className={styles.main}>
           <div className={styles.toolbar}>
             <button className={styles.filterBtn} onClick={() => setDrawer(true)}>
-              Filters
+              {t("shop.filters")}
             </button>
             <select className={styles.sort} value={sort} onChange={(e) => setSort(e.target.value)}>
               {SORTS.map((s) => <option key={s.v} value={s.v}>{s.l}</option>)}
@@ -174,8 +179,8 @@ export default function ShopClient() {
 
           {filtered.length === 0 ? (
             <div className={styles.empty}>
-              <p>No fragrances match these filters.</p>
-              <button className="btn btn--solid" onClick={clearAll}>Reset filters</button>
+              <p>{t("shop.noMatch")}</p>
+              <button className="btn btn--solid" onClick={clearAll}>{t("shop.resetFilters")}</button>
             </div>
           ) : (
             <div className={styles.grid}>
@@ -189,12 +194,12 @@ export default function ShopClient() {
         <div className={styles.drawerWrap} onClick={() => setDrawer(false)}>
           <div className={styles.drawer} onClick={(e) => e.stopPropagation()}>
             <div className={styles.drawerHead}>
-              <h3>Filters</h3>
-              <button onClick={() => setDrawer(false)} aria-label="Close">✕</button>
+              <h3>{t("shop.filters")}</h3>
+              <button onClick={() => setDrawer(false)} aria-label={t("common.close")}>✕</button>
             </div>
             {Filters}
             <button className="btn btn--solid btn--full" onClick={() => setDrawer(false)}>
-              Show {filtered.length} results
+              {t("shop.showResults", { n: filtered.length })}
             </button>
           </div>
         </div>

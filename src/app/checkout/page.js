@@ -3,38 +3,44 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useShop } from "@/context/ShopContext";
+import { useLang } from "@/context/LangContext";
 import styles from "./checkout.module.css";
 
-const GOVERNORATES = [
+const GOV_KEYS = [
   "Cairo", "Giza", "Alexandria", "Beheira", "Dakahlia", "Sharqia",
   "Qalyubia", "Gharbia", "Monufia", "Aswan", "Luxor", "Other",
 ];
-
-const PAYMENTS = [
-  { id: "cod", label: "Cash on Delivery", note: "Pay when your order arrives" },
-  { id: "card", label: "Visa / Mastercard", note: "Secure card payment" },
-  { id: "instapay", label: "InstaPay", note: "Bank transfer via InstaPay" },
-  { id: "vodafone", label: "Vodafone Cash", note: "Mobile wallet" },
-  { id: "orange", label: "Orange Cash", note: "Mobile wallet" },
-  { id: "etisalat", label: "Etisalat Cash", note: "Mobile wallet" },
-];
+const GOV_AR = {
+  Cairo: "القاهرة", Giza: "الجيزة", Alexandria: "الإسكندرية", Beheira: "البحيرة",
+  Dakahlia: "الدقهلية", Sharqia: "الشرقية", Qalyubia: "القليوبية", Gharbia: "الغربية",
+  Monufia: "المنوفية", Aswan: "أسوان", Luxor: "الأقصر", Other: "أخرى",
+};
 
 export default function CheckoutPage() {
   const { state, dispatch, cartTotal } = useShop();
+  const { t, lang } = useLang();
   const [pay, setPay] = useState("cod");
   const [placed, setPlaced] = useState(false);
   const [form, setForm] = useState({
     name: state.user?.name || "",
     phone: "", governorate: "", city: "", address: "", email: state.user?.email || "",
   });
+  const cur = t("common.currency");
+
+  const PAYMENTS = [
+    { id: "cod", label: t("pay.cod"), note: t("pay.codNote") },
+    { id: "card", label: t("pay.card"), note: t("pay.cardNote") },
+    { id: "instapay", label: t("pay.instapay"), note: t("pay.instapayNote") },
+    { id: "vodafone", label: t("pay.vodafone"), note: t("pay.vodafoneNote") },
+    { id: "orange", label: t("pay.orange"), note: t("pay.orangeNote") },
+    { id: "etisalat", label: t("pay.etisalat"), note: t("pay.etisalatNote") },
+  ];
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const valid = form.name && form.phone && form.governorate && form.city && form.address && form.email;
 
   const placeOrder = () => {
     if (!valid) return;
-    // Prototype: no real payment/gateway call. Inventory would be deducted
-    // only after Admin confirms the order (see blueprint §14).
     setPlaced(true);
     dispatch({ type: "CLEAR_CART" });
     window.scrollTo({ top: 0 });
@@ -44,14 +50,11 @@ export default function CheckoutPage() {
     return (
       <div className={`container ${styles.done}`}>
         <div className={styles.doneMark}>✓</div>
-        <h1>Order placed</h1>
-        <p>
-          Thank you. Your order has been received with status <strong>New</strong>.
-          We&apos;ll confirm it shortly — you can track progress in your account.
-        </p>
+        <h1>{t("checkout.done")}</h1>
+        <p>{t("checkout.doneText")}</p>
         <div className={styles.doneActions}>
-          <Link href="/account" className="btn btn--solid">View my orders</Link>
-          <Link href="/shop" className="btn btn--ghost">Continue shopping</Link>
+          <Link href="/account" className="btn btn--solid">{t("checkout.viewOrders")}</Link>
+          <Link href="/shop" className="btn btn--ghost">{t("checkout.continueShopping")}</Link>
         </div>
       </div>
     );
@@ -60,9 +63,9 @@ export default function CheckoutPage() {
   if (state.cart.length === 0) {
     return (
       <div className={`container ${styles.done}`}>
-        <h1>Nothing to check out</h1>
-        <p>Your cart is empty.</p>
-        <Link href="/shop" className="btn btn--solid">Shop fragrances</Link>
+        <h1>{t("checkout.nothing")}</h1>
+        <p>{t("checkout.emptyCart")}</p>
+        <Link href="/shop" className="btn btn--solid">{t("cart.shopBtn")}</Link>
       </div>
     );
   }
@@ -70,40 +73,40 @@ export default function CheckoutPage() {
   return (
     <div className="container">
       <div className={styles.head}>
-        <p className="eyebrow">Almost There</p>
-        <h1 className={styles.title}>Checkout</h1>
+        <p className="eyebrow">{t("checkout.eyebrow")}</p>
+        <h1 className={styles.title}>{t("checkout.title")}</h1>
       </div>
 
       {!state.user && (
         <div className={styles.notice}>
-          You&apos;re checking out as a guest in this preview. An account is
-          required to complete a real order — <Link href="/login">sign in</Link> or{" "}
-          <Link href="/register">create one</Link>.
+          {t("checkout.guestNotice")}{" "}
+          <Link href="/login">{t("checkout.signIn")}</Link> {t("checkout.or")}{" "}
+          <Link href="/register">{t("checkout.createOne")}</Link>.
         </div>
       )}
 
       <div className={styles.layout}>
         <div className={styles.formCol}>
           <section className={styles.card}>
-            <h3>Delivery details</h3>
+            <h3>{t("checkout.delivery")}</h3>
             <div className={styles.grid2}>
-              <Field label="Full name" value={form.name} onChange={set("name")} />
-              <Field label="Phone number" value={form.phone} onChange={set("phone")} type="tel" />
+              <Field label={t("checkout.fullName")} value={form.name} onChange={set("name")} />
+              <Field label={t("checkout.phone")} value={form.phone} onChange={set("phone")} type="tel" />
               <div className={styles.field}>
-                <label>Governorate</label>
+                <label>{t("checkout.governorate")}</label>
                 <select value={form.governorate} onChange={set("governorate")}>
-                  <option value="">Select…</option>
-                  {GOVERNORATES.map((g) => <option key={g} value={g}>{g}</option>)}
+                  <option value="">{t("checkout.select")}</option>
+                  {GOV_KEYS.map((g) => <option key={g} value={g}>{lang === "ar" ? GOV_AR[g] : g}</option>)}
                 </select>
               </div>
-              <Field label="City / Markaz" value={form.city} onChange={set("city")} />
-              <Field label="Email" value={form.email} onChange={set("email")} type="email" full />
-              <Field label="Detailed address" value={form.address} onChange={set("address")} full textarea />
+              <Field label={t("checkout.city")} value={form.city} onChange={set("city")} />
+              <Field label={t("checkout.email")} value={form.email} onChange={set("email")} type="email" full />
+              <Field label={t("checkout.address")} value={form.address} onChange={set("address")} full textarea />
             </div>
           </section>
 
           <section className={styles.card}>
-            <h3>Payment method</h3>
+            <h3>{t("checkout.payment")}</h3>
             <div className={styles.payments}>
               {PAYMENTS.map((p) => (
                 <label key={p.id} className={`${styles.payment} ${pay === p.id ? styles.payOn : ""}`}>
@@ -113,35 +116,32 @@ export default function CheckoutPage() {
                 </label>
               ))}
             </div>
-            <p className={styles.payHint}>
-              Payment gateway configuration is set up by the store admin. This
-              preview does not process real payments.
-            </p>
+            <p className={styles.payHint}>{t("checkout.paymentHint")}</p>
           </section>
         </div>
 
         <aside className={styles.summary}>
-          <h3>Your order</h3>
+          <h3>{t("checkout.yourOrder")}</h3>
           <div className={styles.lines}>
             {state.cart.map((i) => (
               <div key={i.key} className={styles.line}>
                 <span className={styles.lineDot} style={{ background: i.color }} />
                 <span className={styles.lineName}>{i.name} · {i.size} × {i.qty}</span>
-                <span className={styles.linePrice}>{i.price * i.qty} EGP</span>
+                <span className={styles.linePrice}>{i.price * i.qty} {cur}</span>
               </div>
             ))}
           </div>
           <div className={styles.totals}>
-            <div><span>Subtotal</span><span>{cartTotal} EGP</span></div>
-            <div><span>Shipping</span><span>2–5 days · TBD</span></div>
+            <div><span>{t("cart.subtotal")}</span><span>{cartTotal} {cur}</span></div>
+            <div><span>{t("cart.shipping")}</span><span>{t("checkout.shippingTbd")}</span></div>
           </div>
           <div className={styles.total}>
-            <span>Total</span><span>{cartTotal} EGP</span>
+            <span>{t("cart.total")}</span><span>{cartTotal} {cur}</span>
           </div>
           <button className="btn btn--solid btn--full" onClick={placeOrder} disabled={!valid}>
-            Place order
+            {t("checkout.placeOrder")}
           </button>
-          {!valid && <p className={styles.fillNote}>Fill in all delivery details to continue.</p>}
+          {!valid && <p className={styles.fillNote}>{t("checkout.fillNote")}</p>}
         </aside>
       </div>
     </div>

@@ -14,3 +14,6 @@
   transition: transform 0.2s;
 }
 .wa:hover { transform: scale(1.08); }
+
+/* RTL: move to bottom-left */
+html[dir="rtl"] .wa { right: auto; left: 20px; }

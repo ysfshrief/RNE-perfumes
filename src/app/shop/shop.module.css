@@ -149,3 +149,6 @@
 @media (max-width: 440px) {
   .grid { grid-template-columns: 1fr; }
 }
+
+/* RTL: drawer slides from the right */
+html[dir="rtl"] .drawerWrap { justify-content: flex-end; }

@@ -2,37 +2,30 @@
 
 import { useState } from "react";
 import PageShell from "@/components/PageShell";
+import { useLang } from "@/context/LangContext";
 import styles from "./contact.module.css";
 
 export default function ContactPage() {
+  const { t } = useLang();
   const [sent, setSent] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const submit = (e) => {
-    e.preventDefault();
-    setSent(true);
-  };
-
   return (
-    <PageShell
-      eyebrow="Get in Touch"
-      title="Contact us"
-      lead="Questions about a fragrance, an order, or a recommendation? We're here to help."
-    >
+    <PageShell eyebrow={t("contact.eyebrow")} title={t("contact.title")} lead={t("contact.lead")}>
       <div className={styles.layout}>
         <div className={styles.info}>
           <div className={styles.infoItem}>
-            <h3>WhatsApp</h3>
-            <p>Fastest way to reach us — tap the green button on any page.</p>
+            <h3>{t("contact.whatsapp")}</h3>
+            <p>{t("contact.whatsappText")}</p>
           </div>
           <div className={styles.infoItem}>
-            <h3>Email</h3>
+            <h3>{t("contact.emailLabel")}</h3>
             <p>hello@rneperfumes.com</p>
           </div>
           <div className={styles.infoItem}>
-            <h3>Hours</h3>
-            <p>Saturday–Thursday, 10am–8pm</p>
+            <h3>{t("contact.hours")}</h3>
+            <p>{t("contact.hoursText")}</p>
           </div>
         </div>
 
@@ -40,24 +33,24 @@ export default function ContactPage() {
           {sent ? (
             <div className={styles.sent}>
               <div className={styles.sentMark}>✓</div>
-              <h3>Message sent</h3>
-              <p>Thanks — we&apos;ll get back to you soon.</p>
+              <h3>{t("contact.sent")}</h3>
+              <p>{t("contact.sentText")}</p>
             </div>
           ) : (
-            <form onSubmit={submit} className={styles.form}>
+            <form onSubmit={(e) => { e.preventDefault(); setSent(true); }} className={styles.form}>
               <div className={styles.field}>
-                <label>Name</label>
+                <label>{t("contact.name")}</label>
                 <input required value={form.name} onChange={set("name")} />
               </div>
               <div className={styles.field}>
-                <label>Email</label>
+                <label>{t("contact.emailLabel")}</label>
                 <input type="email" required value={form.email} onChange={set("email")} />
               </div>
               <div className={styles.field}>
-                <label>Message</label>
+                <label>{t("contact.message")}</label>
                 <textarea rows={5} required value={form.message} onChange={set("message")} />
               </div>
-              <button className="btn btn--solid btn--full" type="submit">Send message</button>
+              <button className="btn btn--solid btn--full" type="submit">{t("contact.send")}</button>
             </form>
           )}
         </div>

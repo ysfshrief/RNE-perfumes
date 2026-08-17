@@ -1,47 +1,51 @@
+"use client";
+
 import Link from "next/link";
-import Logo from "./Logo";
+import LogoRNE from "./LogoRNE";
+import LogoJoe from "./LogoJoe";
+import FooterAdminTrigger from "./FooterAdminTrigger";
+import { useLang } from "@/context/LangContext";
 import styles from "./Footer.module.css";
 
-const columns = [
-  {
-    title: "Shop",
-    links: [
-      { href: "/shop", label: "All Fragrances" },
-      { href: "/shop?category=Men", label: "For Men" },
-      { href: "/shop?category=Women", label: "For Women" },
-      { href: "/shop?offers=true", label: "Offers" },
-    ],
-  },
-  {
-    title: "Help",
-    links: [
-      { href: "/faq", label: "FAQ" },
-      { href: "/shipping-policy", label: "Shipping Policy" },
-      { href: "/return-policy", label: "Returns & Refunds" },
-      { href: "/contact", label: "Contact Us" },
-    ],
-  },
-  {
-    title: "Brand",
-    links: [
-      { href: "/about", label: "About RNE" },
-      { href: "/terms", label: "Terms & Conditions" },
-      { href: "/account", label: "My Account" },
-    ],
-  },
-];
-
 export default function Footer() {
+  const { t } = useLang();
+
+  const columns = [
+    {
+      title: t("footer.shop"),
+      links: [
+        { href: "/shop", label: t("footer.allFragrances") },
+        { href: "/shop?category=Men", label: t("nav.men") },
+        { href: "/shop?category=Women", label: t("nav.women") },
+        { href: "/shop?offers=true", label: t("footer.offers") },
+      ],
+    },
+    {
+      title: t("footer.help"),
+      links: [
+        { href: "/faq", label: t("footer.faq") },
+        { href: "/shipping-policy", label: t("footer.shippingPolicy") },
+        { href: "/return-policy", label: t("footer.returns") },
+        { href: "/contact", label: t("nav.contact") },
+      ],
+    },
+    {
+      title: t("footer.brand"),
+      links: [
+        { href: "/about", label: t("footer.aboutRne") },
+        { href: "/terms", label: t("footer.terms") },
+        { href: "/account", label: t("nav.myAccount") },
+      ],
+    },
+  ];
+
   return (
     <footer className={styles.footer}>
       <div className="container">
         <div className={styles.top}>
           <div className={styles.brand}>
-            <Logo light />
-            <p className={styles.tag}>
-              Premium fragrances, composed with intent. Crafted for those who
-              wear scent as signature.
-            </p>
+            <LogoRNE light />
+            <p className={styles.tag}>{t("footer.tag")}</p>
             <div className={styles.social}>
               <a href="#" aria-label="Instagram"><IgIcon /></a>
               <a href="#" aria-label="Facebook"><FbIcon /></a>
@@ -67,8 +71,19 @@ export default function Footer() {
 
         {/* Mandatory copyright — do not alter */}
         <div className={styles.bottom}>
-          <p>جميع الحقوق محفوظة RNE perfumes</p>
-          <p>Developed &amp; designed by : Youssef Shrief</p>
+          <div className={styles.copyLeft}>
+            {/* Secret admin trigger: tap RNE 3× then enter 000 */}
+            <FooterAdminTrigger />
+            <div className={styles.copyText}>
+              <p dir="rtl">جميع الحقوق محفوظة RNE perfumes</p>
+              <p dir="ltr">Developed &amp; designed by : Youssef Shrief</p>
+            </div>
+          </div>
+
+          <div className={styles.devBy} dir="ltr">
+            <span className={styles.poweredBy} dir="ltr">Powered by</span>
+            <LogoJoe height={30} />
+          </div>
         </div>
       </div>
     </footer>

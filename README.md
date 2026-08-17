@@ -1,33 +1,20 @@
-# RNE Perfumes — E-Commerce Storefront
+# RNE Perfumes — متجر إلكتروني | E-Commerce Storefront
 
-A premium, mobile-first e-commerce prototype for **RNE Perfumes**, built with
-Next.js (App Router). This is a **front-end prototype with mock data** — a
-complete, deployable UI that maps directly to the project blueprint, ready to
-push to Vercel.
+متجر إلكتروني فاخر لبراند **RNE Perfumes**، مبني بـ Next.js، جاهز للرفع على Vercel.
+عربي/إنجليزي كامل مع دعم RTL، وتصميم mobile-first.
 
----
-
-## Tech stack
-
-- **Next.js 14** (App Router)
-- **React 18**
-- CSS Modules + a design-token system (no CSS framework)
-- Client-side cart & wishlist state persisted in `localStorage`
-- Fonts: Syne (display) + Inter (body), loaded from Google Fonts
-
-No backend or database is included. All product, order, customer, and review
-data is mock data under `src/data/`.
+A premium, bilingual (Arabic/English, RTL-ready), mobile-first e-commerce
+prototype for **RNE Perfumes**, built with Next.js (App Router) and ready to
+deploy to Vercel. Front-end only, with mock data.
 
 ---
 
-## Getting started
+## التشغيل | Getting started
 
 ```bash
 npm install
-npm run dev
+npm run dev      # http://localhost:3000
 ```
-
-Open http://localhost:3000
 
 ### Build for production
 
@@ -38,77 +25,67 @@ npm start
 
 ---
 
-## Deploy to Vercel
+## الرفع على Vercel | Deploy to Vercel
 
-1. Push this folder to a GitHub repository.
-2. Go to [vercel.com](https://vercel.com) → **Add New Project** → import the repo.
-3. Vercel auto-detects Next.js. No environment variables are needed for the
-   prototype. Click **Deploy**.
-
-Alternatively, with the Vercel CLI:
-
-```bash
-npm i -g vercel
-vercel
-```
+1. ارفع الفولدر على مستودع GitHub.
+2. من [vercel.com](https://vercel.com) اختر **Add New Project** واستورد المستودع.
+3. Vercel هيتعرّف على Next.js تلقائيًا. اضغط **Deploy**.
 
 ---
 
-## What's included
+## 🔑 الدخول لصفحة الإدارة | Admin access
 
-### Storefront
-- **Home** — hero, categories, best sellers, editorial section
-- **Shop** — search, category / size / price / rating filters, sort, mobile drawer
-- **Product details** — gallery, size + stock, fragrance-note pyramid, reviews
-- **Cart** — quantities, coupon codes (`RNE10`, `SAVE50`), totals
-- **Checkout** — delivery form, all six payment methods, order confirmation
-- **Account** — login / register / orders / profile / addresses (mock auth)
-- **Wishlist**
-- **Content pages** — About, Contact, FAQ, Shipping, Returns, Terms
-- Global footer with mandatory copyright, floating WhatsApp button
+صفحة الإدارة مخفية. للدخول:
 
-### Admin dashboard (`/admin`)
-- **Overview** — stats, recent orders, low-stock alerts
-- **Products** — table with hide/show, delete, stock, best-seller flags
-- **Orders** — status flow (New → Confirmed → Preparing → Out for Delivery →
-  Delivered, plus Cancelled / Returned) with per-order management
-- **Customers**, **Reviews** (approve / hide / delete), **Discounts** (create
-  coupons), **Content** editor, **Settings** (payment methods, gateway,
-  Meta Pixel, WhatsApp, social links)
+1. انزل لأسفل أي صفحة لحد الفوتر.
+2. اضغط **٣ مرات** على لوجو **RNE** الموجود في شريط الحقوق بالفوتر.
+3. هيظهر صندوق — اكتب **`000`** واضغط دخول.
+
+To open the hidden admin dashboard: tap the **RNE logo** in the footer's
+copyright bar **3 times**, then enter **`000`**.
 
 ---
 
-## Important notes for production
+## 🌐 اللغة | Language
 
-This prototype intentionally does **not** implement the security-critical
-backend logic described in the blueprint. Before going live you'll need:
-
-- A real backend + database (products, orders, customers, reviews, inventory)
-- Server-side auth (the UI is structured to be auth-provider agnostic)
-- **Inventory deducted only when an order is set to `Confirmed`** — enforced
-  server-side, not in the UI
-- Server-side price & stock validation (never trust the client)
-- Real payment gateway integration (configurable from Admin → Settings)
-- Shipping provider integration (deferred per blueprint)
-
-The front-end is organized to make adding this backend straightforward:
-data access is isolated in `src/data/`, and shopping state lives in
-`src/context/ShopContext.js`.
+- العربية هي اللغة الافتراضية (RTL).
+- زر تبديل اللغة (عربي/English) موجود في الهيدر.
+- كل نصوص الموقع ولوحة الإدارة مترجمة، وأسماء المنتجات ووصفها ونغمات العطر.
 
 ---
 
-## Project structure
+## 🖼️ اللوجوهات | Logos
 
-```
-src/
-  app/                 # routes (App Router)
-    admin/             # admin dashboard
-    product/[slug]/    # dynamic product pages
-    shop/ cart/ ...    # storefront pages
-  components/          # Header, Footer, ProductCard, etc.
-  context/             # cart & wishlist state
-  data/                # mock product / review data
-```
+الصور الأصلية موجودة في فولدر `public/`:
+
+- `rne-logo.png` — لوجو RNE (نسخة داكنة للخلفيات الفاتحة)
+- `rne-logo-light.png` — لوجو RNE (نسخة فاتحة لفوتر داكن)
+- `joe-logo.png` — لوجو JOE INDUSTRIES
+
+لتبديل أي لوجو، استبدل الملف في `public/` بنفس الاسم.
+
+---
+
+## المحتوى | What's included
+
+### المتجر | Storefront
+الرئيسية، المتجر (بحث + فلاتر)، صفحة المنتج (بهرم نغمات العطر)، السلة (بكوبونات
+`RNE10` / `SAVE50`)، الدفع (كل طرق الدفع)، الحساب/تسجيل الدخول/التسجيل، المفضلة،
+من نحن، اتصل بنا، الأسئلة الشائعة، وكل السياسات.
+
+### لوحة الإدارة | Admin (`/admin`)
+نظرة عامة، المنتجات، الطلبات (بمسار الحالة New → Confirmed → … → Delivered)،
+العملاء، التقييمات، الخصومات، المحتوى، والإعدادات.
+
+الفوتر يحتوي على حقوق النشر الإلزامية + لوجو JOE INDUSTRIES.
+
+---
+
+## ملاحظات للإنتاج | Production notes
+
+النسخة دي **front-end فقط ببيانات تجريبية**. قبل الإطلاق الحقيقي محتاج:
+Backend + قاعدة بيانات، مصادقة حقيقية، خصم المخزون عند "Confirmed" من السيرفر،
+التحقق من الأسعار والمخزون في الـ Backend، وربط بوابة الدفع.
 
 ---
 

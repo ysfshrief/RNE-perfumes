@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { useShop } from "@/context/ShopContext";
+import { useLang } from "@/context/LangContext";
 import { getMinPrice, isInStock } from "@/data/products";
+import { pName, pTagline } from "@/data/productLocale";
 import styles from "./ProductCard.module.css";
 
 export default function ProductCard({ product }) {
   const { state, dispatch } = useShop();
+  const { t, lang } = useLang();
   const saved = state.wishlist.includes(product.id);
   const inStock = isInStock(product);
   const minPrice = getMinPrice(product);
@@ -14,20 +17,20 @@ export default function ProductCard({ product }) {
 
   return (
     <article className={styles.card}>
-      <Link href={`/product/${product.slug}`} className={styles.media} aria-label={product.name}>
+      <Link href={`/product/${product.slug}`} className={styles.media} aria-label={pName(product, lang)}>
         <div className={styles.bottle} style={{ background: product.images[0] }}>
-          <span className={styles.bottleLabel}>{product.name}</span>
+          <span className={`${styles.bottleLabel} keep-latin`}>{product.name}</span>
         </div>
         <div className={styles.badges}>
-          {!inStock && <span className="badge badge--out">Sold Out</span>}
-          {inStock && hasSale && <span className="badge badge--sale">Sale</span>}
+          {!inStock && <span className="badge badge--out">{t("badge.soldOut")}</span>}
+          {inStock && hasSale && <span className="badge badge--sale">{t("badge.sale")}</span>}
           {inStock && product.bestSeller && !hasSale && (
-            <span className="badge badge--best">Best Seller</span>
+            <span className="badge badge--best">{t("badge.best")}</span>
           )}
         </div>
         <button
           className={`${styles.wish} ${saved ? styles.wishOn : ""}`}
-          aria-label={saved ? "Remove from wishlist" : "Add to wishlist"}
+          aria-label={saved ? t("card.removeWishlist") : t("card.addWishlist")}
           onClick={(e) => {
             e.preventDefault();
             dispatch({ type: "TOGGLE_WISHLIST", payload: product.id });
@@ -41,21 +44,21 @@ export default function ProductCard({ product }) {
 
       <div className={styles.body}>
         <div className={styles.meta}>
-          <span>{product.gender}</span>
-          <span className="stars" aria-label={`${product.rating} out of 5`}>
+          <span>{t(`g.${product.gender}`)}</span>
+          <span className="stars" aria-label={`${product.rating} / 5`}>
             ★ {product.rating}
           </span>
         </div>
         <h3 className={styles.name}>
-          <Link href={`/product/${product.slug}`}>{product.name}</Link>
+          <Link href={`/product/${product.slug}`}>{pName(product, lang)}</Link>
         </h3>
-        <p className={styles.tag}>{product.tagline}</p>
+        <p className={styles.tag}>{pTagline(product, lang)}</p>
         <div className={styles.foot}>
           <span className="price">
-            {minPrice} EGP
+            {minPrice} {t("common.currency")}
           </span>
           <Link href={`/product/${product.slug}`} className={styles.view}>
-            View →
+            {t("common.view")}
           </Link>
         </div>
       </div>

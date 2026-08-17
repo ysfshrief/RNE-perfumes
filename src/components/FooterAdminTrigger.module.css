@@ -1,0 +1,53 @@
+.trigger { -webkit-tap-highlight-color: transparent; }
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+.box {
+  background: var(--paper);
+  border-radius: 8px;
+  padding: 1.8rem;
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: center;
+}
+.box h3 { font-size: 1.2rem; }
+.box p { font-size: 0.85rem; color: var(--olive); margin-bottom: 0.6rem; }
+.box input {
+  padding: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: 1.4rem;
+  text-align: center;
+  letter-spacing: 0.4em;
+  background: var(--white);
+  font-family: var(--font-display);
+}
+.box input:focus { outline: none; border-color: var(--amber); }
+.inputError { border-color: var(--danger) !important; }
+.err { color: var(--danger); font-size: 0.8rem; }
+.actions { display: flex; gap: 0.6rem; margin-top: 0.8rem; }
+.cancel, .enter {
+  flex: 1;
+  padding: 0.7rem;
+  border-radius: var(--radius);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.cancel { border: 1px solid var(--line); }
+.cancel:hover { border-color: var(--ink); }
+.enter { background: var(--ink); color: var(--paper); }
+.enter:hover { background: var(--amber-deep); }

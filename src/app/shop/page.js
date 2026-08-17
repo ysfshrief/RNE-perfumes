@@ -5,7 +5,7 @@ export const metadata = { title: "Shop — RNE Perfumes" };
 
 export default function ShopPage() {
   return (
-    <Suspense fallback={<div className="container section">Loading shop…</div>}>
+    <Suspense fallback={<div className="container section">…</div>}>
       <ShopClient />
     </Suspense>
   );

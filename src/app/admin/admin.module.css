@@ -167,3 +167,10 @@
   .menuBtn { display: block; }
   .overlay { display: block; }
 }
+
+/* RTL: mobile sidebar slides from the right */
+html[dir="rtl"] .sidebar { left: auto; right: 0; }
+@media (max-width: 880px) {
+  html[dir="rtl"] .sidebar { transform: translateX(100%); }
+  html[dir="rtl"] .sidebarOpen { transform: translateX(0); }
+}

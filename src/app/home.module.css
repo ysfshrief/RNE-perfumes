@@ -158,3 +158,8 @@
 @media (max-width: 440px) {
   .grid, .grid4 { grid-template-columns: 1fr; }
 }
+
+/* RTL */
+html[dir="rtl"] .catArrow { transform: scaleX(-1); }
+html[dir="rtl"] .cat:hover .catArrow { transform: scaleX(-1) translateX(4px); }
+html[dir="rtl"] .heroMark { right: auto; left: -3%; }

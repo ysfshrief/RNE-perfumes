@@ -4,20 +4,22 @@ import { useState } from "react";
 import Link from "next/link";
 import Logo from "./Logo";
 import { useShop } from "@/context/ShopContext";
+import { useLang } from "@/context/LangContext";
 import styles from "./Header.module.css";
-
-const nav = [
-  { href: "/shop", label: "Shop" },
-  { href: "/shop?category=Men", label: "Men" },
-  { href: "/shop?category=Women", label: "Women" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-];
 
 export default function Header() {
   const { cartCount, state } = useShop();
+  const { t, toggle, lang } = useLang();
   const [open, setOpen] = useState(false);
   const wishCount = state.wishlist.length;
+
+  const nav = [
+    { href: "/shop", label: t("nav.shop") },
+    { href: "/shop?category=Men", label: t("nav.men") },
+    { href: "/shop?category=Women", label: t("nav.women") },
+    { href: "/about", label: t("nav.about") },
+    { href: "/contact", label: t("nav.contact") },
+  ];
 
   return (
     <header className={styles.header}>
@@ -37,21 +39,24 @@ export default function Header() {
 
         <nav className={styles.nav} aria-label="Primary">
           {nav.map((n) => (
-            <Link key={n.label} href={n.href} className={styles.link}>
+            <Link key={n.href} href={n.href} className={styles.link}>
               {n.label}
             </Link>
           ))}
         </nav>
 
         <div className={styles.actions}>
-          <Link href="/account" aria-label="Account" className={styles.iconLink}>
+          <button className={styles.langBtn} onClick={toggle} aria-label="Switch language">
+            {t("lang.toggle")}
+          </button>
+          <Link href="/account" aria-label={t("nav.account")} className={styles.iconLink}>
             <UserIcon />
           </Link>
-          <Link href="/wishlist" aria-label="Wishlist" className={styles.iconLink}>
+          <Link href="/wishlist" aria-label={t("nav.wishlist")} className={styles.iconLink}>
             <HeartIcon />
             {wishCount > 0 && <span className={styles.count}>{wishCount}</span>}
           </Link>
-          <Link href="/cart" aria-label="Cart" className={styles.iconLink}>
+          <Link href="/cart" aria-label={t("nav.cart")} className={styles.iconLink}>
             <BagIcon />
             {cartCount > 0 && <span className={styles.count}>{cartCount}</span>}
           </Link>
@@ -61,11 +66,14 @@ export default function Header() {
       {open && (
         <nav className={styles.mobileNav} aria-label="Mobile">
           {nav.map((n) => (
-            <Link key={n.label} href={n.href} onClick={() => setOpen(false)}>
+            <Link key={n.href} href={n.href} onClick={() => setOpen(false)}>
               {n.label}
             </Link>
           ))}
-          <Link href="/account" onClick={() => setOpen(false)}>My Account</Link>
+          <Link href="/account" onClick={() => setOpen(false)}>{t("nav.myAccount")}</Link>
+          <button className={styles.mobileLang} onClick={() => { toggle(); setOpen(false); }}>
+            {t("lang.toggle")}
+          </button>
         </nav>
       )}
     </header>

@@ -1,47 +1,48 @@
+"use client";
+
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
 import WhatsApp from "@/components/WhatsApp";
 import { products } from "@/data/products";
+import { useLang } from "@/context/LangContext";
 import styles from "./home.module.css";
 
 export default function HomePage() {
+  const { t } = useLang();
   const featured = products.filter((p) => p.bestSeller).slice(0, 3);
   const fresh = products.slice(0, 4);
 
+  const cats = [
+    { label: t("home.forMen"), href: "/shop?category=Men", c: "#26302b" },
+    { label: t("home.forWomen"), href: "/shop?category=Women", c: "#7a4b52" },
+    { label: t("home.summer"), href: "/shop?category=Summer", c: "#3d5a6b" },
+    { label: t("home.winter"), href: "/shop?category=Winter", c: "#8f6a30" },
+  ];
+
   return (
     <>
-      {/* Hero */}
       <section className={styles.hero}>
         <div className="container">
-          <p className={styles.heroEyebrow}>RNE — Eau de Parfum</p>
+          <p className={styles.heroEyebrow}>{t("home.heroEyebrow")}</p>
           <h1 className={styles.heroTitle}>
-            Scent, <em>engineered</em>
-            <br /> into signature.
+            {t("home.heroTitle1")} <em>{t("home.heroTitleEm")}</em>
+            <br /> {t("home.heroTitle2")}
           </h1>
-          <p className={styles.heroLead}>
-            Premium compositions built note by note. Discover fragrances made to
-            be remembered — for him, for her, for every season.
-          </p>
+          <p className={styles.heroLead}>{t("home.heroLead")}</p>
           <div className={styles.heroActions}>
-            <Link href="/shop" className="btn btn--solid">Shop the collection</Link>
-            <Link href="/shop?offers=true" className="btn btn--ghost">View offers</Link>
+            <Link href="/shop" className="btn btn--solid">{t("home.shopCollection")}</Link>
+            <Link href="/shop?offers=true" className="btn btn--ghost">{t("home.viewOffers")}</Link>
           </div>
         </div>
-        <div className={styles.heroMark} aria-hidden="true">RNE</div>
+        <div className={`${styles.heroMark} keep-latin`} aria-hidden="true">RNE</div>
       </section>
 
-      {/* Category strip */}
       <section className={styles.catStrip}>
         <div className="container">
-          <div className="rule">The Collection</div>
+          <div className="rule">{t("home.theCollection")}</div>
           <div className={styles.cats}>
-            {[
-              { label: "For Men", href: "/shop?category=Men", c: "#26302b" },
-              { label: "For Women", href: "/shop?category=Women", c: "#7a4b52" },
-              { label: "Summer", href: "/shop?category=Summer", c: "#3d5a6b" },
-              { label: "Winter", href: "/shop?category=Winter", c: "#8f6a30" },
-            ].map((cat) => (
-              <Link key={cat.label} href={cat.href} className={styles.cat} style={{ "--c": cat.c }}>
+            {cats.map((cat) => (
+              <Link key={cat.href} href={cat.href} className={styles.cat} style={{ "--c": cat.c }}>
                 <span>{cat.label}</span>
                 <span className={styles.catArrow}>→</span>
               </Link>
@@ -50,14 +51,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured */}
       <section className="section container">
         <div className={styles.sectionHead}>
           <div>
-            <p className="eyebrow">Best Sellers</p>
-            <h2 className={styles.sectionTitle}>Most-loved this season</h2>
+            <p className="eyebrow">{t("home.bestSellers")}</p>
+            <h2 className={styles.sectionTitle}>{t("home.mostLoved")}</h2>
           </div>
-          <Link href="/shop" className={styles.seeAll}>See all →</Link>
+          <Link href="/shop" className={styles.seeAll}>{t("common.viewAll")}</Link>
         </div>
         <div className={styles.grid}>
           {featured.map((p) => (
@@ -66,45 +66,41 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Editorial band */}
       <section className={styles.editorial}>
         <div className="container">
           <div className={styles.editorialInner}>
             <div>
-              <p className={styles.editEyebrow}>The RNE Standard</p>
-              <h2 className={styles.editTitle}>
-                Composed with intent. Worn as identity.
-              </h2>
+              <p className={styles.editEyebrow}>{t("home.theStandard")}</p>
+              <h2 className={styles.editTitle}>{t("home.standardTitle")}</h2>
             </div>
             <div className={styles.editCols}>
               <div className={styles.editItem}>
                 <span className={styles.editNum}>01</span>
-                <h4>Concentrated formulas</h4>
-                <p>Eau de parfum strength for depth and longevity that lasts through the day.</p>
+                <h4>{t("home.feat1Title")}</h4>
+                <p>{t("home.feat1Text")}</p>
               </div>
               <div className={styles.editItem}>
                 <span className={styles.editNum}>02</span>
-                <h4>Considered notes</h4>
-                <p>Every accord — top, heart, base — chosen to unfold in balance over time.</p>
+                <h4>{t("home.feat2Title")}</h4>
+                <p>{t("home.feat2Text")}</p>
               </div>
               <div className={styles.editItem}>
                 <span className={styles.editNum}>03</span>
-                <h4>Delivered local</h4>
-                <p>Fast local delivery in 2–5 days, with cash and card options at checkout.</p>
+                <h4>{t("home.feat3Title")}</h4>
+                <p>{t("home.feat3Text")}</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* New arrivals */}
       <section className="section container">
         <div className={styles.sectionHead}>
           <div>
-            <p className="eyebrow">The Range</p>
-            <h2 className={styles.sectionTitle}>Explore every scent</h2>
+            <p className="eyebrow">{t("home.theRange")}</p>
+            <h2 className={styles.sectionTitle}>{t("home.exploreEvery")}</h2>
           </div>
-          <Link href="/shop" className={styles.seeAll}>See all →</Link>
+          <Link href="/shop" className={styles.seeAll}>{t("common.viewAll")}</Link>
         </div>
         <div className={styles.grid4}>
           {fresh.map((p) => (

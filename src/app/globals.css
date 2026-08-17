@@ -16,6 +16,7 @@
   /* Type */
   --font-display: "Syne", system-ui, sans-serif;
   --font-body: "Inter", system-ui, sans-serif;
+  --font-ar: "Cairo", system-ui, sans-serif;
 
   /* Layout */
   --max: 1240px;
@@ -182,3 +183,54 @@ h1, h2, h3, h4 {
   letter-spacing: 0.1em;
   font-size: 0.85rem;
 }
+
+/* ============================================
+   RTL / Arabic support
+   ============================================ */
+html[dir="rtl"] body {
+  font-family: var(--font-ar);
+}
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3,
+html[dir="rtl"] h4,
+html[dir="rtl"] .eyebrow,
+html[dir="rtl"] .rule,
+html[dir="rtl"] .btn,
+html[dir="rtl"] .badge,
+html[dir="rtl"] .price {
+  font-family: var(--font-ar);
+}
+
+/* Latin brand mark should stay Syne even in RTL */
+html[dir="rtl"] .keep-latin {
+  font-family: var(--font-display) !important;
+}
+
+/* Price line-through spacing flips */
+html[dir="rtl"] .price__old {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+/* Numerals: keep Latin digits for prices/quantities readability */
+.price, .qty span { font-feature-settings: "tnum"; }
+
+/* ============================================
+   Mobile-first polish
+   ============================================ */
+/* Prevent iOS input zoom (font-size >= 16px on inputs) */
+input, select, textarea { font-size: 16px; }
+
+/* Smoother tap targets on mobile */
+@media (max-width: 600px) {
+  .btn { padding: 0.9rem 1.4rem; }
+  a, button { -webkit-tap-highlight-color: transparent; }
+}
+
+/* Keep prices LTR even inside RTL so "650 ج.م" reads correctly */
+.price, .price__old { direction: ltr; unicode-bidi: isolate; }
+html[dir="rtl"] .price { text-align: inherit; }
+
+/* Isolate Latin brand text within RTL flow */
+.keep-latin { unicode-bidi: isolate; }
