@@ -1,17 +1,15 @@
 "use client";
 
 import { useLang } from "@/context/LangContext";
+import { contact } from "@/data/brand";
 import styles from "./WhatsApp.module.css";
-
-// Placeholder number — configurable from Admin Dashboard in production.
-const PHONE = "201000000000";
 
 export default function WhatsApp() {
   const { t } = useLang();
   return (
     <a
       className={styles.wa}
-      href={`https://wa.me/${PHONE}?text=${encodeURIComponent(t("whatsapp.msg"))}`}
+      href={`https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(t("whatsapp.msg"))}`}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="WhatsApp"

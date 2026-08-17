@@ -16,7 +16,8 @@
   /* Type */
   --font-display: "Syne", system-ui, sans-serif;
   --font-body: "Inter", system-ui, sans-serif;
-  --font-ar: "Cairo", system-ui, sans-serif;
+  --font-ar: "Tajawal", system-ui, sans-serif;
+  --font-ar-display: "Almarai", "Tajawal", system-ui, sans-serif;
 
   /* Layout */
   --max: 1240px;
@@ -189,18 +190,30 @@ h1, h2, h3, h4 {
    ============================================ */
 html[dir="rtl"] body {
   font-family: var(--font-ar);
+  letter-spacing: 0;
 }
 html[dir="rtl"] h1,
 html[dir="rtl"] h2,
 html[dir="rtl"] h3,
-html[dir="rtl"] h4,
+html[dir="rtl"] h4 {
+  font-family: var(--font-ar-display);
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
 html[dir="rtl"] .eyebrow,
 html[dir="rtl"] .rule,
 html[dir="rtl"] .btn,
-html[dir="rtl"] .badge,
+html[dir="rtl"] .badge {
+  font-family: var(--font-ar);
+  letter-spacing: 0.08em;
+}
 html[dir="rtl"] .price {
   font-family: var(--font-ar);
+  font-weight: 700;
 }
+/* Arabic body reads better with a touch more line-height */
+html[dir="rtl"] p { line-height: 1.85; }
 
 /* Latin brand mark should stay Syne even in RTL */
 html[dir="rtl"] .keep-latin {
@@ -234,3 +247,19 @@ html[dir="rtl"] .price { text-align: inherit; }
 
 /* Isolate Latin brand text within RTL flow */
 .keep-latin { unicode-bidi: isolate; }
+
+/* ============================================
+   Premium responsive typography refinement
+   ============================================ */
+h1 { font-size: clamp(1.9rem, 5.2vw, 3.4rem); line-height: 1.06; }
+h2 { font-size: clamp(1.5rem, 3.6vw, 2.4rem); line-height: 1.12; }
+h3 { font-size: clamp(1.15rem, 2.4vw, 1.5rem); line-height: 1.2; }
+h4 { font-size: clamp(0.95rem, 1.8vw, 1.1rem); }
+
+body { font-size: 15.5px; }
+@media (min-width: 768px) { body { font-size: 16px; } }
+
+/* Comfortable minimum tap targets on mobile */
+@media (max-width: 600px) {
+  .btn { min-height: 46px; padding: 0.8rem 1.35rem; font-size: 0.8rem; }
+}

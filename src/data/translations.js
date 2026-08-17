@@ -365,6 +365,15 @@ export const translations = {
     "footer.returns": "Returns & Refunds",
     "footer.aboutRne": "About RNE",
     "footer.terms": "Terms & Conditions",
+    "footer.navigation": "Navigation",
+    "footer.customerCare": "Customer Care",
+    "footer.contact": "Contact",
+    "footer.followUs": "Follow Us",
+    "footer.emailUs": "Email us",
+    "footer.callWhatsapp": "WhatsApp",
+    "footer.copyright": "\u00A9 جميع الحقوق محفوظة RNE Perfumes",
+    "footer.developedBy": "Developed & designed by : Youssef Shrief",
+    "footer.home": "Home",
 
     // 404
     "notfound.eyebrow": "Error 404",
@@ -742,6 +751,15 @@ export const translations = {
     "footer.returns": "الإرجاع والاسترداد",
     "footer.aboutRne": "عن RNE",
     "footer.terms": "الشروط والأحكام",
+    "footer.navigation": "التصفّح",
+    "footer.customerCare": "خدمة العملاء",
+    "footer.contact": "تواصل",
+    "footer.followUs": "تابعنا",
+    "footer.emailUs": "راسلنا",
+    "footer.callWhatsapp": "واتساب",
+    "footer.copyright": "\u00A9 جميع الحقوق محفوظة RNE Perfumes",
+    "footer.developedBy": "Developed & designed by : Youssef Shrief",
+    "footer.home": "الرئيسية",
 
     // 404
     "notfound.eyebrow": "خطأ ٤٠٤",

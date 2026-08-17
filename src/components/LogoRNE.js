@@ -1,12 +1,14 @@
 "use client";
 
-// RNE logo — uses the original brand image (background removed).
-// Files live in /public: rne-logo.png (dark) and rne-logo-light.png (light).
+// RNE logo — official brand image (background removed), files in /public.
+// rne-logo.png (dark, for light backgrounds) · rne-logo-light.png (light, for dark)
 
-const RATIO = 767 / 470; // original artwork aspect ratio
+const RATIO = 480 / 295; // official artwork aspect ratio (with EAU DE PARFUM rule)
 
-export default function LogoRNE({ compact = false, light = false, onClick, className = "" }) {
-  const height = compact ? 40 : 58;
+export default function LogoRNE({ size = "md", light = false, onClick, className = "" }) {
+  // Heights tuned per placement; width derived from the true aspect ratio.
+  const heights = { sm: 30, md: 38, lg: 46 };
+  const height = heights[size] || heights.md;
   const width = Math.round(height * RATIO);
   const src = light ? "/rne-logo-light.png" : "/rne-logo.png";
 

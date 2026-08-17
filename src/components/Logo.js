@@ -2,7 +2,7 @@
 
 import LogoRNE from "./LogoRNE";
 
-// Thin wrapper so existing imports keep working.
+// Back-compat wrapper. compact -> smaller size.
 export default function Logo({ compact = false, light = false }) {
-  return <LogoRNE compact={compact} light={light} />;
+  return <LogoRNE size={compact ? "sm" : "md"} light={light} />;
 }

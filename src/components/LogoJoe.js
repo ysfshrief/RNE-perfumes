@@ -1,8 +1,8 @@
-// JOE INDUSTRIES logo — original brand image (background removed), in /public.
+// JOE INDUSTRIES logo — official brand image (background removed), in /public.
 
-const RATIO = 733 / 249;
+const RATIO = 732 / 164;
 
-export default function LogoJoe({ height = 20 }) {
+export default function LogoJoe({ height = 26 }) {
   const width = Math.round(height * RATIO);
   return (
     <span style={{ display: "inline-flex", lineHeight: 0, direction: "ltr" }}>

@@ -153,9 +153,10 @@
 @media (max-width: 620px) {
   .cats { grid-template-columns: repeat(2, 1fr); }
   .editCols { grid-template-columns: 1fr; gap: 1.4rem; }
-  .grid4 { grid-template-columns: repeat(2, 1fr); }
+  .grid, .grid4 { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+  .sectionHead { margin-bottom: 1.5rem; }
 }
-@media (max-width: 440px) {
+@media (max-width: 360px) {
   .grid, .grid4 { grid-template-columns: 1fr; }
 }
 
@@ -163,3 +164,13 @@
 html[dir="rtl"] .catArrow { transform: scaleX(-1); }
 html[dir="rtl"] .cat:hover .catArrow { transform: scaleX(-1) translateX(4px); }
 html[dir="rtl"] .heroMark { right: auto; left: -3%; }
+
+/* ---- Hero mobile refinement ---- */
+@media (max-width: 600px) {
+  .hero { padding-block: 2.75rem 3rem; }
+  .heroEyebrow { margin-bottom: 1rem; font-size: 0.66rem; }
+  .heroLead { margin-top: 1.25rem; font-size: 0.95rem; }
+  .heroActions { margin-top: 1.75rem; gap: 0.7rem; }
+  .heroActions .btn { flex: 1; min-width: 0; }
+  .heroMark { bottom: -8%; font-size: 8rem; }
+}
