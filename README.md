@@ -7,6 +7,11 @@ A premium, bilingual (Arabic/English, RTL) e-commerce storefront for **RNE
 Perfumes**, built with Next.js (App Router). Front-end prototype with mock data
 and a full admin dashboard. Ready to deploy to Vercel.
 
+> 🔥 **الربط بـ Firebase + بيئات Vercel:** اتبع دليل **`SETUP.md`** — المشروع
+> جاهز ومتوصّل، وبمجرد إضافة مفاتيح Firebase كل التعديلات هتتحفظ على السيرفر
+> وتظهر لكل الزوار. من غير مفاتيح، الموقع يشتغل عادي بتخزين محلي.
+> See **`SETUP.md`** for the full Firebase + Vercel guide.
+
 ---
 
 ## التشغيل | Getting started

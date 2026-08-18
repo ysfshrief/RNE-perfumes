@@ -1,0 +1,52 @@
+rules_version = '2';
+
+// RNE Perfumes — Firestore Security Rules
+// Deploy from the Firebase Console (Firestore → Rules) or via the Firebase CLI:
+//   firebase deploy --only firestore:rules
+//
+// Model:
+//  - Everyone can READ site content/config/products (needed to render the store).
+//  - Only an authenticated admin (custom claim admin == true) can WRITE them.
+//  - Orders: a signed-in customer can create their own order; only admins read/update.
+//  - Reviews: a signed-in customer can create; everyone reads approved ones;
+//    admins moderate.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    // Editable site content (text overrides), config (slider/wheel), product overrides
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Product catalog (if you migrate products fully into Firestore)
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Orders
+    match /orders/{orderId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Customer accounts (each user can read/write their own doc)
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isAdmin();
+    }
+
+    // Product reviews
+    match /reviews/{reviewId} {
+      allow read: if true; // storefront filters to approved
+      allow create: if request.auth != null;
+      allow update, delete: if isAdmin();
+    }
+  }
+}
