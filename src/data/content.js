@@ -32,18 +32,7 @@ export const shippingPolicy = {
   ],
 };
 
-export const returnPolicy = {
-  en: [
-    { h: "Eligibility", p: "If something isn't right with your order, contact us as soon as possible. Products should be unused and in their original packaging to be eligible for a return." },
-    { h: "How to start a return", p: "Reach out via our contact page or WhatsApp with your order number, tell us the reason, and we'll guide you through the next steps." },
-    { h: "Refunds", p: "Once a return is received and approved, your refund is processed to your original payment method. Timing depends on your payment provider." },
-  ],
-  ar: [
-    { h: "الأهلية", p: "لو في مشكلة في طلبك، تواصل معنا في أقرب وقت. يجب أن يكون المنتج غير مستخدم وفي عبوته الأصلية ليكون مؤهلًا للإرجاع." },
-    { h: "كيفية بدء الإرجاع", p: "تواصل معنا عبر صفحة الاتصال أو واتساب برقم طلبك، وأخبرنا بالسبب، وسنرشدك للخطوات التالية." },
-    { h: "الاسترداد", p: "بعد استلام الإرجاع والموافقة عليه، يُعاد المبلغ إلى طريقة الدفع الأصلية. يعتمد التوقيت على مزوّد الدفع." },
-  ],
-};
+
 
 export const terms = {
   en: [

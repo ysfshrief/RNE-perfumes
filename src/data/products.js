@@ -29,8 +29,8 @@ export const products = [
     rating: 4.8,
     reviewCount: 47,
     bestSeller: true,
-    image: "#3a2a1a",
-    images: ["#3a2a1a", "#4a3520", "#2a1e12"],
+    image: "/products/khamrah.jpg",
+    images: ["/products/khamrah.jpg"],
   },
   {
     id: "rne-02",
@@ -55,8 +55,8 @@ export const products = [
     rating: 4.7,
     reviewCount: 39,
     bestSeller: true,
-    image: "#7a2a3a",
-    images: ["#7a2a3a", "#8f3548", "#661f30"],
+    image: "/products/scandal.jpg",
+    images: ["/products/scandal.jpg"],
   },
   {
     id: "rne-03",
@@ -81,8 +81,8 @@ export const products = [
     rating: 4.6,
     reviewCount: 28,
     bestSeller: false,
-    image: "#2a6a7a",
-    images: ["#2a6a7a", "#358090", "#1f5460"],
+    image: "/products/pacific-chill.jpg",
+    images: ["/products/pacific-chill.jpg"],
   },
   {
     id: "rne-04",
@@ -107,8 +107,8 @@ export const products = [
     rating: 4.8,
     reviewCount: 42,
     bestSeller: true,
-    image: "#5a8a8f",
-    images: ["#5a8a8f", "#6fa0a5", "#456d72"],
+    image: "/products/imagination.jpg",
+    images: ["/products/imagination.jpg"],
   },
   {
     id: "rne-05",
@@ -133,8 +133,8 @@ export const products = [
     rating: 4.9,
     reviewCount: 63,
     bestSeller: true,
-    image: "#1a2a4a",
-    images: ["#1a2a4a", "#243560", "#131f38"],
+    image: "/products/bleu-de-chanel.jpg",
+    images: ["/products/bleu-de-chanel.jpg"],
   },
   {
     id: "rne-06",
@@ -159,8 +159,8 @@ export const products = [
     rating: 4.9,
     reviewCount: 71,
     bestSeller: true,
-    image: "#14203a",
-    images: ["#14203a", "#1e2c4e", "#0e1728"],
+    image: "/products/sauvage.jpg",
+    images: ["/products/sauvage.jpg"],
   },
   {
     id: "rne-07",
@@ -185,8 +185,8 @@ export const products = [
     rating: 4.7,
     reviewCount: 35,
     bestSeller: false,
-    image: "#c98a9a",
-    images: ["#c98a9a", "#d89caa", "#b8788a"],
+    image: "/products/miss-dior.jpg",
+    images: ["/products/miss-dior.jpg"],
   },
   {
     id: "rne-08",
@@ -211,8 +211,8 @@ export const products = [
     rating: 4.6,
     reviewCount: 24,
     bestSeller: false,
-    image: "#8a9a9f",
-    images: ["#8a9a9f", "#a0b0b5", "#6d7d82"],
+    image: "/products/silver-mountain-water.jpg",
+    images: ["/products/silver-mountain-water.jpg"],
   },
   {
     id: "rne-09",
@@ -237,8 +237,8 @@ export const products = [
     rating: 4.8,
     reviewCount: 38,
     bestSeller: true,
-    image: "#1a9a9a",
-    images: ["#1a9a9a", "#20b0b0", "#147a7a"],
+    image: "/products/erba-pura.jpg",
+    images: ["/products/erba-pura.jpg"],
   },
 ];
 
@@ -256,25 +256,10 @@ export function isInStock(product) {
   return product.sizes.some((s) => s.stock > 0);
 }
 
-// Helper: is this image value a real photo URL vs a color placeholder?
+// Helper: is this image value a real photo URL or local path vs a color placeholder?
 export function isPhoto(val) {
-  return typeof val === "string" && /^https?:\/\//.test(val);
+  return typeof val === "string" && (/^https?:\/\//.test(val) || val.startsWith("/products/"));
 }
 
 // Mock reviews keyed by product id
-export const reviews = {
-  "rne-01": [
-    { name: "Karim H.", rating: 5, date: "2026-07-12", text: "The sweetness and spice are perfect for winter. Lasts all day." },
-    { name: "Omar S.", rating: 5, date: "2026-06-30", text: "Smells expensive. Everyone asks what I'm wearing." },
-  ],
-  "rne-05": [
-    { name: "Ziad M.", rating: 5, date: "2026-08-01", text: "My everyday scent. Fresh, clean, never fails." },
-  ],
-  "rne-06": [
-    { name: "Youssef A.", rating: 5, date: "2026-07-20", text: "Beast mode performance. Exactly like the original." },
-    { name: "Mostafa K.", rating: 4, date: "2026-07-05", text: "Great projection. Wish the 50ml was always in stock." },
-  ],
-  "rne-02": [
-    { name: "Nada F.", rating: 5, date: "2026-08-03", text: "Sweet but classy. Compliments non-stop." },
-  ],
-};
+export const reviews = {};

@@ -42,7 +42,6 @@ export default function Footer() {
     { href: "/about", label: t("footer.aboutRne") },
     { href: "/faq", label: t("footer.faq") },
     { href: "/shipping-policy", label: t("footer.shippingPolicy") },
-    { href: "/return-policy", label: t("footer.returns") },
     { href: "/terms", label: t("footer.terms") },
   ];
 

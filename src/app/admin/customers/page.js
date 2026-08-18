@@ -3,13 +3,7 @@
 import { useLang } from "@/context/LangContext";
 import styles from "../admin.module.css";
 
-const CUSTOMERS = [
-  { name: "Dina Fouad", email: "dina.f@email.com", gov: "Cairo", orders: 3, spent: 2510 },
-  { name: "Sara Adel", email: "sara.adel@email.com", gov: "Giza", orders: 5, spent: 4180 },
-  { name: "Karim Hany", email: "karim.h@email.com", gov: "Alexandria", orders: 2, spent: 1600 },
-  { name: "Omar Salah", email: "omar.s@email.com", gov: "Beheira", orders: 1, spent: 650 },
-  { name: "Nada Mostafa", email: "nada.m@email.com", gov: "Dakahlia", orders: 4, spent: 3320 },
-];
+const CUSTOMERS = [];
 
 export default function AdminCustomers() {
   const { t } = useLang();

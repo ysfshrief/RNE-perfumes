@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { writeDoc, subscribeDoc } from "@/lib/store";
 
 // Central admin-editable site config. Defaults live here; the admin dashboard
 // overrides them and persists to localStorage (front-end prototype). In
@@ -45,24 +46,20 @@ export function ConfigProvider({ children }) {
   const [config, setConfig] = useState(defaultConfig);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("rne-config");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        // shallow-merge so new default keys still appear
-        setConfig({ ...defaultConfig, ...parsed });
-      }
-    } catch (e) {}
+    const unsub = subscribeDoc("config", defaultConfig, (data) => {
+      setConfig({ ...defaultConfig, ...(data || {}) });
+    });
+    return unsub;
   }, []);
 
   const save = (next) => {
     setConfig(next);
-    try { localStorage.setItem("rne-config", JSON.stringify(next)); } catch (e) {}
+    writeDoc("config", next);
   };
 
   const reset = () => {
     setConfig(defaultConfig);
-    try { localStorage.removeItem("rne-config"); } catch (e) {}
+    writeDoc("config", defaultConfig);
   };
 
   return (

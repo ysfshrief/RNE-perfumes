@@ -3,54 +3,48 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { products as baseProducts } from "@/data/products";
 import { productAr } from "@/data/productLocale";
+import { readDoc, writeDoc, subscribeDoc } from "@/lib/store";
 
 // Lets the admin edit product fields (names, prices, stock, image Drive links,
-// visibility) with changes persisted to localStorage. Front-end prototype —
-// in production this is the backend catalog.
+// visibility). Persists to Firestore (settings/products) when Firebase is
+// configured, otherwise to localStorage. Front-end + optional backend.
 
 const ProductContext = createContext(null);
-const KEY = "rne-product-overrides";
+const STORE_KEY = "products"; // settings/products doc (or rne-products in LS)
 
 // Convert a Google Drive share link to a direct-view image URL.
-// Accepts:
-//   https://drive.google.com/file/d/FILEID/view?usp=sharing
-//   https://drive.google.com/open?id=FILEID
-//   https://drive.google.com/uc?id=FILEID
-// Returns a thumbnail URL that renders inline. Non-Drive URLs pass through.
 export function normalizeImageUrl(url) {
   if (!url || typeof url !== "string") return url;
   const u = url.trim();
   if (!u) return u;
-  // already a direct image or non-drive URL
   let id = null;
   let m = u.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (m) id = m[1];
   if (!id) { m = u.match(/[?&]id=([a-zA-Z0-9_-]+)/); if (m) id = m[1]; }
   if (id) {
-    // thumbnail endpoint renders reliably inline as an <img>
     return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
   }
   return u;
 }
 
 export function ProductProvider({ children }) {
-  const [overrides, setOverrides] = useState({}); // { [id]: { field: value, images:[...] } }
+  const [overrides, setOverrides] = useState({}); // { [id]: {...override} }
   const [ready, setReady] = useState(false);
 
+  // Live subscription (Firestore onSnapshot or local fallback)
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(KEY);
-      if (saved) setOverrides(JSON.parse(saved));
-    } catch (e) {}
-    setReady(true);
+    const unsub = subscribeDoc(STORE_KEY, {}, (data) => {
+      setOverrides(data || {});
+      setReady(true);
+    });
+    return unsub;
   }, []);
 
-  const persist = (next) => {
+  const persist = useCallback((next) => {
     setOverrides(next);
-    try { localStorage.setItem(KEY, JSON.stringify(next)); } catch (e) {}
-  };
+    writeDoc(STORE_KEY, next);
+  }, []);
 
-  // Merge base product with its override
   const mergeProduct = useCallback((p) => {
     const o = overrides[p.id];
     if (!o) return p;
@@ -62,30 +56,23 @@ export function ProductProvider({ children }) {
     };
   }, [overrides]);
 
-  // The effective product list (respecting hidden flag for storefront use)
   const allProducts = baseProducts.map(mergeProduct);
   const visibleProducts = allProducts.filter((p) => !p.hidden);
 
   const updateProduct = useCallback((id, patch) => {
-    setOverrides((prev) => {
-      const next = { ...prev, [id]: { ...(prev[id] || {}), ...patch } };
-      try { localStorage.setItem(KEY, JSON.stringify(next)); } catch (e) {}
-      return next;
-    });
-  }, []);
+    const next = { ...overrides, [id]: { ...(overrides[id] || {}), ...patch } };
+    persist(next);
+  }, [overrides, persist]);
 
   const resetProduct = useCallback((id) => {
-    setOverrides((prev) => {
-      const next = { ...prev };
-      delete next[id];
-      try { localStorage.setItem(KEY, JSON.stringify(next)); } catch (e) {}
-      return next;
-    });
-  }, []);
+    const next = { ...overrides };
+    delete next[id];
+    persist(next);
+  }, [overrides, persist]);
 
   const resetAll = useCallback(() => {
     persist({});
-  }, []);
+  }, [persist]);
 
   return (
     <ProductContext.Provider

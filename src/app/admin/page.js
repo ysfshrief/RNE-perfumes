@@ -17,12 +17,7 @@ export default function AdminOverview() {
     { label: t("admin.lowStockItems"), value: "4", delta: t("admin.actionNeeded"), up: false },
   ];
 
-  const RECENT = [
-    { id: "RNE-2533", customer: "Dina Fouad", total: `780 ${cur}`, status: "Confirmed", color: "var(--amber-deep)" },
-    { id: "RNE-2510", customer: "Sara Adel", total: `1,400 ${cur}`, status: "OutForDelivery", color: "#3d5a6b" },
-    { id: "RNE-2508", customer: "Karim Hany", total: `950 ${cur}`, status: "New", color: "var(--olive)" },
-    { id: "RNE-2481", customer: "Omar Salah", total: `650 ${cur}`, status: "Delivered", color: "var(--success)" },
-  ];
+  const RECENT = [];
 
   const lowStock = products.flatMap((p) =>
     p.sizes.filter((s) => s.stock > 0 && s.stock <= 5).map((s) => ({ name: p.name, size: s.size, stock: s.stock }))

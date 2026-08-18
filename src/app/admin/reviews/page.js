@@ -5,12 +5,7 @@ import { useLang } from "@/context/LangContext";
 import styles from "../admin.module.css";
 import r from "./reviews.module.css";
 
-const SEED = [
-  { id: 1, product: "Rose de Nuit", name: "Nada M.", rating: 5, text: "The rose is so natural, not soapy at all. Obsessed.", status: "pending", date: "2026-08-15" },
-  { id: 2, product: "Noir Absolu", name: "Karim H.", rating: 5, text: "Lasts all day, projects beautifully. My signature scent now.", status: "approved", date: "2026-07-12" },
-  { id: 3, product: "Citrus Marin", name: "Anonymous", rating: 2, text: "Didn't last long on me. Buy tester first.", status: "pending", date: "2026-08-16" },
-  { id: 4, product: "Ambre Royal", name: "Dina F.", rating: 5, text: "Warm and luxurious. Worth every pound.", status: "approved", date: "2026-07-05" },
-];
+const SEED = [];
 
 export default function AdminReviews() {
   const { t } = useLang();

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { translations } from "@/data/translations";
+import { writeDoc, subscribeDoc } from "@/lib/store";
 
 const LangContext = createContext(null);
 
@@ -13,20 +14,21 @@ export function LangProvider({ children }) {
   // Admin text overrides: { en: { key: value }, ar: { key: value } }
   const [overrides, setOverrides] = useState({ en: {}, ar: {} });
 
-  // Hydrate saved language + overrides
+  // Hydrate saved language
   useEffect(() => {
     try {
       const saved = localStorage.getItem("rne-lang");
       if (saved === "ar" || saved === "en") setLang(saved);
     } catch (e) {}
-    try {
-      const o = localStorage.getItem(OVERRIDES_KEY);
-      if (o) {
-        const parsed = JSON.parse(o);
-        setOverrides({ en: parsed.en || {}, ar: parsed.ar || {} });
-      }
-    } catch (e) {}
     setReady(true);
+  }, []);
+
+  // Live subscription to text overrides (Firestore or local fallback)
+  useEffect(() => {
+    const unsub = subscribeDoc("content", { en: {}, ar: {} }, (data) => {
+      setOverrides({ en: data?.en || {}, ar: data?.ar || {} });
+    });
+    return unsub;
   }, []);
 
   // Reflect on <html> for direction + persist language
@@ -78,19 +80,20 @@ export function LangProvider({ children }) {
       } else {
         next[L][key] = value;
       }
-      try { localStorage.setItem(OVERRIDES_KEY, JSON.stringify(next)); } catch (e) {}
+      writeDoc("content", next);
       return next;
     });
   }, [lang]);
 
   const saveOverrides = useCallback((next) => {
     setOverrides(next);
-    try { localStorage.setItem(OVERRIDES_KEY, JSON.stringify(next)); } catch (e) {}
+    writeDoc("content", next);
   }, []);
 
   const resetOverrides = useCallback(() => {
-    setOverrides({ en: {}, ar: {} });
-    try { localStorage.removeItem(OVERRIDES_KEY); } catch (e) {}
+    const empty = { en: {}, ar: {} };
+    setOverrides(empty);
+    writeDoc("content", empty);
   }, []);
 
   const toggle = () => setLang((l) => (l === "ar" ? "en" : "ar"));

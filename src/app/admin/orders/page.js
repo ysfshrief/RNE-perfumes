@@ -18,12 +18,7 @@ const STATUS_STYLE = {
   Returned: { bg: "#f7e7e4", c: "var(--danger)" },
 };
 
-const SEED = [
-  { id: "RNE-2533", customer: "Dina Fouad", phone: "0100 111 2222", gov: "Cairo", date: "2026-08-16", total: 780, status: "Confirmed", items: [{ n: "Ambre Royal", s: "30ml", q: 1 }] },
-  { id: "RNE-2510", customer: "Sara Adel", phone: "0101 333 4444", gov: "Giza", date: "2026-08-14", total: 1400, status: "OutForDelivery", items: [{ n: "Rose de Nuit", s: "30ml", q: 2 }] },
-  { id: "RNE-2508", customer: "Karim Hany", phone: "0102 555 6666", gov: "Alexandria", date: "2026-08-14", total: 950, status: "New", items: [{ n: "Noir Absolu", s: "50ml", q: 1 }] },
-  { id: "RNE-2481", customer: "Omar Salah", phone: "0106 777 8888", gov: "Beheira", date: "2026-08-10", total: 650, status: "Delivered", items: [{ n: "Noir Absolu", s: "30ml", q: 1 }] },
-];
+const SEED = [];
 
 export default function AdminOrders() {
   const { t } = useLang();

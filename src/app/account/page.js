@@ -6,11 +6,7 @@ import { useShop } from "@/context/ShopContext";
 import { useLang } from "@/context/LangContext";
 import styles from "./account.module.css";
 
-const MOCK_ORDERS = [
-  { id: "RNE-2481", date: "2026-08-10", status: "Delivered", total: 950, items: [{ name: "Noir Absolu", size: "50ml", qty: 1 }] },
-  { id: "RNE-2510", date: "2026-08-14", status: "OutForDelivery", total: 1400, items: [{ name: "Rose de Nuit", size: "30ml", qty: 2 }] },
-  { id: "RNE-2533", date: "2026-08-16", status: "Confirmed", total: 780, items: [{ name: "Ambre Royal", size: "30ml", qty: 1 }] },
-];
+const MOCK_ORDERS = [];
 
 const STATUS_COLORS = {
   New: "var(--olive)", Confirmed: "var(--amber-deep)", Preparing: "var(--amber-deep)",

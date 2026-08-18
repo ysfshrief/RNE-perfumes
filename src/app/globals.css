@@ -1,14 +1,15 @@
 :root {
-  /* Palette */
+  /* Palette — Black & White + Burgundy */
   --ink: #0a0a0a;
-  --ink-soft: #2a2a28;
-  --paper: #f7f5f1;
-  --sand: #e8e2d6;
-  --sand-deep: #d9d1c1;
-  --amber: #b8863b;
-  --amber-deep: #96692a;
-  --olive: #6b6a5e;
-  --line: #d8d2c6;
+  --ink-soft: #1a1a1a;
+  --paper: #fafaf8;
+  --sand: #f0eee8;
+  --sand-deep: #e2ded4;
+  --amber: #8B1A2B;
+  --amber-deep: #6e1422;
+  --burgundy: #8B1A2B;
+  --olive: #8a8880;
+  --line: #e0ddd6;
   --white: #ffffff;
   --danger: #a23b2d;
   --success: #4b6f4a;
@@ -22,7 +23,7 @@
   /* Layout */
   --max: 1240px;
   --gutter: clamp(1.1rem, 4vw, 3rem);
-  --radius: 2px;
+  --radius: 3px;
 }
 
 * {
@@ -263,3 +264,84 @@ body { font-size: 15.5px; }
 @media (max-width: 600px) {
   .btn { min-height: 46px; padding: 0.8rem 1.35rem; font-size: 0.8rem; }
 }
+
+/* ============================================
+   Global animations & transitions
+   ============================================ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Apply fade-up to main sections */
+section, .container > div {
+  animation: fadeUp 0.6s ease both;
+}
+
+/* Smooth transitions on interactive elements */
+a, button, input, select, textarea {
+  transition: all 0.25s ease;
+}
+
+/* Card hover lift */
+article, [class*="card"] {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Image hover scale */
+[class*="media"] img, [class*="thumb"] img {
+  transition: transform 0.4s ease;
+}
+[class*="media"]:hover img, [class*="thumb"]:hover img {
+  transform: scale(1.05);
+}
+
+/* Badge styling — burgundy */
+.badge {
+  background: var(--burgundy);
+  color: var(--white);
+}
+.badge--best {
+  background: var(--ink);
+  color: var(--white);
+}
+.badge--out {
+  background: var(--olive);
+}
+
+/* Button solid — burgundy accent */
+.btn--solid {
+  background: var(--ink);
+  color: var(--white);
+  border-color: var(--ink);
+}
+.btn--solid:hover {
+  background: var(--burgundy);
+  border-color: var(--burgundy);
+  transform: translateY(-2px);
+}
+
+/* Stars — burgundy */
+.stars { color: var(--burgundy); }
+
+/* Price highlight */
+.price { color: var(--ink); font-weight: 700; }
+.price__old { color: var(--olive); text-decoration: line-through; }
+
+/* Eyebrow — burgundy accent */
+.eyebrow { color: var(--burgundy); }
+
+/* Rule line — use burgundy center dot */
+.rule::before { background: var(--burgundy); }
