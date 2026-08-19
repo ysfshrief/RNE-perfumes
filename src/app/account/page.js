@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useShop } from "@/context/ShopContext";
+import { useAuth } from "@/context/AuthContext";
 import { useLang } from "@/context/LangContext";
 import styles from "./account.module.css";
 
@@ -16,6 +17,7 @@ const STATUS_COLORS = {
 
 export default function AccountPage() {
   const { state, dispatch } = useShop();
+  const { signOut } = useAuth();
   const { t } = useLang();
   const [tab, setTab] = useState("Orders");
   const cur = t("common.currency");
@@ -46,7 +48,7 @@ export default function AccountPage() {
           <p className="eyebrow">{t("account.eyebrow")}</p>
           <h1 className={styles.title}>{t("account.hello", { name: state.user.name })}</h1>
         </div>
-        <button className="btn btn--ghost" onClick={() => dispatch({ type: "LOGOUT" })}>
+        <button className="btn btn--ghost" onClick={() => { signOut(); dispatch({ type: "LOGOUT" }); }}>
           {t("account.signOut")}
         </button>
       </div>

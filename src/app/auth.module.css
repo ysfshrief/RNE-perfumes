@@ -45,3 +45,12 @@
   .grid2 { grid-template-columns: 1fr; }
   .card { padding: 1.8rem; }
 }
+
+.errorMsg {
+  background: #fde8e8;
+  color: #a23b2d;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  text-align: center;
+}

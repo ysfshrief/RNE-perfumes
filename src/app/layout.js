@@ -1,5 +1,6 @@
 import "./globals.css";
 import { ShopProvider } from "@/context/ShopContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { LangProvider } from "@/context/LangContext";
 import { ConfigProvider } from "@/context/ConfigContext";
 import { ProductProvider } from "@/context/ProductContext";
@@ -29,12 +30,14 @@ export default function RootLayout({ children }) {
         <LangProvider>
           <ConfigProvider>
             <ProductProvider>
-              <ShopProvider>
+              <AuthProvider>
+                <ShopProvider>
                 <ThemeApplier />
               <Header />
                 <main>{children}</main>
                 <Footer />
               </ShopProvider>
+              </AuthProvider>
             </ProductProvider>
           </ConfigProvider>
         </LangProvider>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useShop } from "@/context/ShopContext";
+import { useAuth } from "@/context/AuthContext";
 import { useLang } from "@/context/LangContext";
 import styles from "../auth.module.css";
 
@@ -19,17 +20,28 @@ const GOV_AR = {
 
 export default function RegisterPage() {
   const { dispatch } = useShop();
+  const { register } = useAuth();
   const { t, lang } = useLang();
   const router = useRouter();
   const [form, setForm] = useState({
     name: "", phone: "", governorate: "", city: "", address: "", email: "", password: "",
   });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    dispatch({ type: "LOGIN", payload: { name: form.name, email: form.email, ...form } });
-    router.push("/account");
+    setError("");
+    setLoading(true);
+    const res = await register(form.email, form.password, form.name);
+    setLoading(false);
+    if (res.ok) {
+      dispatch({ type: "LOGIN", payload: { name: form.name, email: form.email, ...form } });
+      router.push("/account");
+    } else {
+      setError(res.error || t("auth.registerFailed"));
+    }
   };
 
   return (
@@ -71,7 +83,8 @@ export default function RegisterPage() {
               <input type="password" required value={form.password} onChange={set("password")} />
             </div>
           </div>
-          <button className="btn btn--solid btn--full" type="submit">{t("auth.createAccount")}</button>
+          {error && <p className={styles.errorMsg}>{error}</p>}
+          <button className="btn btn--solid btn--full" type="submit" disabled={loading}>{loading ? "..." : t("auth.createAccount")}</button>
         </form>
         <p className={styles.alt}>
           {t("auth.alreadyReg")} <Link href="/login">{t("auth.signIn")}</Link>
