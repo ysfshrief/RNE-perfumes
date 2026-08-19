@@ -69,6 +69,7 @@ export const translations = {
 
     // Shop
     "shop.eyebrow": "The Collection",
+    "shop.ourFragrances": "All Fragrances",
     "shop.title": "Shop all fragrances",
     "shop.count": "{shown} of {total} products",
     "shop.searchPlaceholder": "Search fragrances…",
@@ -123,6 +124,10 @@ export const translations = {
     "discovery.duplicate": "Already selected — choose a different scent",
     "discovery.addToCart": "Add Discovery Set to Cart",
     "discovery.selectAll": "Please select all 6 scents first",
+    "discovery.service": "Try before you buy",
+    "discovery.badge": "6 × 5ml Testers",
+    "discovery.from": "Only",
+    "discovery.build": "Build your set",
 
     // Cart
     "cart.empty": "Your cart is empty",
@@ -468,6 +473,7 @@ export const translations = {
 
     // Shop
     "shop.eyebrow": "المجموعة",
+    "shop.ourFragrances": "كل العطور",
     "shop.title": "تسوّق كل العطور",
     "shop.count": "{shown} من {total} منتج",
     "shop.searchPlaceholder": "ابحث عن العطور…",
@@ -522,6 +528,10 @@ export const translations = {
     "discovery.duplicate": "تم اختياره بالفعل — اختار عطر مختلف",
     "discovery.addToCart": "أضف الديسكفري سيت للسلة",
     "discovery.selectAll": "اختار الـ٦ عطور الأول",
+    "discovery.service": "جرّب قبل ما تشتري",
+    "discovery.badge": "٦ تيسترات × ٥ مل",
+    "discovery.from": "بس بـ",
+    "discovery.build": "كوّن الباكيدچ",
 
     // Cart
     "cart.empty": "سلتك فارغة",

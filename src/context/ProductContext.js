@@ -56,8 +56,15 @@ export function ProductProvider({ children }) {
     };
   }, [overrides]);
 
-  const allProducts = baseProducts.map(mergeProduct);
-  const visibleProducts = allProducts.filter((p) => !p.hidden);
+  // Pinned products (e.g. the Test Package) always appear first.
+  const sortPinned = (list) => {
+    const pinned = list.filter((p) => p.isDiscoverySet || p.pinned);
+    const rest = list.filter((p) => !(p.isDiscoverySet || p.pinned));
+    return [...pinned, ...rest];
+  };
+
+  const allProducts = sortPinned(baseProducts.map(mergeProduct));
+  const visibleProducts = sortPinned(allProducts.filter((p) => !p.hidden));
 
   const updateProduct = useCallback((id, patch) => {
     const next = { ...overrides, [id]: { ...(overrides[id] || {}), ...patch } };

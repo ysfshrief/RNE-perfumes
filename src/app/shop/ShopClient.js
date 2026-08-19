@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
+import TestPackageBanner from "@/components/TestPackageBanner";
 import WhatsApp from "@/components/WhatsApp";
 import { products as baseProducts, categories, getMinPrice } from "@/data/products";
 import { pName, pTagline } from "@/data/productLocale";
@@ -71,8 +72,18 @@ export default function ShopClient() {
       case "rating": out = [...out].sort((a, b) => b.rating - a.rating); break;
       default: out = [...out].sort((a, b) => (b.bestSeller ? 1 : 0) - (a.bestSeller ? 1 : 0));
     }
+    // Test Package always pinned first, regardless of sort
+    out = [...out].sort((a, b) => {
+      const ap = a.isDiscoverySet || a.pinned ? 1 : 0;
+      const bp = b.isDiscoverySet || b.pinned ? 1 : 0;
+      return bp - ap;
+    });
     return out;
   }, [search, activeCats, activeSizes, minRating, maxPrice, bestOnly, saleOnly, sort]);
+
+  // Separate the Test Package (shown as a distinct feature) from regular products
+  const testPackage = filtered.find((p) => p.isDiscoverySet);
+  const regularProducts = filtered.filter((p) => !p.isDiscoverySet);
 
   const clearAll = () => {
     setActiveCats([]); setActiveSizes([]); setMinRating(0);
@@ -186,9 +197,20 @@ export default function ShopClient() {
               <button className="btn btn--solid" onClick={clearAll}>{t("shop.resetFilters")}</button>
             </div>
           ) : (
-            <div className={styles.grid}>
-              {filtered.map((p) => <ProductCard key={p.id} product={p} />)}
-            </div>
+            <>
+              {/* Test Package — shown as a distinct wide feature, separated from products */}
+              {testPackage && (
+                <>
+                  <TestPackageBanner product={testPackage} />
+                  <div className={styles.serviceDivider}>
+                    <span>{t("shop.ourFragrances")}</span>
+                  </div>
+                </>
+              )}
+              <div className={styles.grid}>
+                {regularProducts.map((p) => <ProductCard key={p.id} product={p} />)}
+              </div>
+            </>
           )}
         </div>
       </div>

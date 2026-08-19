@@ -252,7 +252,7 @@ export const products = [
   {
     id: "rne-discovery",
     slug: "discovery-set",
-    name: "Discovery Set",
+    name: "Test Package",
     inspiredBy: null,
     tagline: "Choose 6 testers and find your signature",
     description:
@@ -270,8 +270,8 @@ export const products = [
     isDiscoverySet: true,
     testerCount: 6,
     maxPerScent: 1,
-    image: "/products/hero.jpg",
-    images: ["/products/hero.jpg"],
+    image: "/products/test-package.jpg",
+    images: ["/products/test-package.jpg"],
   },
 ];
 

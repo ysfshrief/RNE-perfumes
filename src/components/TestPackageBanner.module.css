@@ -1,0 +1,172 @@
+.banner {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--white);
+  margin-bottom: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  position: relative;
+}
+.banner:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 50px rgba(10, 10, 10, 0.12);
+  border-color: var(--amber);
+}
+
+/* Accent stripe on the side */
+.banner::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--burgundy);
+  z-index: 3;
+}
+
+.media {
+  position: relative;
+  aspect-ratio: auto;
+  min-height: 220px;
+  overflow: hidden;
+  background: #eceae4;
+}
+.media :global(img) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.tag {
+  position: absolute;
+  top: 14px;
+  inset-inline-start: 14px;
+  background: var(--burgundy);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  z-index: 4;
+}
+
+.body {
+  padding: 1.75rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--burgundy);
+}
+.name {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1.1;
+  margin: 0.15rem 0;
+}
+.desc {
+  color: var(--olive);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 46ch;
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.1rem;
+  flex-wrap: wrap;
+}
+.priceWrap {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.from {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--olive);
+}
+.price {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--ink);
+}
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  padding: 0.85rem 1.5rem;
+  border-radius: var(--radius);
+  transition: background 0.2s, gap 0.2s;
+}
+.banner:hover .cta {
+  background: var(--burgundy);
+  gap: 0.8rem;
+}
+.arrow { transition: transform 0.2s; }
+html[dir="rtl"] .arrow { transform: scaleX(-1); }
+
+/* ── Service divider between the package and the products ── */
+.serviceDivider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.5rem 0 1.75rem;
+  color: var(--olive);
+}
+.serviceDivider::before,
+.serviceDivider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.serviceDivider span {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── Mobile: stack image on top, full width ── */
+@media (max-width: 640px) {
+  .banner {
+    grid-template-columns: 1fr;
+  }
+  .media {
+    min-height: 200px;
+    aspect-ratio: 16 / 10;
+  }
+  .body {
+    padding: 1.4rem 1.3rem 1.6rem;
+  }
+  .name { font-size: 1.5rem; }
+  .desc { font-size: 0.9rem; }
+  .foot { margin-top: 1rem; }
+  .cta { padding: 0.75rem 1.2rem; font-size: 0.8rem; }
+}
