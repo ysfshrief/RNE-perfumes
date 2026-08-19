@@ -58,23 +58,51 @@ export async function readDoc(key, fallback) {
 }
 
 // Write (replace) a settings document.
+// Always updates the local cache + fires a same-tab event so the UI reflects
+// instantly, then syncs to Firestore in the background when enabled. This keeps
+// the admin (and this browser) responsive even if Firestore is slow/unreachable.
 export async function writeDoc(key, value) {
+  // 1) Local-first: update cache and notify listeners immediately.
+  lsSet(key, value);
+
+  // 2) Sync to Firestore in the background (when enabled).
   if (isFirebaseEnabled && db) {
     try {
       const { doc, setDoc } = await loadFirestore();
       await setDoc(doc(db, "settings", key), value, { merge: false });
       return true;
     } catch (e) {
-      lsSet(key, value); // keep a local copy so the admin still sees changes
+      // eslint-disable-next-line no-console
+      console.warn("Firestore write failed (kept local copy):", e?.message);
       return false;
     }
   }
-  lsSet(key, value);
   return true;
 }
 
 // Subscribe to live updates. Returns an unsubscribe function.
 export function subscribeDoc(key, fallback, callback) {
+  // Always seed from local cache first so the UI has data instantly.
+  callback(lsGet(key, fallback));
+
+  // Always listen for local changes (same-tab + cross-tab) so writes reflect
+  // immediately regardless of Firestore connectivity.
+  let localCleanup = () => {};
+  if (typeof window !== "undefined") {
+    const handler = (e) => {
+      if (e.type === "storage" && e.key && e.key !== LS_PREFIX + key) return;
+      if (e.type === "rne-store-change" && e.detail?.key !== key) return;
+      callback(lsGet(key, fallback));
+    };
+    window.addEventListener("storage", handler);
+    window.addEventListener("rne-store-change", handler);
+    localCleanup = () => {
+      window.removeEventListener("storage", handler);
+      window.removeEventListener("rne-store-change", handler);
+    };
+  }
+
+  // When Firebase is enabled, ALSO subscribe to Firestore for cross-device sync.
   if (isFirebaseEnabled && db) {
     let unsub = () => {};
     let cancelled = false;
@@ -82,25 +110,22 @@ export function subscribeDoc(key, fallback, callback) {
       if (cancelled) return;
       unsub = onSnapshot(
         doc(db, "settings", key),
-        (snap) => callback(snap.exists() ? snap.data() : fallback),
-        () => callback(lsGet(key, fallback))
+        (snap) => {
+          if (snap.exists()) {
+            const data = snap.data();
+            // keep local cache in sync (without re-firing our own event loop)
+            try { localStorage.setItem(LS_PREFIX + key, JSON.stringify(data)); } catch (e) {}
+            callback(data);
+          }
+        },
+        (err) => {
+          // eslint-disable-next-line no-console
+          console.warn("Firestore subscribe error (using local):", err?.message);
+        }
       );
     });
-    return () => { cancelled = true; unsub(); };
+    return () => { cancelled = true; unsub(); localCleanup(); };
   }
 
-  // Fallback: seed once, then listen for local changes (same-tab + cross-tab)
-  callback(lsGet(key, fallback));
-  if (typeof window === "undefined") return () => {};
-  const handler = (e) => {
-    if (e.type === "storage" && e.key && e.key !== LS_PREFIX + key) return;
-    if (e.type === "rne-store-change" && e.detail?.key !== key) return;
-    callback(lsGet(key, fallback));
-  };
-  window.addEventListener("storage", handler);
-  window.addEventListener("rne-store-change", handler);
-  return () => {
-    window.removeEventListener("storage", handler);
-    window.removeEventListener("rne-store-change", handler);
-  };
+  return localCleanup;
 }
