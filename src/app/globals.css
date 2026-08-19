@@ -345,3 +345,93 @@ article, [class*="card"] {
 
 /* Rule line — use burgundy center dot */
 .rule::before { background: var(--burgundy); }
+
+/* ============================================
+   Disable effects via admin toggle classes
+   ============================================ */
+html.no-effects *, html.no-effects *::before, html.no-effects *::after {
+  animation: none !important;
+  transition: none !important;
+}
+html.no-fade section, html.no-fade .container > div {
+  animation: none !important;
+}
+html.no-hover-lift article:hover, html.no-hover-lift [class*="card"]:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+html.no-image-zoom [class*="media"]:hover img, html.no-image-zoom [class*="thumb"]:hover img {
+  transform: none !important;
+}
+html.no-transitions *, html.no-transitions *::before, html.no-transitions *::after {
+  transition-duration: 0s !important;
+}
+html.no-parallax [class*="heroMark"] {
+  animation: none !important;
+}
+
+/* ============================================
+   More impressive visual effects
+   ============================================ */
+
+/* Staggered fade-in for card grids */
+[class*="grid"] > *:nth-child(1) { animation-delay: 0.05s; }
+[class*="grid"] > *:nth-child(2) { animation-delay: 0.12s; }
+[class*="grid"] > *:nth-child(3) { animation-delay: 0.19s; }
+[class*="grid"] > *:nth-child(4) { animation-delay: 0.26s; }
+[class*="grid"] > *:nth-child(5) { animation-delay: 0.33s; }
+[class*="grid"] > *:nth-child(6) { animation-delay: 0.4s; }
+
+/* Smooth underline animation on links */
+a { position: relative; }
+
+/* Glowing accent border on focus */
+input:focus, select:focus, textarea:focus {
+  box-shadow: 0 0 0 3px rgba(139, 26, 43, 0.15) !important;
+}
+
+/* Card hover — elegant lift + shadow spread */
+article:hover, [class*="card"]:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(10, 10, 10, 0.1);
+}
+
+/* Button press effect */
+.btn:active, button:active {
+  transform: scale(0.97);
+}
+
+/* Subtle shimmer on badges */
+@keyframes shimmer {
+  0% { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
+}
+.badge {
+  background-size: 200% 100%;
+  background-image: linear-gradient(90deg, var(--burgundy) 0%, #a82440 45%, var(--burgundy) 55%, var(--burgundy) 100%);
+  animation: shimmer 3s ease infinite;
+}
+.badge--best {
+  background-image: linear-gradient(90deg, var(--ink) 0%, #2a2a2a 45%, var(--ink) 55%, var(--ink) 100%);
+}
+
+/* Page transition feel */
+main {
+  animation: fadeUp 0.5s ease both;
+}
+
+/* Smooth scroll behavior */
+html { scroll-behavior: smooth; }
+
+/* Hero watermark subtle float */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* WhatsApp button entrance */
+@keyframes bounceIn {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}

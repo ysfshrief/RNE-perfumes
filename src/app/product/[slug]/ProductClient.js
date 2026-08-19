@@ -9,6 +9,7 @@ import { pName, pTagline, pDescription, pIngredients, tNote, tGender, tSeason } 
 import ProductCard from "@/components/ProductCard";
 import ProductImage from "@/components/ProductImage";
 import LearnMore from "@/components/LearnMore";
+import ScentPicker from "@/components/ScentPicker";
 import WhatsApp from "@/components/WhatsApp";
 import { useProducts } from "@/context/ProductContext";
 import styles from "./product.module.css";
@@ -96,69 +97,82 @@ export default function ProductClient({ product: baseProduct }) {
             {size.oldPrice && <span className="price__old">{size.oldPrice} {cur}</span>}
           </div>
 
-          <div className={styles.block}>
-            <h4>{t("product.size")}</h4>
-            <div className={styles.sizes}>
-              {product.sizes.map((s, i) => (
+          {product.isDiscoverySet ? (
+            <>
+              <p className={styles.desc}>{pDescription(product, lang)}</p>
+              <div className={styles.priceRow}>
+                <span className="price">{product.sizes[0].price} {cur}</span>
+              </div>
+              <ScentPicker product={product} />
+            </>
+          ) : (
+            <>
+              <div className={styles.block}>
+                <h4>{t("product.size")}</h4>
+                <div className={styles.sizes}>
+                  {product.sizes.map((s, i) => (
+                    <button
+                      key={s.size}
+                      className={`${styles.sizeBtn} ${i === sizeIdx ? styles.sizeOn : ""} ${
+                        s.stock <= 0 ? styles.sizeOut : ""
+                      }`}
+                      onClick={() => { setSizeIdx(i); setQty(1); }}
+                      disabled={s.stock <= 0}
+                    >
+                      {s.size}
+                      {s.stock <= 0 && <span className={styles.outTag}>{t("badge.soldOut")}</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.stockNote}>
+                {size.stock > 0 ? (
+                  size.stock <= 5 ? (
+                    <span className={styles.low}>● {t("product.onlyLeft", { n: size.stock })}</span>
+                  ) : (
+                    <span className={styles.avail}>● {t("product.inStock")}</span>
+                  )
+                ) : (
+                  <span className={styles.soldout}>● {t("product.unavailable")}</span>
+                )}
+              </div>
+
+              <div className={styles.buyRow}>
+                <div className={styles.qty}>
+                  <button onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="-">−</button>
+                  <span>{qty}</span>
+                  <button
+                    onClick={() => setQty((q) => Math.min(size.stock, q + 1))}
+                    disabled={qty >= size.stock}
+                    aria-label="+"
+                  >+</button>
+                </div>
                 <button
-                  key={s.size}
-                  className={`${styles.sizeBtn} ${i === sizeIdx ? styles.sizeOn : ""} ${
-                    s.stock <= 0 ? styles.sizeOut : ""
-                  }`}
-                  onClick={() => { setSizeIdx(i); setQty(1); }}
-                  disabled={s.stock <= 0}
+                  className="btn btn--solid"
+                  style={{ flex: 1 }}
+                  onClick={addToCart}
+                  disabled={size.stock <= 0}
                 >
-                  {s.size}
-                  {s.stock <= 0 && <span className={styles.outTag}>{t("badge.soldOut")}</span>}
+                  {added ? t("product.added") : size.stock > 0 ? t("product.addToCart") : t("product.soldOut")}
                 </button>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          <div className={styles.stockNote}>
-            {size.stock > 0 ? (
-              size.stock <= 5 ? (
-                <span className={styles.low}>● {t("product.onlyLeft", { n: size.stock })}</span>
-              ) : (
-                <span className={styles.avail}>● {t("product.inStock")}</span>
-              )
-            ) : (
-              <span className={styles.soldout}>● {t("product.unavailable")}</span>
-            )}
-          </div>
-
-          <div className={styles.buyRow}>
-            <div className={styles.qty}>
-              <button onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="-">−</button>
-              <span>{qty}</span>
               <button
-                onClick={() => setQty((q) => Math.min(size.stock, q + 1))}
-                disabled={qty >= size.stock}
-                aria-label="+"
-              >+</button>
-            </div>
-            <button
-              className="btn btn--solid"
-              style={{ flex: 1 }}
-              onClick={addToCart}
-              disabled={size.stock <= 0}
-            >
-              {added ? t("product.added") : size.stock > 0 ? t("product.addToCart") : t("product.soldOut")}
-            </button>
-          </div>
+                className={`btn btn--ghost btn--full ${styles.wishBtn}`}
+                onClick={() => dispatch({ type: "TOGGLE_WISHLIST", payload: product.id })}
+              >
+                {saved ? t("product.savedWishlist") : t("product.addWishlist")}
+              </button>
 
-          <button
-            className={`btn btn--ghost btn--full ${styles.wishBtn}`}
-            onClick={() => dispatch({ type: "TOGGLE_WISHLIST", payload: product.id })}
-          >
-            {saved ? t("product.savedWishlist") : t("product.addWishlist")}
-          </button>
-
-          <p className={styles.desc}>{pDescription(product, lang)}</p>
-          <LearnMore product={product} />
+              <p className={styles.desc}>{pDescription(product, lang)}</p>
+              <LearnMore product={product} />
+            </>
+          )}
         </div>
       </section>
 
+      {!product.isDiscoverySet && product.notes?.top?.length > 0 && (
       <section className={styles.notesSection}>
         <div className="container">
           <div className="rule">{t("product.fragranceNotes")}</div>
@@ -188,6 +202,7 @@ export default function ProductClient({ product: baseProduct }) {
           </div>
         </div>
       </section>
+      )}
 
       <section className={`container ${styles.reviews}`}>
         <div className="rule rule--short">{t("product.reviewsHead")}</div>

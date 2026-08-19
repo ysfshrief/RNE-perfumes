@@ -5,6 +5,7 @@ import { ConfigProvider } from "@/context/ConfigContext";
 import { ProductProvider } from "@/context/ProductContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ThemeApplier from "@/components/ThemeApplier";
 
 export const metadata = {
   title: "RNE — Eau de Parfum",
@@ -29,7 +30,8 @@ export default function RootLayout({ children }) {
           <ConfigProvider>
             <ProductProvider>
               <ShopProvider>
-                <Header />
+                <ThemeApplier />
+              <Header />
                 <main>{children}</main>
                 <Footer />
               </ShopProvider>

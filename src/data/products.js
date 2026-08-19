@@ -240,6 +240,30 @@ export const products = [
     image: "/products/erba-pura.jpg",
     images: ["/products/erba-pura.jpg"],
   },
+  {
+    id: "rne-discovery",
+    slug: "discovery-set",
+    name: "Discovery Set",
+    inspiredBy: null,
+    tagline: "Choose 6 testers and find your signature",
+    description:
+      "Can't decide? Try before you commit. Pick any 6 fragrances from our collection — each as a 5ml tester vial — and discover your perfect scent. One of each, no repeats.",
+    gender: "Unisex",
+    season: ["Summer", "Winter"],
+    notes: { top: [], heart: [], base: [] },
+    ingredients: "",
+    sizes: [
+      { size: "6 × 5ml", price: 350, oldPrice: null, stock: 50 },
+    ],
+    rating: 4.9,
+    reviewCount: 0,
+    bestSeller: true,
+    isDiscoverySet: true,
+    testerCount: 6,
+    maxPerScent: 1,
+    image: "/products/hero.jpg",
+    images: ["/products/hero.jpg"],
+  },
 ];
 
 export const categories = ["Men", "Women", "Summer", "Winter"];

@@ -8,11 +8,26 @@ import { writeDoc, subscribeDoc } from "@/lib/store";
 // production this comes from the backend.
 
 export const defaultConfig = {
-  // "Learn more about our fragrances" — Drive file or YouTube link
-  learnMore: {
-    enabled: true,
-    url: "https://www.youtube.com/results?search_query=rne+perfumes",
-    type: "youtube", // "youtube" | "drive" | "link"
+  // Site color theme (admin-editable)
+  colors: {
+    ink: "#0a0a0a",
+    paper: "#fafaf8",
+    accent: "#8B1A2B",       // burgundy — the main accent color
+    accentDeep: "#6e1422",
+    olive: "#8a8880",
+    line: "#e0ddd6",
+    success: "#4b6f4a",
+    danger: "#a23b2d",
+  },
+
+  // Visual effects toggle
+  effects: {
+    enabled: true,            // master toggle — disables ALL effects
+    fadeOnScroll: true,       // fade-up as sections enter viewport
+    hoverLift: true,          // cards lift on hover
+    imageZoom: true,          // images scale on hover
+    smoothTransitions: true,  // all transitions
+    parallax: true,           // subtle parallax on hero
   },
 
   // Advertising slider (Noon-style hero carousel)

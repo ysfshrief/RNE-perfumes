@@ -57,7 +57,7 @@ export default function AdSlider() {
           <div
             className={styles.track}
             ref={trackRef}
-            style={{ transform: `translateX(${lang === "ar" ? "" : "-"}${active * 100}%)` }}
+            style={{ transform: `translateX(${-active * 100}%)` }}
           >
             {slides.map((s) => (
               <div className={styles.slide} key={s.id} style={{ background: s.bg, color: s.fg }}>

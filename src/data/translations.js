@@ -114,6 +114,15 @@ export const translations = {
     "product.inspiredBy": "Inspired by",
     "product.learnMore": "Learn more about our fragrances",
     "product.contactDetails": "Contact us for details",
+    "discovery.title": "Choose your 6 scents",
+    "discovery.subtitle": "Select 6 different fragrances for your discovery set",
+    "discovery.scent": "Scent",
+    "discovery.selectScent": "Select scent",
+    "discovery.selected": "{n} of 6 selected",
+    "discovery.complete": "All 6 scents selected ✓",
+    "discovery.duplicate": "Already selected — choose a different scent",
+    "discovery.addToCart": "Add Discovery Set to Cart",
+    "discovery.selectAll": "Please select all 6 scents first",
 
     // Cart
     "cart.empty": "Your cart is empty",
@@ -504,6 +513,15 @@ export const translations = {
     "product.inspiredBy": "مستوحى من",
     "product.learnMore": "اعرف أكتر عن عطورنا",
     "product.contactDetails": "تواصل معانا للتفاصيل",
+    "discovery.title": "اختار ٦ عطور",
+    "discovery.subtitle": "اختار ٦ أنواع مختلفة لباكيدج التيسترات",
+    "discovery.scent": "عطر",
+    "discovery.selectScent": "اختار العطر",
+    "discovery.selected": "{n} من ٦ تم اختيارهم",
+    "discovery.complete": "تم اختيار الـ٦ عطور ✓",
+    "discovery.duplicate": "تم اختياره بالفعل — اختار عطر مختلف",
+    "discovery.addToCart": "أضف الديسكفري سيت للسلة",
+    "discovery.selectAll": "اختار الـ٦ عطور الأول",
 
     // Cart
     "cart.empty": "سلتك فارغة",
