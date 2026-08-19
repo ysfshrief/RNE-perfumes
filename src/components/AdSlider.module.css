@@ -142,3 +142,29 @@ html[dir="rtl"] .next { right: auto; left: 14px; }
   .prev { left: 8px; }
   .next { right: 8px; }
 }
+
+/* ── Image banner slides ── */
+.slideImage {
+  position: relative;
+}
+.slideBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+.slideInnerOverlay {
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(90deg, rgba(10,10,10,0.55) 0%, rgba(10,10,10,0.2) 50%, transparent 100%);
+}
+html[dir="rtl"] .slideInnerOverlay {
+  background: linear-gradient(270deg, rgba(10,10,10,0.55) 0%, rgba(10,10,10,0.2) 50%, transparent 100%);
+}
+.slideImage .title,
+.slideImage .badge {
+  text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+}

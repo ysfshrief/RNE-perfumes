@@ -8,24 +8,47 @@
 }
 
 .bar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   height: 72px;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 @media (max-width: 600px) {
   .bar { height: 60px; }
 }
 
-.logo { display: inline-flex; flex-shrink: 0; }
+/* leftGroup sits in column 1 (start) */
+.leftGroup { justify-self: start; }
+/* logo centered in column 2 */
+.logo { display: inline-flex; flex-shrink: 0; justify-self: center; }
 
 .nav {
-  display: flex;
-  gap: 1.75rem;
-  flex: 1;
-  justify-content: center;
+  display: none;
+}
+
+/* actions in column 3 (end) */
+.actions {
+  justify-self: end;
+}
+
+/* On desktop: show nav centered, hide logo from center, put logo at start */
+@media (min-width: 861px) {
+  .bar {
+    grid-template-columns: auto 1fr auto;
+  }
+  .leftGroup { justify-self: start; }
+  .logo { justify-self: start; grid-column: 1; }
+  .nav {
+    display: flex;
+    gap: 1.75rem;
+    justify-content: center;
+    grid-column: 2;
+  }
+  .actions { grid-column: 3; }
+  /* leftGroup is empty on desktop (burger+lang hidden), so collapse it */
+  .leftGroup { display: none; }
 }
 
 .link {
@@ -151,19 +174,17 @@ html[dir="rtl"] .langBtn { font-family: var(--font-display); }
 @media (max-width: 860px) {
   .nav { display: none; }
   .burger { display: flex; }
-  .logo { position: absolute; left: 50%; transform: translateX(-50%); }
-  /* On mobile the lang button sits next to the burger (left) */
+  .leftGroup { display: inline-flex; }
+  /* On mobile the lang button sits next to the burger */
   .leftGroup .langBtn { display: inline-flex; padding: 0.3rem 0.5rem; font-size: 0.72rem; }
   .langBtnDesktop { display: none; }
   .langText { display: inline; }
   .actions { gap: 0.9rem; }
 }
-html[dir="rtl"] .logo { left: auto; right: 50%; transform: translateX(50%); }
 @media (max-width: 600px) {
   .actions { gap: 0.75rem; }
   .iconLink svg { width: 19px; height: 19px; }
 }
-html[dir="rtl"] .logo { left: auto; right: 50%; transform: translateX(50%); }
 
 /* RTL adjustments */
 html[dir="rtl"] .count { right: auto; left: -9px; }

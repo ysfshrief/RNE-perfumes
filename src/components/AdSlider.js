@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useConfig } from "@/context/ConfigContext";
 import { useLang } from "@/context/LangContext";
+import { normalizeImageUrl } from "@/context/ProductContext";
 import styles from "./AdSlider.module.css";
 
 export default function AdSlider() {
@@ -59,9 +60,23 @@ export default function AdSlider() {
             ref={trackRef}
             style={{ transform: `translateX(${-active * 100}%)` }}
           >
-            {slides.map((s) => (
-              <div className={styles.slide} key={s.id} style={{ background: s.bg, color: s.fg }}>
-                <div className={styles.slideInner}>
+            {slides.map((s) => {
+              const hasImage = s.image && (s.image.startsWith("http") || s.image.startsWith("/"));
+              const imgUrl = hasImage ? normalizeImageUrl(s.image) : null;
+              return (
+              <div
+                className={`${styles.slide} ${hasImage ? styles.slideImage : ""}`}
+                key={s.id}
+                style={{
+                  background: hasImage ? "#0a0a0a" : s.bg,
+                  color: s.fg,
+                }}
+              >
+                {hasImage && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={imgUrl} alt="" className={styles.slideBg} draggable={false} />
+                )}
+                <div className={`${styles.slideInner} ${hasImage ? styles.slideInnerOverlay : ""}`}>
                   <div className={styles.text}>
                     <span className={styles.badge}>{lang === "ar" ? s.title : s.titleEn}</span>
                     <h2 className={styles.title} style={{ color: s.fg }}>
@@ -73,14 +88,17 @@ export default function AdSlider() {
                       </Link>
                     )}
                   </div>
-                  <div className={styles.decor} aria-hidden="true">
-                    <span style={{ background: s.fg }} />
-                    <span style={{ background: s.fg }} />
-                    <span style={{ background: s.fg }} />
-                  </div>
+                  {!hasImage && (
+                    <div className={styles.decor} aria-hidden="true">
+                      <span style={{ background: s.fg }} />
+                      <span style={{ background: s.fg }} />
+                      <span style={{ background: s.fg }} />
+                    </div>
+                  )}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Arrows */}

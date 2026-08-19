@@ -25,6 +25,7 @@ export const products = [
     sizes: [
       { size: "30ml", price: 650, oldPrice: 780, stock: 14 },
       { size: "50ml", price: 950, oldPrice: null, stock: 8 },
+      { size: "100ml", price: 1420, oldPrice: null, stock: 6 },
     ],
     rating: 4.8,
     reviewCount: 47,
@@ -51,6 +52,7 @@ export const products = [
     sizes: [
       { size: "30ml", price: 720, oldPrice: null, stock: 18 },
       { size: "50ml", price: 1080, oldPrice: 1250, stock: 6 },
+      { size: "100ml", price: 1620, oldPrice: null, stock: 6 },
     ],
     rating: 4.7,
     reviewCount: 39,
@@ -77,6 +79,7 @@ export const products = [
     sizes: [
       { size: "30ml", price: 680, oldPrice: null, stock: 20 },
       { size: "50ml", price: 990, oldPrice: null, stock: 0 },
+      { size: "100ml", price: 1480, oldPrice: null, stock: 6 },
     ],
     rating: 4.6,
     reviewCount: 28,
@@ -103,6 +106,7 @@ export const products = [
     sizes: [
       { size: "30ml", price: 700, oldPrice: null, stock: 15 },
       { size: "50ml", price: 1020, oldPrice: 1180, stock: 5 },
+      { size: "100ml", price: 1530, oldPrice: null, stock: 6 },
     ],
     rating: 4.8,
     reviewCount: 42,
@@ -129,6 +133,7 @@ export const products = [
     sizes: [
       { size: "30ml", price: 730, oldPrice: null, stock: 22 },
       { size: "50ml", price: 1080, oldPrice: null, stock: 9 },
+      { size: "100ml", price: 1620, oldPrice: null, stock: 6 },
     ],
     rating: 4.9,
     reviewCount: 63,
@@ -155,6 +160,7 @@ export const products = [
     sizes: [
       { size: "30ml", price: 730, oldPrice: 850, stock: 25 },
       { size: "50ml", price: 1080, oldPrice: null, stock: 11 },
+      { size: "100ml", price: 1620, oldPrice: null, stock: 6 },
     ],
     rating: 4.9,
     reviewCount: 71,
@@ -181,6 +187,7 @@ export const products = [
     sizes: [
       { size: "30ml", price: 710, oldPrice: null, stock: 16 },
       { size: "50ml", price: 1050, oldPrice: 1200, stock: 7 },
+      { size: "100ml", price: 1580, oldPrice: null, stock: 6 },
     ],
     rating: 4.7,
     reviewCount: 35,
@@ -207,6 +214,7 @@ export const products = [
     sizes: [
       { size: "30ml", price: 740, oldPrice: null, stock: 12 },
       { size: "50ml", price: 1090, oldPrice: null, stock: 4 },
+      { size: "100ml", price: 1640, oldPrice: null, stock: 6 },
     ],
     rating: 4.6,
     reviewCount: 24,
@@ -233,6 +241,7 @@ export const products = [
     sizes: [
       { size: "30ml", price: 760, oldPrice: null, stock: 13 },
       { size: "50ml", price: 1120, oldPrice: 1300, stock: 6 },
+      { size: "100ml", price: 1680, oldPrice: null, stock: 6 },
     ],
     rating: 4.8,
     reviewCount: 38,
