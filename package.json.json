@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "rne-perfumes",
+  "private_key_id": "5a16ef18147ded105ab324ea223bdaea07a4c799",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDDR+E1ndZr/z8J\nsb+G/IhXqL8uY8ip/9Avu4MSbRoMONSwthVnfB3Tis9xGMx90nHGWAiSfEtdlr9h\nudf4zklyHSMwD9h8uYZBQKk9TZ/3FKHm7e+N3u+Cdwz5QEA/sjm05GhmUrCDJSSV\nZrQDCsMilBqi6U8SdX4HDkWQ633U5cESJkcZiKh1H6rP4yWGw9bh89izJJfJPG52\nsHhKKzQHc3CF8ahpPqBP9VrrPPycZ8JO5nPmv33DPlSLnGQVM+ZsmXSbUPCwpf4D\nkWzaZNCyPwI5562lKr7I3yuKC7nxnNA6/VOJxaGqHmalF3PrMI+FJ/sj7f3X10EM\nSQNOlCMXAgMBAAECggEASJWFlJ/DzOWVYT2TwpFH/kknMo99TQ7cK3nHmMg7t9JB\n4CL15r6f+Xqta0y76YKYrpAXM5eGjdVT8neY2o6Whxdkdl9VaNqul794iGQ7cqPV\nH9hNw85a+QPWKykiGGre/yks0uemW0CpjeycOUs9R7OECQyuSt6oBuhbnCej4EcU\n8Dybe8IAlnZTirV59I7xy4hXNu8POS4erf7gQskQcQsBdJAneH97pgyOxhr+Ad9d\n1qG+Chxm3hwg4yUdkApMqFu7NTzGaZfm1pYK3x+Qx0bYVfpY15wXHr2h/WHAlFgi\nKxyPMhD4L12A4pTFRUka1asjNwvu8aqAxTbx7a8smQKBgQD0iz8ijgC/BX0ojKNp\nsQ2DT1U5Dl1UiMm3oGpxb+vG35YedrH2f7AafcCuwQZg7moZE+wTqU1s0X2jE4OK\nujOTqo5FO8YEZ1/F0G95ZqCTvvnYwd5+RTusk0pN8b+LTsi4GTyluTPqIbE5uui+\nJFuFcDYZnvv7cqmZP49JrCGxWQKBgQDMbdUmC0VdGelqKMwHy5fFuXMqT29mA4nE\niNtJcqujQZYi3J/mybrexruU4pxrp2BqCyZMKz0psYk3Bzz8+DyfjXpEYFNmrEy0\nVyDHlxKyJqtqcFy5lmodwWeFYqk98RavnAvekNg7OIR2GFOxk+EhBqBUlUfJMpZe\nyiiyLqD57wKBgAHvxF06sKjSm04h5v1kSI4cp7ke8wBDYQ2SOKWTVFOr2518JSal\nljhvfIIlxy4nVTHDpZ/2PEW7VvpeojEMDnKB7ESCF6xbQTfo0aktdeIVphbgWim3\n1KQmOnVpj7HDuvUyRfeuAso84BFr+IHg+dSRsev8BVTVcKBlD3Zu5YlpAoGAI4Ar\nVMj+SbW3QDVHgU8M00xqQH289bVFlnjBxBaC0f4QyYsQxa5golFWv/s+eL9/UcsP\n4ohbvcLT9lducuvU80xJYFhuA1WGmIbM7XxBxehLOle68ou5b+NnS9WfWF9mtiZe\nNU9oDZi6ABwnZJ4uqWKSMz4dUkZTsLBgstjAIccCgYEA6dNZEABMvjnCAEOswpKd\nkPRFJwC+w2pKhu6CszW2lcPPU2CY3+oBsmVHF8C7Qb3higNXF3ToSYM1gi2oNkEA\nbD/C6PWttcnwGQbFM8SJQy894tyLm5LJOQY/S2EXBb/oWhupmBM8IB9z3GF2nSPj\nov/lMv2uA3O0/2MCfppowkM=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@rne-perfumes.iam.gserviceaccount.com",
+  "client_id": "115426544822317571825",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40rne-perfumes.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
