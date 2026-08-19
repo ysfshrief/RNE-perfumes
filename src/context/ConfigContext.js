@@ -30,6 +30,16 @@ export const defaultConfig = {
     parallax: true,           // subtle parallax on hero
   },
 
+  // Payment methods (admin can enable/disable each)
+  payments: {
+    cod: true,
+    card: true,
+    instapay: true,
+    vodafone: true,
+    orange: true,
+    etisalat: true,
+  },
+
   // Advertising slider (Noon-style hero carousel)
   adSlides: [
     { id: "s1", title: "خصومات الصيف", titleEn: "Summer Sale", subtitle: "خصم يصل إلى ٢٥٪ على عطور مختارة", subtitleEn: "Up to 25% off selected fragrances", cta: "تسوّق الآن", ctaEn: "Shop now", href: "/shop?offers=true", bg: "#2a1e3a", fg: "#f7f5f1" },

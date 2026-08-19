@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useShop } from "@/context/ShopContext";
 import { useLang } from "@/context/LangContext";
+import { useConfig } from "@/context/ConfigContext";
 import styles from "./checkout.module.css";
 
 const GOV_KEYS = [
@@ -19,6 +20,7 @@ const GOV_AR = {
 export default function CheckoutPage() {
   const { state, dispatch, cartTotal } = useShop();
   const { t, lang } = useLang();
+  const { config } = useConfig();
   const [pay, setPay] = useState("cod");
   const [placed, setPlaced] = useState(false);
   const [form, setForm] = useState({
@@ -27,6 +29,7 @@ export default function CheckoutPage() {
   });
   const cur = t("common.currency");
 
+  const enabledPayments = config.payments || {};
   const PAYMENTS = [
     { id: "cod", label: t("pay.cod"), note: t("pay.codNote") },
     { id: "card", label: t("pay.card"), note: t("pay.cardNote") },
@@ -34,7 +37,7 @@ export default function CheckoutPage() {
     { id: "vodafone", label: t("pay.vodafone"), note: t("pay.vodafoneNote") },
     { id: "orange", label: t("pay.orange"), note: t("pay.orangeNote") },
     { id: "etisalat", label: t("pay.etisalat"), note: t("pay.etisalatNote") },
-  ];
+  ].filter((p) => enabledPayments[p.id] !== false);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const valid = form.name && form.phone && form.governorate && form.city && form.address && form.email;

@@ -86,6 +86,24 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  // Sign in with Google popup
+  const signInWithGoogle = useCallback(async () => {
+    if (!isFirebaseEnabled || !auth) {
+      const mockUser = { uid: "local", email: "google@user.com", name: "Google User" };
+      setUser(mockUser);
+      try { localStorage.setItem("rne-user", JSON.stringify(mockUser)); } catch (e) {}
+      return { ok: true };
+    }
+    try {
+      const { GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: e.code || e.message };
+    }
+  }, []);
+
   const signOut = useCallback(async () => {
     if (!isFirebaseEnabled || !auth) {
       setUser(null);
@@ -97,7 +115,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isAdmin, ready, signIn, register, signOut }}>
+    <AuthContext.Provider value={{ user, isAdmin, ready, signIn, register, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );

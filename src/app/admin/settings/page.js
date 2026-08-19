@@ -121,6 +121,34 @@ export default function AdminSettings() {
           </div>
         </div>
 
+        {/* ─── Payment Methods ─── */}
+        <div className={adminStyles.card}>
+          <h3 className={s.secTitle}>{T("💳 طرق الدفع", "💳 Payment Methods")}</h3>
+          <p className={s.secNote}>{T("فعّل أو أوقف طرق الدفع اللي تظهر للعميل.", "Enable or disable the payment methods shown at checkout.")}</p>
+          <div className={s.effectsList}>
+            {[
+              { key: "cod", label: T("الدفع عند الاستلام", "Cash on Delivery") },
+              { key: "card", label: T("فيزا / ماستركارد", "Visa / Mastercard") },
+              { key: "instapay", label: "InstaPay" },
+              { key: "vodafone", label: T("فودافون كاش", "Vodafone Cash") },
+              { key: "orange", label: T("أورنج كاش", "Orange Cash") },
+              { key: "etisalat", label: T("اتصالات كاش", "Etisalat Cash") },
+            ].map((pm) => {
+              const on = (config.payments || {})[pm.key] !== false;
+              return (
+                <div key={pm.key} className={s.effectRow}>
+                  <span className={s.effectLabel}>{pm.label}</span>
+                  <button
+                    className={`${s.switch} ${on ? s.switchOn : ""}`}
+                    onClick={() => { save({ ...config, payments: { ...(config.payments || {}), [pm.key]: !on } }); flash(); }}
+                    role="switch" aria-checked={on}
+                  ><span className={s.knob} /></button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* ─── Ad Slides ─── */}
         <div className={`${adminStyles.card} ${s.fullWidth}`}>
           <h3 className={s.secTitle}>{T("🖼️ البانر المتحرك", "🖼️ Ad Banner Slides")}</h3>
