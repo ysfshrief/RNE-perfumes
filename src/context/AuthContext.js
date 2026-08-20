@@ -28,7 +28,9 @@ export function AuthProvider({ children }) {
 
     let unsub = () => {};
     (async () => {
-      const { onAuthStateChanged } = await import("firebase/auth");
+      const { onAuthStateChanged, getRedirectResult } = await import("firebase/auth");
+      // Complete any pending Google redirect sign-in
+      try { await getRedirectResult(auth); } catch (e) {}
       unsub = onAuthStateChanged(auth, async (fbUser) => {
         if (fbUser) {
           // Read the custom claims to detect admin
@@ -86,7 +88,7 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // Sign in with Google popup
+  // Sign in with Google (popup, with redirect fallback for COOP-restricted browsers)
   const signInWithGoogle = useCallback(async () => {
     if (!isFirebaseEnabled || !auth) {
       const mockUser = { uid: "local", email: "google@user.com", name: "Google User" };
@@ -95,10 +97,25 @@ export function AuthProvider({ children }) {
       return { ok: true };
     }
     try {
-      const { GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
+      const { GoogleAuthProvider, signInWithPopup, signInWithRedirect } = await import("firebase/auth");
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      return { ok: true };
+      provider.setCustomParameters({ prompt: "select_account" });
+      try {
+        await signInWithPopup(auth, provider);
+        return { ok: true };
+      } catch (popupErr) {
+        // Popup blocked or closed by browser security (COOP) → fall back to redirect
+        if (
+          popupErr.code === "auth/popup-blocked" ||
+          popupErr.code === "auth/cancelled-popup-request" ||
+          popupErr.code === "auth/popup-closed-by-user" ||
+          (popupErr.message && popupErr.message.includes("Cross-Origin"))
+        ) {
+          await signInWithRedirect(auth, provider);
+          return { ok: true, redirecting: true };
+        }
+        throw popupErr;
+      }
     } catch (e) {
       return { ok: false, error: e.code || e.message };
     }

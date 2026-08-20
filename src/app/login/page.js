@@ -37,6 +37,7 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     const res = await signInWithGoogle();
+    if (res.redirecting) return; // page will redirect to Google, keep loading
     setLoading(false);
     if (res.ok) {
       router.push("/account");
