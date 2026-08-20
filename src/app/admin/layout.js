@@ -4,11 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLang } from "@/context/LangContext";
+import { useAuth } from "@/context/AuthContext";
 import styles from "./admin.module.css";
 
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const { t } = useLang();
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
 
   const NAV = [
@@ -52,7 +54,7 @@ export default function AdminLayout({ children }) {
         <header className={styles.topbar}>
           <button className={styles.menuBtn} onClick={() => setOpen((v) => !v)} aria-label="Menu">☰</button>
           <div className={styles.topbarRight}>
-            <span className={styles.adminName}>{t("admin.brand")} · روفائيل نسيم</span>
+            <span className={styles.adminName}>{t("admin.brand")} · {user?.name || user?.email || t("admin.brand")}</span>
             <span className={`${styles.avatar} keep-latin`}>R</span>
           </div>
         </header>

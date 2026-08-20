@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useShop } from "@/context/ShopContext";
 import { useLang } from "@/context/LangContext";
 import { useConfig } from "@/context/ConfigContext";
+import { addToCollection } from "@/lib/store";
 import styles from "./checkout.module.css";
 
 const GOV_KEYS = [
@@ -42,8 +43,42 @@ export default function CheckoutPage() {
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const valid = form.name && form.phone && form.governorate && form.city && form.address && form.email;
 
-  const placeOrder = () => {
+  const placeOrder = async () => {
     if (!valid) return;
+    // Build the order record
+    const order = {
+      status: "New",
+      customer: {
+        name: form.name,
+        phone: form.phone,
+        email: form.email,
+        governorate: form.governorate,
+        city: form.city,
+        address: form.address,
+      },
+      items: state.cart.map((it) => ({
+        id: it.product.id,
+        name: it.product.name,
+        size: it.size?.size,
+        price: it.size?.price,
+        qty: it.qty,
+        selectedScents: it.product._selectedScents || null,
+      })),
+      total: cartTotal,
+      payment: pay,
+      note: form.note || "",
+    };
+    await addToCollection("orders", order);
+    // Also save/update the customer record
+    await addToCollection("customers", {
+      id: `cust_${form.email}`,
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      governorate: form.governorate,
+      city: form.city,
+      address: form.address,
+    });
     setPlaced(true);
     dispatch({ type: "CLEAR_CART" });
     window.scrollTo({ top: 0 });

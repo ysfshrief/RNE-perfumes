@@ -129,3 +129,119 @@ export function subscribeDoc(key, fallback, callback) {
 
   return localCleanup;
 }
+
+// ============================================================
+// Collection helpers — for lists like orders, customers, discounts.
+// Each collection is stored as an array under a localStorage key, and (when
+// Firebase is enabled) as a Firestore collection with the same name.
+// ============================================================
+
+// Add an item to a collection (generates an id + timestamp).
+export async function addToCollection(collectionName, item) {
+  const id = item.id || `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  const record = { id, createdAt: new Date().toISOString(), ...item };
+
+  // Local-first
+  const current = lsGet(`col:${collectionName}`, []);
+  const next = [record, ...current];
+  lsSet(`col:${collectionName}`, next);
+
+  // Firestore sync
+  if (isFirebaseEnabled && db) {
+    try {
+      const { doc, setDoc } = await loadFirestore();
+      await setDoc(doc(db, collectionName, id), record);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn(`Firestore add to ${collectionName} failed (kept local):`, e?.message);
+    }
+  }
+  return record;
+}
+
+// Update an item in a collection by id.
+export async function updateInCollection(collectionName, id, patch) {
+  const current = lsGet(`col:${collectionName}`, []);
+  const next = current.map((it) => (it.id === id ? { ...it, ...patch } : it));
+  lsSet(`col:${collectionName}`, next);
+
+  if (isFirebaseEnabled && db) {
+    try {
+      const { doc, setDoc } = await loadFirestore();
+      await setDoc(doc(db, collectionName, id), patch, { merge: true });
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn(`Firestore update ${collectionName} failed:`, e?.message);
+    }
+  }
+}
+
+// Delete an item from a collection by id.
+export async function deleteFromCollection(collectionName, id) {
+  const current = lsGet(`col:${collectionName}`, []);
+  lsSet(`col:${collectionName}`, current.filter((it) => it.id !== id));
+
+  if (isFirebaseEnabled && db) {
+    try {
+      const { doc, deleteDoc } = await loadFirestore();
+      await deleteDoc(doc(db, collectionName, id));
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.warn(`Firestore delete ${collectionName} failed:`, e?.message);
+    }
+  }
+}
+
+// Subscribe to a whole collection (live). Returns unsubscribe.
+export function subscribeCollection(collectionName, callback) {
+  // seed from local
+  const seeded = lsGet(`col:${collectionName}`, []);
+  callback(seeded);
+
+  let localCleanup = () => {};
+  if (typeof window !== "undefined") {
+    const handler = (e) => {
+      if (e.type === "storage" && e.key && e.key !== `${LS_PREFIX}col:${collectionName}`) return;
+      if (e.type === "rne-store-change" && e.detail?.key !== `col:${collectionName}`) return;
+      callback(lsGet(`col:${collectionName}`, []));
+    };
+    window.addEventListener("storage", handler);
+    window.addEventListener("rne-store-change", handler);
+    localCleanup = () => {
+      window.removeEventListener("storage", handler);
+      window.removeEventListener("rne-store-change", handler);
+    };
+  }
+
+  if (isFirebaseEnabled && db) {
+    let unsub = () => {};
+    let cancelled = false;
+    loadFirestore().then(({ collection, onSnapshot, query, orderBy }) => {
+      if (cancelled) return;
+      const handleSnap = (snap) => {
+        const items = snap.docs.map((d) => d.data());
+        // Never let an empty Firestore result wipe existing local data.
+        // (Empty can mean: offline cache, pending server fetch, or a genuinely
+        // empty collection — we can't tell reliably, so we keep local data.)
+        if (items.length === 0) {
+          const local = lsGet(`col:${collectionName}`, []);
+          if (local.length > 0) return; // keep what we have
+        }
+        try { localStorage.setItem(`${LS_PREFIX}col:${collectionName}`, JSON.stringify(items)); } catch (e) {}
+        callback(items);
+      };
+      try {
+        const q = query(collection(db, collectionName), orderBy("createdAt", "desc"));
+        unsub = onSnapshot(q, handleSnap, (err) => {
+          // eslint-disable-next-line no-console
+          console.warn(`Firestore subscribe ${collectionName} error:`, err?.message);
+        });
+      } catch (e) {
+        unsub = onSnapshot(collection(db, collectionName), handleSnap);
+      }
+    });
+    return () => { cancelled = true; unsub(); localCleanup(); };
+  }
+
+  return localCleanup;
+}

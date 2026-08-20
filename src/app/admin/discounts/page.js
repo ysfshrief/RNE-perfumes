@@ -2,27 +2,25 @@
 
 import { useState } from "react";
 import { useLang } from "@/context/LangContext";
+import { useConfig } from "@/context/ConfigContext";
 import styles from "../admin.module.css";
 import d from "./discounts.module.css";
 
-const SEED = [
-  { code: "RNE10", type: "percent", value: "10%", active: true, uses: 42 },
-  { code: "SAVE50", type: "fixed", value: "50", active: true, uses: 18 },
-  { code: "WINTER25", type: "percent", value: "25%", active: false, uses: 0 },
-];
-
 export default function AdminDiscounts() {
   const { t } = useLang();
+  const { config, save } = useConfig();
   const cur = t("common.currency");
-  const [coupons, setCoupons] = useState(SEED);
+  const coupons = config.coupons || [];
   const [form, setForm] = useState({ code: "", type: "percent", value: "" });
 
+  const persist = (next) => save({ ...config, coupons: next });
+
   const typeLabel = (ty) => (ty === "percent" ? t("admin.percentage") : t("admin.fixed"));
-  const toggle = (code) => setCoupons((list) => list.map((c) => (c.code === code ? { ...c, active: !c.active } : c)));
-  const remove = (code) => setCoupons((list) => list.filter((c) => c.code !== code));
+  const toggle = (code) => persist(coupons.map((c) => (c.code === code ? { ...c, active: !c.active } : c)));
+  const remove = (code) => persist(coupons.filter((c) => c.code !== code));
   const add = () => {
     if (!form.code || !form.value) return;
-    setCoupons((list) => [{ code: form.code.toUpperCase(), type: form.type, value: form.value, active: true, uses: 0 }, ...list]);
+    persist([{ code: form.code.toUpperCase(), type: form.type, value: form.value, active: true, uses: 0 }, ...coupons]);
     setForm({ code: "", type: "percent", value: "" });
   };
 

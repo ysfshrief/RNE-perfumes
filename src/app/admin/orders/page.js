@@ -1,7 +1,8 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { useLang } from "@/context/LangContext";
+import { subscribeCollection, updateInCollection } from "@/lib/store";
 import styles from "../admin.module.css";
 import o from "./orders.module.css";
 
@@ -18,17 +19,22 @@ const STATUS_STYLE = {
   Returned: { bg: "#f7e7e4", c: "var(--danger)" },
 };
 
-const SEED = [];
-
 export default function AdminOrders() {
   const { t } = useLang();
   const cur = t("common.currency");
-  const [orders, setOrders] = useState(SEED);
+  const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState("All");
   const [expanded, setExpanded] = useState(null);
 
-  const setStatus = (id, status) =>
+  useEffect(() => {
+    const unsub = subscribeCollection("orders", setOrders);
+    return unsub;
+  }, []);
+
+  const setStatus = (id, status) => {
     setOrders((list) => list.map((ord) => (ord.id === id ? { ...ord, status } : ord)));
+    updateInCollection("orders", id, { status });
+  };
   const shown = filter === "All" ? orders : orders.filter((ord) => ord.status === filter);
 
   return (
@@ -67,10 +73,10 @@ export default function AdminOrders() {
             {shown.map((ord) => (
               <Fragment key={ord.id}>
                 <tr>
-                  <td><strong className="keep-latin">{ord.id}</strong></td>
-                  <td>{ord.customer}</td>
-                  <td>{ord.gov}</td>
-                  <td>{ord.date}</td>
+                  <td><strong className="keep-latin">{ord.id.slice(0, 8)}</strong></td>
+                  <td>{ord.customer?.name || ord.customer}</td>
+                  <td>{ord.customer?.governorate || ord.gov || "—"}</td>
+                  <td>{ord.createdAt ? new Date(ord.createdAt).toLocaleDateString() : ord.date}</td>
                   <td>{ord.total} {cur}</td>
                   <td>
                     <span className={styles.pill} style={{ background: STATUS_STYLE[ord.status].bg, color: STATUS_STYLE[ord.status].c }}>
@@ -89,10 +95,14 @@ export default function AdminOrders() {
                       <div className={o.expand}>
                         <div>
                           <h4>{t("admin.contact")}</h4>
-                          <p>{ord.customer} · {ord.phone}</p>
+                          <p>{ord.customer?.name || ord.customer} · {ord.customer?.phone || ord.phone}</p>
+                          {ord.customer?.address && <p>{ord.customer.address}, {ord.customer.city}</p>}
                           <h4>{t("admin.items")}</h4>
                           {ord.items.map((it, i) => (
-                            <p key={i} className="keep-latin">{it.n} · {it.s} × {it.q}</p>
+                            <p key={i} className="keep-latin">
+                              {it.name || it.n} · {it.size || it.s} × {it.qty || it.q}
+                              {it.selectedScents ? ` (${it.selectedScents.join(", ")})` : ""}
+                            </p>
                           ))}
                         </div>
                         <div>
@@ -118,6 +128,11 @@ export default function AdminOrders() {
             ))}
           </tbody>
         </table>
+        {shown.length === 0 && (
+          <p style={{ padding: "2rem", textAlign: "center", color: "var(--olive)" }}>
+            {t("admin.noOrders")}
+          </p>
+        )}
       </div>
     </>
   );

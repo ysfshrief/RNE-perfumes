@@ -30,6 +30,9 @@ export const defaultConfig = {
     parallax: true,           // subtle parallax on hero
   },
 
+  // Discount coupons (admin-managed)
+  coupons: [],
+
   // Payment methods (admin can enable/disable each)
   payments: {
     cod: true,
