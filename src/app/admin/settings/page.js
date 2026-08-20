@@ -149,6 +149,129 @@ export default function AdminSettings() {
           </div>
         </div>
 
+        {/* ─── Category Cards ─── */}
+        <div className={`${adminStyles.card} ${s.fullWidth}`}>
+          <h3 className={s.secTitle}>{T("🗂️ خانات الصفحة الرئيسية", "🗂️ Homepage Category Cards")}</h3>
+          <p className={s.secNote}>{T("عدّل اسم وصورة كل خانة. الصق رابط صورة من Google Drive.", "Edit each card's name and image. Paste a Google Drive image link.")}</p>
+          <div className={s.slidesList}>
+            {(config.categories || []).map((cat, i) => (
+              <div key={cat.id} className={s.slideCard} style={{ borderInlineStart: `4px solid ${cat.color}` }}>
+                <div className={s.slideFields}>
+                  <div className={s.sfRow}>
+                    <label>{T("الاسم (ع)", "Label (AR)")}</label>
+                    <input dir="rtl" value={cat.label} onChange={(e) => {
+                      const cats = [...config.categories]; cats[i] = { ...cat, label: e.target.value };
+                      save({ ...config, categories: cats });
+                    }} />
+                  </div>
+                  <div className={s.sfRow}>
+                    <label>{T("الاسم (EN)", "Label (EN)")}</label>
+                    <input dir="ltr" value={cat.labelEn} onChange={(e) => {
+                      const cats = [...config.categories]; cats[i] = { ...cat, labelEn: e.target.value };
+                      save({ ...config, categories: cats });
+                    }} />
+                  </div>
+                  <div className={s.sfRow} style={{ gridColumn: "1 / -1" }}>
+                    <label>{T("رابط الصورة (Drive)", "Image link (Drive)")}</label>
+                    <input dir="ltr" value={cat.image} placeholder="https://drive.google.com/file/d/..." onChange={(e) => {
+                      const cats = [...config.categories]; cats[i] = { ...cat, image: e.target.value };
+                      save({ ...config, categories: cats });
+                    }} />
+                  </div>
+                  <div className={s.sfRow}>
+                    <label>{T("لون الخلفية", "Overlay color")}</label>
+                    <div className={s.colorInputWrap}>
+                      <input type="color" className={s.colorPicker} value={cat.color} onChange={(e) => {
+                        const cats = [...config.categories]; cats[i] = { ...cat, color: e.target.value };
+                        save({ ...config, categories: cats });
+                      }} />
+                      <input type="text" dir="ltr" className={s.colorHex} value={cat.color} onChange={(e) => {
+                        const cats = [...config.categories]; cats[i] = { ...cat, color: e.target.value };
+                        save({ ...config, categories: cats });
+                      }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ─── Spin Wheel ─── */}
+        <div className={`${adminStyles.card} ${s.fullWidth}`}>
+          <h3 className={s.secTitle}>{T("🎡 عجلة الحظ", "🎡 Spin Wheel")}</h3>
+          <p className={s.secNote}>{T("العجلة بتتلعب مرة واحدة لكل زائر. عدّل الجوائز والاحتمالات (الوزن الأكبر = فرصة أكبر).", "The wheel is played once per visitor. Edit prizes and weights (higher weight = higher chance).")}</p>
+
+          <div className={s.effectRow}>
+            <span className={s.effectLabel}>{T("تفعيل العجلة", "Enable wheel")}</span>
+            <button
+              className={`${s.switch} ${(config.wheel?.enabled !== false) ? s.switchOn : ""}`}
+              onClick={() => save({ ...config, wheel: { ...config.wheel, enabled: !(config.wheel?.enabled !== false) } })}
+              role="switch"
+            ><span className={s.knob} /></button>
+          </div>
+
+          <div className={s.sfRow} style={{ marginTop: "1rem" }}>
+            <label>{T("عنوان العجلة (ع)", "Wheel title (AR)")}</label>
+            <input dir="rtl" value={config.wheel?.title || ""} onChange={(e) => save({ ...config, wheel: { ...config.wheel, title: e.target.value } })} />
+          </div>
+          <div className={s.sfRow}>
+            <label>{T("عنوان العجلة (EN)", "Wheel title (EN)")}</label>
+            <input dir="ltr" value={config.wheel?.titleEn || ""} onChange={(e) => save({ ...config, wheel: { ...config.wheel, titleEn: e.target.value } })} />
+          </div>
+
+          <h4 style={{ margin: "1.2rem 0 0.6rem", fontSize: "0.85rem" }}>{T("الجوائز", "Prizes")}</h4>
+          <div className={s.slidesList}>
+            {(config.wheel?.segments || []).map((seg, i) => (
+              <div key={seg.id || i} className={s.slideCard} style={{ borderInlineStart: `4px solid ${seg.color || "#8B1A2B"}` }}>
+                <div className={s.slideFields}>
+                  <div className={s.sfRow}>
+                    <label>{T("الجائزة (ع)", "Prize (AR)")}</label>
+                    <input dir="rtl" value={seg.label || ""} onChange={(e) => {
+                      const segs = [...config.wheel.segments]; segs[i] = { ...seg, label: e.target.value };
+                      save({ ...config, wheel: { ...config.wheel, segments: segs } });
+                    }} />
+                  </div>
+                  <div className={s.sfRow}>
+                    <label>{T("الجائزة (EN)", "Prize (EN)")}</label>
+                    <input dir="ltr" value={seg.labelEn || ""} onChange={(e) => {
+                      const segs = [...config.wheel.segments]; segs[i] = { ...seg, labelEn: e.target.value };
+                      save({ ...config, wheel: { ...config.wheel, segments: segs } });
+                    }} />
+                  </div>
+                  <div className={s.sfRow}>
+                    <label>{T("كود الخصم", "Coupon code")}</label>
+                    <input dir="ltr" value={seg.code || ""} placeholder={T("سيبه فاضي لو مفيش جائزة", "empty = no prize")} onChange={(e) => {
+                      const segs = [...config.wheel.segments]; segs[i] = { ...seg, code: e.target.value };
+                      save({ ...config, wheel: { ...config.wheel, segments: segs } });
+                    }} />
+                  </div>
+                  <div className={s.sfRow}>
+                    <label>{T("الوزن (الاحتمال)", "Weight (chance)")}</label>
+                    <input dir="ltr" type="number" value={seg.weight || 1} onChange={(e) => {
+                      const segs = [...config.wheel.segments]; segs[i] = { ...seg, weight: Number(e.target.value) || 1 };
+                      save({ ...config, wheel: { ...config.wheel, segments: segs } });
+                    }} />
+                  </div>
+                  <div className={s.sfRow}>
+                    <label>{T("لون القطاع", "Segment color")}</label>
+                    <div className={s.colorInputWrap}>
+                      <input type="color" className={s.colorPicker} value={seg.color || "#8B1A2B"} onChange={(e) => {
+                        const segs = [...config.wheel.segments]; segs[i] = { ...seg, color: e.target.value };
+                        save({ ...config, wheel: { ...config.wheel, segments: segs } });
+                      }} />
+                      <input type="text" dir="ltr" className={s.colorHex} value={seg.color || "#8B1A2B"} onChange={(e) => {
+                        const segs = [...config.wheel.segments]; segs[i] = { ...seg, color: e.target.value };
+                        save({ ...config, wheel: { ...config.wheel, segments: segs } });
+                      }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* ─── Ad Slides ─── */}
         <div className={`${adminStyles.card} ${s.fullWidth}`}>
           <h3 className={s.secTitle}>{T("🖼️ البانر المتحرك", "🖼️ Ad Banner Slides")}</h3>

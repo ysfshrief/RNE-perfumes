@@ -417,7 +417,7 @@ article:hover, [class*="card"]:hover {
 
 /* Page transition feel */
 main {
-  animation: fadeUp 0.5s ease both;
+  animation: fadeIn 0.5s ease both;
 }
 
 /* Smooth scroll behavior */

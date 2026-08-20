@@ -99,7 +99,7 @@ export default function ProductClient({ product: baseProduct }) {
 
           {product.isDiscoverySet ? (
             <>
-              <p className={styles.desc}>{pDescription(product, lang)}</p>
+              <p className={styles.desc}>{t("discovery.description")}</p>
               <div className={styles.priceRow}>
                 <span className="price">{product.sizes[0].price} {cur}</span>
               </div>

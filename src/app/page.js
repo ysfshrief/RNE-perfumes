@@ -6,24 +6,26 @@ import TestPackageBanner from "@/components/TestPackageBanner";
 import WhatsApp from "@/components/WhatsApp";
 import AdSlider from "@/components/AdSlider";
 import SpinWheel from "@/components/SpinWheel";
-import { useProducts } from "@/context/ProductContext";
+import { useProducts, normalizeImageUrl } from "@/context/ProductContext";
 import { useLang } from "@/context/LangContext";
+import { useConfig } from "@/context/ConfigContext";
 import styles from "./home.module.css";
 
 export default function HomePage() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const { visibleProducts } = useProducts();
+  const { config } = useConfig();
   const products = visibleProducts.filter((p) => !p.isDiscoverySet);
   const testPackage = visibleProducts.find((p) => p.isDiscoverySet);
   const featured = products.filter((p) => p.bestSeller).slice(0, 3);
   const fresh = products.slice(0, 4);
 
-  const cats = [
-    { label: t("home.forMen"), href: "/shop?category=Men", c: "#26302b" },
-    { label: t("home.forWomen"), href: "/shop?category=Women", c: "#7a4b52" },
-    { label: t("home.summer"), href: "/shop?category=Summer", c: "#3d5a6b" },
-    { label: t("home.winter"), href: "/shop?category=Winter", c: "#8f6a30" },
-  ];
+  const cats = (config.categories || []).map((c) => ({
+    label: lang === "ar" ? c.label : c.labelEn,
+    href: `/shop?category=${c.key}`,
+    c: c.color,
+    img: c.image ? normalizeImageUrl(c.image) : null,
+  }));
 
   return (
     <>
@@ -51,7 +53,11 @@ export default function HomePage() {
           <div className={styles.cats}>
             {cats.map((cat) => (
               <Link key={cat.href} href={cat.href} className={styles.cat} style={{ "--c": cat.c }}>
-                <span>{cat.label}</span>
+                {cat.img && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={cat.img} alt="" className={styles.catImg} />
+                )}
+                <span className={styles.catLabel}>{cat.label}</span>
                 <span className={styles.catArrow}>→</span>
               </Link>
             ))}

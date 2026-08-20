@@ -8,6 +8,7 @@ export const SECTION_LABELS = {
   shop: { en: "Shop Page", ar: "صفحة المتجر" },
   sort: { en: "Sorting Options", ar: "خيارات الترتيب" },
   product: { en: "Product Page", ar: "صفحة المنتج" },
+  discovery: { en: "Test Package (تيست باكيدچ)", ar: "التيست باكيدچ" },
   badge: { en: "Product Badges", ar: "شارات المنتج" },
   card: { en: "Product Cards", ar: "بطاقات المنتج" },
   g: { en: "Gender Labels", ar: "تصنيف النوع" },
@@ -35,7 +36,7 @@ export const SECTION_LABELS = {
 
 // Section display order (sections not listed appear after, except admin* which is hidden)
 export const SECTION_ORDER = [
-  "home", "nav", "common", "product", "card", "badge", "g", "s",
+  "home", "nav", "common", "product", "discovery", "card", "badge", "g", "s",
   "shop", "sort", "cart", "checkout", "pay",
   "auth", "account", "status",
   "about", "contact", "faq", "shipping", "return", "terms", "policy",

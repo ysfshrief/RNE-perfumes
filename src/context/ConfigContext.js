@@ -30,6 +30,14 @@ export const defaultConfig = {
     parallax: true,           // subtle parallax on hero
   },
 
+  // Homepage category cards (admin controls image + label per card)
+  categories: [
+    { id: "men", key: "Men", label: "رجالي", labelEn: "For Men", image: "/products/bleu-de-chanel.jpg", color: "#26302b" },
+    { id: "women", key: "Women", label: "حريمي", labelEn: "For Women", image: "/products/miss-dior.jpg", color: "#7a4b52" },
+    { id: "summer", key: "Summer", label: "صيفي", labelEn: "Summer", image: "/products/pacific-chill.jpg", color: "#3d5a6b" },
+    { id: "winter", key: "Winter", label: "شتوي", labelEn: "Winter", image: "/products/khamrah.jpg", color: "#8f6a30" },
+  ],
+
   // Discount coupons (admin-managed)
   coupons: [],
 

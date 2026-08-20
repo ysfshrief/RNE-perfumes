@@ -1,19 +1,19 @@
 /* Floating trigger */
 .trigger {
   position: fixed;
-  bottom: 90px;
-  right: 20px;
-  z-index: 90;
+  bottom: 92px;
+  right: 22px;
+  z-index: 91;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  width: 60px;
-  height: 60px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: var(--ink);
   color: var(--amber);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
   justify-content: center;
   transition: transform 0.2s;
   animation: pulse 2.5s ease-in-out infinite;

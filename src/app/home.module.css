@@ -70,19 +70,30 @@
   align-items: flex-end;
   justify-content: space-between;
   padding: 1.1rem 1.2rem;
-  color: var(--paper);
+  color: #fff;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.05rem;
   letter-spacing: 0.02em;
   transition: transform 0.3s;
 }
+.catImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  transition: transform 0.5s ease;
+}
+.cat:hover .catImg { transform: scale(1.08); }
 .cat::before {
   content: "";
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.35));
+  z-index: 1;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 55%, transparent) 0%, rgba(0,0,0,0.65) 100%);
 }
-.cat span { position: relative; }
+.catLabel, .catArrow { position: relative; z-index: 2; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
 .cat:hover { transform: translateY(-3px); }
 .catArrow { transition: transform 0.25s; }
 .cat:hover .catArrow { transform: translateX(4px); }
