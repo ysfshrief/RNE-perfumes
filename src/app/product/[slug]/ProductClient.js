@@ -14,21 +14,30 @@ import WhatsApp from "@/components/WhatsApp";
 import { useProducts } from "@/context/ProductContext";
 import styles from "./product.module.css";
 
-export default function ProductClient({ product: baseProduct }) {
+export default function ProductClient({ product: baseProduct, slug }) {
   const { dispatch, state } = useShop();
   const { t, lang } = useLang();
-  const { mergeProduct } = useProducts();
-  const product = mergeProduct(baseProduct);
-  const [sizeIdx, setSizeIdx] = useState(
-    product.sizes.findIndex((s) => s.stock > 0) === -1
-      ? 0
-      : product.sizes.findIndex((s) => s.stock > 0)
-  );
+  const { mergeProduct, allProducts, ready } = useProducts();
+  // Static product if it exists; otherwise find a custom product by slug from context.
+  // Slugs may be URL-encoded (Arabic names), so decode before comparing.
+  const decodedSlug = (() => { try { return decodeURIComponent(slug); } catch (e) { return slug; } })();
+  const resolved = baseProduct || allProducts.find((p) => p.slug === slug || p.slug === decodedSlug) || null;
+  const product = resolved ? mergeProduct(resolved) : null;
+
+  const [sizeIdx, setSizeIdx] = useState(0);
   const [qty, setQty] = useState(1);
   const [imgIdx, setImgIdx] = useState(0);
   const [added, setAdded] = useState(false);
 
-  const size = product.sizes[sizeIdx];
+  if (!product) {
+    return (
+      <div className="container" style={{ padding: "4rem 0", textAlign: "center" }}>
+        <p>{!ready ? "..." : (lang === "ar" ? "المنتج غير موجود" : "Product not found")}</p>
+      </div>
+    );
+  }
+
+  const size = product.sizes[sizeIdx] || product.sizes[0];
   const saved = state.wishlist.includes(product.id);
   const reviews = allReviews[product.id] || [];
   const related = products.filter((p) => p.id !== product.id && p.gender === product.gender).slice(0, 3);

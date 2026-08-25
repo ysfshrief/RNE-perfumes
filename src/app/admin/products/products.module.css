@@ -223,3 +223,48 @@ html[dir="rtl"] .switchOn .knob { transform: translateX(-18px); }
   .grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
   .drawer { max-width: 100%; }
 }
+
+/* Add product */
+.head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
+.addBtn {
+  background: var(--ink);
+  color: var(--white);
+  padding: 0.7rem 1.3rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.addBtn:hover { background: var(--burgundy); }
+.addForm {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1.4rem;
+  margin: 1rem 0 1.5rem;
+  background: var(--paper);
+}
+.addForm h3 { font-size: 1.05rem; margin-bottom: 1rem; }
+.addGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+.addGrid label { display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.8rem; font-weight: 500; color: var(--olive); }
+.addGrid label.full { grid-column: 1 / -1; }
+.addGrid input, .addGrid select, .addGrid textarea {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--ink);
+  font-family: inherit;
+}
+.addGrid input:focus, .addGrid select:focus, .addGrid textarea:focus { outline: none; border-color: var(--amber); }
+.addActions { display: flex; gap: 0.7rem; margin-top: 1.1rem; }
+.saveBtn { background: var(--ink); color: var(--white); padding: 0.7rem 1.4rem; border-radius: 8px; font-weight: 600; font-size: 0.88rem; }
+.saveBtn:hover { background: var(--burgundy); }
+.saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.cancelBtn { color: var(--olive); font-size: 0.88rem; padding: 0.7rem 1rem; }
+.addHint { font-size: 0.75rem; color: var(--olive); margin-top: 0.8rem; }
+.deleteLink { color: var(--danger); font-size: 0.85rem; font-weight: 600; }
+
+@media (max-width: 600px) {
+  .addGrid { grid-template-columns: 1fr; }
+}

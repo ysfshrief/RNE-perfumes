@@ -15,10 +15,10 @@
   --success: #4b6f4a;
 
   /* Type */
-  --font-display: "Syne", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
-  --font-ar: "Tajawal", system-ui, sans-serif;
-  --font-ar-display: "Almarai", "Tajawal", system-ui, sans-serif;
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Jost", system-ui, sans-serif;
+  --font-ar: "Rubik", "Cairo", system-ui, sans-serif;
+  --font-ar-display: "Cairo", "Rubik", system-ui, sans-serif;
 
   /* Layout */
   --max: 1240px;

@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import { getProductBySlug, products } from "@/data/products";
 import ProductClient from "./ProductClient";
 
@@ -11,8 +10,9 @@ export function generateMetadata({ params }) {
   return { title: p ? `${p.name} — RNE Perfumes` : "Product — RNE" };
 }
 
+// Note: custom (admin-added) products aren't in the static list, so we pass the
+// slug and let the client resolve the product from context (localStorage/Firestore).
 export default function ProductPage({ params }) {
-  const product = getProductBySlug(params.slug);
-  if (!product) notFound();
-  return <ProductClient product={product} />;
+  const staticProduct = getProductBySlug(params.slug) || null;
+  return <ProductClient product={staticProduct} slug={params.slug} />;
 }

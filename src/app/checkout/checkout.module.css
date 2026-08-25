@@ -133,3 +133,40 @@
 @media (max-width: 520px) {
   .grid2 { grid-template-columns: 1fr; }
 }
+
+/* Coupon */
+.couponBox { margin: 1rem 0; }
+.couponInput { display: flex; gap: 0.5rem; }
+.couponInput input {
+  flex: 1;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+.couponInput input:focus { outline: none; border-color: var(--amber); }
+.couponApply {
+  padding: 0.7rem 1.2rem;
+  background: var(--ink);
+  color: var(--white);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+.couponApply:hover { background: var(--burgundy); }
+.couponApplied {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.7rem 1rem;
+  background: #e4efe4;
+  color: var(--success);
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.couponRemove { color: var(--danger); font-size: 0.8rem; text-decoration: underline; }
+.couponError { color: var(--danger); font-size: 0.8rem; margin-top: 0.4rem; }
+.discountRow { color: var(--success); font-weight: 600; }

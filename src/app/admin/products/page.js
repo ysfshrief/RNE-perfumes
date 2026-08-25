@@ -10,13 +10,31 @@ import styles from "./products.module.css";
 
 export default function AdminProducts() {
   const { lang } = useLang();
-  const { allProducts, updateProduct, resetProduct, overrides } = useProducts();
+  const { allProducts, updateProduct, addProduct, deleteProduct, resetProduct, overrides } = useProducts();
   const [editingId, setEditingId] = useState(null);
   const [query, setQuery] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [newP, setNewP] = useState({ name: "", inspiredBy: "", tagline: "", description: "", gender: "Unisex", image: "", price: "", size: "50ml", stock: "10" });
   const ar = lang === "ar";
   const cur = ar ? "ج.م" : "EGP";
 
   const T = (a, e) => (ar ? a : e);
+
+  const createProduct = () => {
+    if (!newP.name || !newP.price) return;
+    const p = addProduct({
+      name: newP.name,
+      inspiredBy: newP.inspiredBy || null,
+      tagline: newP.tagline,
+      description: newP.description,
+      gender: newP.gender,
+      image: newP.image,
+      sizes: [{ size: newP.size || "50ml", price: Number(newP.price), oldPrice: null, stock: Number(newP.stock) || 10 }],
+    });
+    setAdding(false);
+    setNewP({ name: "", inspiredBy: "", tagline: "", description: "", gender: "Unisex", image: "", price: "", size: "50ml", stock: "10" });
+    setEditingId(p.id);
+  };
 
   const filtered = allProducts.filter((p) =>
     p.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -34,7 +52,52 @@ export default function AdminProducts() {
             {T(`${allProducts.length} منتج — اضغط على أي منتج لتعديله`, `${allProducts.length} products — tap any product to edit`)}
           </p>
         </div>
+        <button className={styles.addBtn} onClick={() => setAdding(true)}>+ {T("أضف منتج", "Add product")}</button>
       </div>
+
+      {adding && (
+        <div className={styles.addForm}>
+          <h3>{T("منتج جديد", "New product")}</h3>
+          <div className={styles.addGrid}>
+            <label>{T("اسم المنتج *", "Product name *")}
+              <input value={newP.name} onChange={(e) => setNewP({ ...newP, name: e.target.value })} placeholder={T("مثال: خمرة", "e.g. Khamrah")} />
+            </label>
+            <label>{T("مستوحى من", "Inspired by")}
+              <input value={newP.inspiredBy} onChange={(e) => setNewP({ ...newP, inspiredBy: e.target.value })} placeholder="Lattafa Khamrah" />
+            </label>
+            <label>{T("السعر *", "Price *")}
+              <input type="number" value={newP.price} onChange={(e) => setNewP({ ...newP, price: e.target.value })} placeholder="500" />
+            </label>
+            <label>{T("الحجم", "Size")}
+              <input value={newP.size} onChange={(e) => setNewP({ ...newP, size: e.target.value })} placeholder="50ml" />
+            </label>
+            <label>{T("المخزون", "Stock")}
+              <input type="number" value={newP.stock} onChange={(e) => setNewP({ ...newP, stock: e.target.value })} placeholder="10" />
+            </label>
+            <label>{T("النوع", "Gender")}
+              <select value={newP.gender} onChange={(e) => setNewP({ ...newP, gender: e.target.value })}>
+                <option value="Unisex">{T("للجنسين", "Unisex")}</option>
+                <option value="Men">{T("رجالي", "Men")}</option>
+                <option value="Women">{T("حريمي", "Women")}</option>
+              </select>
+            </label>
+            <label className={styles.full}>{T("رابط الصورة (Drive)", "Image link (Drive)")}
+              <input dir="ltr" value={newP.image} onChange={(e) => setNewP({ ...newP, image: e.target.value })} placeholder="https://drive.google.com/..." />
+            </label>
+            <label className={styles.full}>{T("وصف مختصر", "Short tagline")}
+              <input value={newP.tagline} onChange={(e) => setNewP({ ...newP, tagline: e.target.value })} />
+            </label>
+            <label className={styles.full}>{T("الوصف الكامل", "Full description")}
+              <textarea rows={3} value={newP.description} onChange={(e) => setNewP({ ...newP, description: e.target.value })} />
+            </label>
+          </div>
+          <div className={styles.addActions}>
+            <button className={styles.saveBtn} onClick={createProduct} disabled={!newP.name || !newP.price}>{T("حفظ المنتج", "Save product")}</button>
+            <button className={styles.cancelBtn} onClick={() => setAdding(false)}>{T("إلغاء", "Cancel")}</button>
+          </div>
+          <p className={styles.addHint}>{T("بعد الحفظ يمكنك تعديل باقي التفاصيل بالضغط على المنتج.", "After saving you can edit the rest by tapping the product.")}</p>
+        </div>
+      )}
 
       <input
         className={styles.search}
@@ -79,6 +142,7 @@ export default function AdminProducts() {
           onClose={() => setEditingId(null)}
           onSave={(patch) => updateProduct(editing.id, patch)}
           onReset={() => { resetProduct(editing.id); setEditingId(null); }}
+          onDelete={editing._custom ? () => { deleteProduct(editing.id); setEditingId(null); } : null}
           isEdited={!!overrides[editing.id]}
           T={T}
           ar={ar}
@@ -89,7 +153,7 @@ export default function AdminProducts() {
   );
 }
 
-function ProductEditor({ product, onClose, onSave, onReset, isEdited, T, ar, cur }) {
+function ProductEditor({ product, onClose, onSave, onReset, onDelete, isEdited, T, ar, cur }) {
   const [form, setForm] = useState({
     name: product.name,
     nameAr: productAr[product.id]?.name || "",
@@ -238,7 +302,12 @@ function ProductEditor({ product, onClose, onSave, onReset, isEdited, T, ar, cur
         </div>
 
         <div className={styles.drawerFoot}>
-          {isEdited && (
+          {onDelete && (
+            <button className={styles.deleteLink} onClick={() => { if (confirm(T("متأكد من حذف المنتج؟", "Delete this product?"))) onDelete(); }}>
+              {T("🗑 حذف المنتج", "🗑 Delete product")}
+            </button>
+          )}
+          {isEdited && !onDelete && (
             <button className={styles.resetLink} onClick={onReset}>
               {T("استرجاع الأصل", "Reset to default")}
             </button>

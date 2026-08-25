@@ -143,3 +143,6 @@ html[dir="rtl"] .badges { left: auto; right: 12px; }
   html[dir="rtl"] .wish { left: 10px; }
   html[dir="rtl"] .badges { right: 10px; }
 }
+
+.priceWrap { display: inline-flex; align-items: baseline; gap: 0.3rem; }
+.fromLabel { font-size: 0.68rem; color: var(--olive); font-weight: 500; }

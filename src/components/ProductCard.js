@@ -57,7 +57,10 @@ export default function ProductCard({ product }) {
         )}
         <p className={styles.tag}>{pTagline(product, lang)}</p>
         <div className={styles.foot}>
-          <span className="price">{minPrice} {t("common.currency")}</span>
+          <span className={styles.priceWrap}>
+            {product.sizes.length > 1 && <span className={styles.fromLabel}>{t("product.from")}</span>}
+            <span className="price">{minPrice} {t("common.currency")}</span>
+          </span>
           <Link href={`/product/${product.slug}`} className={styles.view}>{t("common.view")}</Link>
         </div>
       </div>

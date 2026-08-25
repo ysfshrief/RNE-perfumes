@@ -3,21 +3,34 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { isFirebaseEnabled, auth } from "@/lib/firebase";
 
-// Wires Firebase Authentication. Tracks the signed-in user and whether they
-// hold the `admin` custom claim (set via scripts/setAdmin.mjs). When Firebase
-// isn't configured, it falls back to a local mock so the prototype still works.
+// Firebase Authentication — rewritten for reliability.
+// - Email/Password sign in + register
+// - Google sign-in: tries popup, falls back to redirect on COOP/popup issues
+// - Detects the `admin` custom claim
+// - Falls back to a local mock when Firebase isn't configured
 
 const AuthContext = createContext(null);
 
+// Human-friendly error messages (Arabic + English handled in the UI layer via codes)
+export const AUTH_ERRORS = {
+  "auth/invalid-credential": { ar: "الإيميل أو كلمة المرور غير صحيحة", en: "Wrong email or password" },
+  "auth/wrong-password": { ar: "كلمة المرور غير صحيحة", en: "Wrong password" },
+  "auth/user-not-found": { ar: "لا يوجد حساب بهذا الإيميل", en: "No account with this email" },
+  "auth/email-already-in-use": { ar: "الإيميل مسجّل بالفعل — سجّل الدخول", en: "Email already registered — sign in" },
+  "auth/weak-password": { ar: "كلمة المرور قصيرة (٦ أحرف على الأقل)", en: "Password too short (min 6)" },
+  "auth/invalid-email": { ar: "صيغة الإيميل غير صحيحة", en: "Invalid email format" },
+  "auth/network-request-failed": { ar: "مشكلة في الاتصال بالإنترنت", en: "Network error" },
+  "auth/too-many-requests": { ar: "محاولات كثيرة — انتظر قليلاً", en: "Too many attempts — wait a bit" },
+  "auth/popup-closed-by-user": { ar: "تم إغلاق نافذة جوجل", en: "Google window closed" },
+};
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);      // { uid, email, name }
+  const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [ready, setReady] = useState(false);
 
-  // Subscribe to Firebase auth state
   useEffect(() => {
     if (!isFirebaseEnabled || !auth) {
-      // Fallback: restore mock user from localStorage
       try {
         const saved = localStorage.getItem("rne-user");
         if (saved) setUser(JSON.parse(saved));
@@ -28,14 +41,26 @@ export function AuthProvider({ children }) {
 
     let unsub = () => {};
     (async () => {
-      const { onAuthStateChanged, getRedirectResult } = await import("firebase/auth");
+      const {
+        onAuthStateChanged,
+        getRedirectResult,
+        setPersistence,
+        browserLocalPersistence,
+      } = await import("firebase/auth");
+
+      // Keep the user logged in across sessions
+      try { await setPersistence(auth, browserLocalPersistence); } catch (e) {}
+
       // Complete any pending Google redirect sign-in
       try { await getRedirectResult(auth); } catch (e) {}
+
       unsub = onAuthStateChanged(auth, async (fbUser) => {
         if (fbUser) {
-          // Read the custom claims to detect admin
-          const tokenResult = await fbUser.getIdTokenResult();
-          const admin = tokenResult.claims.admin === true;
+          let admin = false;
+          try {
+            const tokenResult = await fbUser.getIdTokenResult();
+            admin = tokenResult.claims.admin === true;
+          } catch (e) {}
           setUser({
             uid: fbUser.uid,
             email: fbUser.email,
@@ -52,10 +77,10 @@ export function AuthProvider({ children }) {
     return () => unsub();
   }, []);
 
-  // Sign in with email/password
+  // ---- Email / Password sign in ----
   const signIn = useCallback(async (email, password) => {
+    email = (email || "").trim();
     if (!isFirebaseEnabled || !auth) {
-      // mock
       const mockUser = { uid: "local", email, name: email.split("@")[0] };
       setUser(mockUser);
       try { localStorage.setItem("rne-user", JSON.stringify(mockUser)); } catch (e) {}
@@ -66,12 +91,13 @@ export function AuthProvider({ children }) {
       await signInWithEmailAndPassword(auth, email, password);
       return { ok: true };
     } catch (e) {
-      return { ok: false, error: e.code || e.message };
+      return { ok: false, code: e.code, error: e.code };
     }
   }, []);
 
-  // Register with email/password
+  // ---- Register ----
   const register = useCallback(async (email, password, name) => {
+    email = (email || "").trim();
     if (!isFirebaseEnabled || !auth) {
       const mockUser = { uid: "local", email, name: name || email.split("@")[0] };
       setUser(mockUser);
@@ -81,14 +107,14 @@ export function AuthProvider({ children }) {
     try {
       const { createUserWithEmailAndPassword, updateProfile } = await import("firebase/auth");
       const cred = await createUserWithEmailAndPassword(auth, email, password);
-      if (name) await updateProfile(cred.user, { displayName: name });
+      if (name) { try { await updateProfile(cred.user, { displayName: name }); } catch (e) {} }
       return { ok: true };
     } catch (e) {
-      return { ok: false, error: e.code || e.message };
+      return { ok: false, code: e.code, error: e.code };
     }
   }, []);
 
-  // Sign in with Google (popup, with redirect fallback for COOP-restricted browsers)
+  // ---- Google sign-in (popup → redirect fallback) ----
   const signInWithGoogle = useCallback(async () => {
     if (!isFirebaseEnabled || !auth) {
       const mockUser = { uid: "local", email: "google@user.com", name: "Google User" };
@@ -96,31 +122,34 @@ export function AuthProvider({ children }) {
       try { localStorage.setItem("rne-user", JSON.stringify(mockUser)); } catch (e) {}
       return { ok: true };
     }
+    const { GoogleAuthProvider, signInWithPopup, signInWithRedirect } = await import("firebase/auth");
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    // Try popup first
     try {
-      const { GoogleAuthProvider, signInWithPopup, signInWithRedirect } = await import("firebase/auth");
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: "select_account" });
-      try {
-        await signInWithPopup(auth, provider);
-        return { ok: true };
-      } catch (popupErr) {
-        // Popup blocked or closed by browser security (COOP) → fall back to redirect
-        if (
-          popupErr.code === "auth/popup-blocked" ||
-          popupErr.code === "auth/cancelled-popup-request" ||
-          popupErr.code === "auth/popup-closed-by-user" ||
-          (popupErr.message && popupErr.message.includes("Cross-Origin"))
-        ) {
+      await signInWithPopup(auth, provider);
+      return { ok: true };
+    } catch (popupErr) {
+      // COOP / popup-blocked / closed → use redirect (most reliable)
+      const fallbackCodes = [
+        "auth/popup-blocked",
+        "auth/cancelled-popup-request",
+        "auth/popup-closed-by-user",
+        "auth/internal-error",
+      ];
+      if (fallbackCodes.includes(popupErr.code) || (popupErr.message || "").includes("Cross-Origin")) {
+        try {
           await signInWithRedirect(auth, provider);
           return { ok: true, redirecting: true };
+        } catch (redirErr) {
+          return { ok: false, code: redirErr.code, error: redirErr.code };
         }
-        throw popupErr;
       }
-    } catch (e) {
-      return { ok: false, error: e.code || e.message };
+      return { ok: false, code: popupErr.code, error: popupErr.code };
     }
   }, []);
 
+  // ---- Sign out ----
   const signOut = useCallback(async () => {
     if (!isFirebaseEnabled || !auth) {
       setUser(null);
@@ -128,7 +157,7 @@ export function AuthProvider({ children }) {
       return;
     }
     const { signOut: fbSignOut } = await import("firebase/auth");
-    await fbSignOut(auth);
+    try { await fbSignOut(auth); } catch (e) {}
   }, []);
 
   return (

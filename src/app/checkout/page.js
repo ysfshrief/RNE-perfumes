@@ -43,6 +43,36 @@ export default function CheckoutPage() {
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const valid = form.name && form.phone && form.governorate && form.city && form.address && form.email;
 
+  // ---- Coupon / discount logic ----
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState("");
+
+  const applyCoupon = () => {
+    setCouponError("");
+    const code = couponInput.trim().toUpperCase();
+    if (!code) return;
+    const coupons = config.coupons || [];
+    const found = coupons.find((c) => c.code.toUpperCase() === code && c.active !== false);
+    if (!found) {
+      setAppliedCoupon(null);
+      setCouponError(lang === "ar" ? "الكود غير صحيح أو منتهي" : "Invalid or expired code");
+      return;
+    }
+    setAppliedCoupon(found);
+  };
+
+  const removeCoupon = () => { setAppliedCoupon(null); setCouponInput(""); setCouponError(""); };
+
+  // Calculate discount amount
+  let discount = 0;
+  if (appliedCoupon) {
+    const val = parseFloat(String(appliedCoupon.value).replace(/[^0-9.]/g, "")) || 0;
+    if (appliedCoupon.type === "percent") discount = Math.round((cartTotal * val) / 100);
+    else discount = Math.min(val, cartTotal);
+  }
+  const finalTotal = Math.max(0, cartTotal - discount);
+
   const placeOrder = async () => {
     if (!valid) return;
     // Build the order record
@@ -64,7 +94,10 @@ export default function CheckoutPage() {
         qty: it.qty,
         selectedScents: it.product._selectedScents || null,
       })),
-      total: cartTotal,
+      total: finalTotal,
+      subtotal: cartTotal,
+      discount: discount,
+      coupon: appliedCoupon ? appliedCoupon.code : null,
       payment: pay,
       note: form.note || "",
     };
@@ -172,9 +205,37 @@ export default function CheckoutPage() {
           <div className={styles.totals}>
             <div><span>{t("cart.subtotal")}</span><span>{cartTotal} {cur}</span></div>
             <div><span>{t("cart.shipping")}</span><span>{t("checkout.shippingTbd")}</span></div>
+            {discount > 0 && (
+              <div className={styles.discountRow}>
+                <span>{t("checkout.discount")} ({appliedCoupon.code})</span>
+                <span>− {discount} {cur}</span>
+              </div>
+            )}
           </div>
+
+          {/* Coupon code */}
+          <div className={styles.couponBox}>
+            {appliedCoupon ? (
+              <div className={styles.couponApplied}>
+                <span>✓ {appliedCoupon.code} {t("checkout.couponApplied")}</span>
+                <button type="button" onClick={removeCoupon} className={styles.couponRemove}>{t("checkout.remove")}</button>
+              </div>
+            ) : (
+              <div className={styles.couponInput}>
+                <input
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value)}
+                  placeholder={t("checkout.couponPlaceholder")}
+                  dir="ltr"
+                />
+                <button type="button" onClick={applyCoupon} className={styles.couponApply}>{t("checkout.apply")}</button>
+              </div>
+            )}
+            {couponError && <p className={styles.couponError}>{couponError}</p>}
+          </div>
+
           <div className={styles.total}>
-            <span>{t("cart.total")}</span><span>{cartTotal} {cur}</span>
+            <span>{t("cart.total")}</span><span>{finalTotal} {cur}</span>
           </div>
           <button className="btn btn--solid btn--full" onClick={placeOrder} disabled={!valid}>
             {t("checkout.placeOrder")}

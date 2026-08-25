@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useShop } from "@/context/ShopContext";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth, AUTH_ERRORS } from "@/context/AuthContext";
 import { useLang } from "@/context/LangContext";
 import styles from "../auth.module.css";
 
@@ -40,7 +40,8 @@ export default function RegisterPage() {
       dispatch({ type: "LOGIN", payload: { name: form.name, email: form.email, ...form } });
       router.push("/account");
     } else {
-      setError(res.error || t("auth.registerFailed"));
+      const msg = AUTH_ERRORS[res.code];
+      setError(msg ? (msg[lang] || msg.en) : t("auth.registerFailed"));
     }
   };
 

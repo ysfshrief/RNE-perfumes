@@ -63,12 +63,64 @@ export function ProductProvider({ children }) {
     return [...pinned, ...rest];
   };
 
-  const allProducts = sortPinned(baseProducts.map(mergeProduct));
+  // Custom products added by the admin live under a reserved key `__custom__`
+  // as an array, so they persist alongside the overrides for built-in products.
+  const customProducts = Array.isArray(overrides.__custom__) ? overrides.__custom__ : [];
+
+  const allBase = [...baseProducts, ...customProducts];
+  const allProducts = sortPinned(allBase.map(mergeProduct));
   const visibleProducts = sortPinned(allProducts.filter((p) => !p.hidden));
 
   const updateProduct = useCallback((id, patch) => {
+    // If it's a custom product, patch it inside the array
+    if (Array.isArray(overrides.__custom__) && overrides.__custom__.some((p) => p.id === id)) {
+      const nextCustom = overrides.__custom__.map((p) => (p.id === id ? { ...p, ...patch } : p));
+      persist({ ...overrides, __custom__: nextCustom });
+      return;
+    }
     const next = { ...overrides, [id]: { ...(overrides[id] || {}), ...patch } };
     persist(next);
+  }, [overrides, persist]);
+
+  const addProduct = useCallback((product) => {
+    const id = `custom_${Date.now()}`;
+    // Build an ASCII-safe slug; if the name has no Latin chars (e.g. Arabic),
+    // fall back to the id so URLs stay clean and encodable.
+    let slug = (product.slug || product.name || "")
+      .toLowerCase().trim()
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    if (!slug) slug = id;
+    const newProduct = {
+      id,
+      slug,
+      name: product.name || "New Product",
+      inspiredBy: product.inspiredBy || null,
+      tagline: product.tagline || "",
+      description: product.description || "",
+      gender: product.gender || "Unisex",
+      season: product.season || ["Summer"],
+      notes: { top: [], heart: [], base: [] },
+      ingredients: "",
+      sizes: product.sizes || [{ size: "50ml", price: 500, oldPrice: null, stock: 10 }],
+      rating: 5,
+      reviewCount: 0,
+      bestSeller: false,
+      image: product.image || "",
+      images: product.image ? [product.image] : [],
+      _custom: true,
+    };
+    const nextCustom = [...customProducts, newProduct];
+    persist({ ...overrides, __custom__: nextCustom });
+    return newProduct;
+  }, [overrides, customProducts, persist]);
+
+  const deleteProduct = useCallback((id) => {
+    if (Array.isArray(overrides.__custom__)) {
+      const nextCustom = overrides.__custom__.filter((p) => p.id !== id);
+      const next = { ...overrides, __custom__: nextCustom };
+      delete next[id];
+      persist(next);
+    }
   }, [overrides, persist]);
 
   const resetProduct = useCallback((id) => {
@@ -83,7 +135,7 @@ export function ProductProvider({ children }) {
 
   return (
     <ProductContext.Provider
-      value={{ ready, overrides, allProducts, visibleProducts, mergeProduct, updateProduct, resetProduct, resetAll, baseProducts, productAr }}
+      value={{ ready, overrides, allProducts, visibleProducts, mergeProduct, updateProduct, addProduct, deleteProduct, resetProduct, resetAll, baseProducts, productAr }}
     >
       {children}
     </ProductContext.Provider>

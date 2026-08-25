@@ -56,3 +56,33 @@
 @media (max-width: 760px) {
   .layout { grid-template-columns: 1fr; }
 }
+
+.socialItem { margin-top: 0.5rem; }
+.socialItem h3 {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--olive);
+  margin-bottom: 0.7rem;
+}
+.socialRow { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.socialBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink);
+  transition: all 0.2s;
+}
+.socialBtn:hover {
+  background: var(--burgundy);
+  border-color: var(--burgundy);
+  color: #fff;
+  transform: translateY(-2px);
+}
