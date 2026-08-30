@@ -2,16 +2,15 @@
   display: grid;
   grid-template-columns: 240px 1fr;
   min-height: 100vh;
-  background: #f2f0eb;
+  background: var(--bg);
 }
 
 /* Sidebar */
 .sidebar {
-  background: var(--ink);
-  color: var(--paper);
+  background: #16130F;
+  color: var(--ink);
   display: flex;
   flex-direction: column;
-  padding: 1.4rem 1rem;
   position: sticky;
   top: 0;
   height: 100vh;
@@ -28,7 +27,7 @@
   font-size: 0.62rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--amber);
+  color: var(--accent-text);
   margin-top: 0.2rem;
 }
 .nav { display: flex; flex-direction: column; gap: 0.2rem; flex: 1; }
@@ -41,23 +40,23 @@
   font-family: var(--font-display);
   font-size: 0.85rem;
   font-weight: 600;
-  color: rgba(247, 245, 241, 0.65);
+  color: var(--ink-dim);
   transition: background 0.2s, color 0.2s;
 }
-.navLink:hover { background: rgba(247, 245, 241, 0.08); color: var(--paper); }
-.navActive { background: var(--amber); color: var(--ink); }
-.navActive:hover { background: var(--amber); color: var(--ink); }
+.navLink:hover { background: rgba(255,255,255,0.07); color: var(--ink); }
+.navActive { background: var(--amber); color: var(--pure-white); }
+.navActive:hover { background: var(--amber); color: var(--pure-white); }
 .navIcon { width: 18px; text-align: center; font-size: 0.9rem; }
 
 .backToSite {
   font-family: var(--font-display);
   font-size: 0.78rem;
   font-weight: 600;
-  color: rgba(247, 245, 241, 0.5);
+  color: var(--ink-faint);
   padding: 0.8rem;
   transition: color 0.2s;
 }
-.backToSite:hover { color: var(--paper); }
+.backToSite:hover { color: var(--ink); }
 
 /* Content */
 .content { display: flex; flex-direction: column; min-width: 0; }
@@ -75,12 +74,12 @@
 }
 .menuBtn { display: none; font-size: 1.4rem; }
 .topbarRight { display: flex; align-items: center; gap: 0.9rem; margin-left: auto; }
-.adminName { font-size: 0.85rem; color: var(--ink-soft); font-weight: 500; }
+.adminName { font-size: 0.85rem; color: var(--ink-dim); font-weight: 500; }
 .avatar {
   width: 34px; height: 34px;
   border-radius: 999px;
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--bg-2);
+  color: var(--ink);
   display: grid;
   place-items: center;
   font-family: var(--font-display);
@@ -120,11 +119,11 @@
   letter-spacing: 0.1em;
   color: var(--olive);
   border-bottom: 1px solid var(--line);
-  background: #faf9f6;
+  background: rgba(255,255,255,0.04);
 }
 .table td { padding: 0.9rem 1.1rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
 .table tr:last-child td { border-bottom: none; }
-.table tbody tr:hover { background: #faf9f6; }
+.table tbody tr:hover { background: rgba(255,255,255,0.04); }
 
 .pill {
   display: inline-block;
@@ -137,19 +136,31 @@
 }
 
 .btnSm {
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-fg);
+  border: 1px solid var(--btn-secondary-border);
+  backdrop-filter: var(--btn-blur);
+  -webkit-backdrop-filter: var(--btn-blur);
+
   font-family: var(--font-display);
   font-size: 0.72rem;
   font-weight: 600;
   padding: 0.4rem 0.8rem;
   border-radius: var(--radius);
-  border: 1px solid var(--line);
   transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 .btnSm:hover { border-color: var(--ink); }
-.btnSmSolid { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.btnSmSolid:hover { background: var(--amber-deep); border-color: var(--amber-deep); }
+.btnSmSolid {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  border: 1px solid var(--btn-primary-border);
+  box-shadow: var(--btn-shadow), var(--btn-inner);
+  backdrop-filter: var(--btn-blur);
+  -webkit-backdrop-filter: var(--btn-blur);
+ background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
+.btnSmSolid:hover { background: var(--burgundy); border-color: var(--burgundy); color: #fff; }
 .btnSmDanger { color: var(--danger); border-color: transparent; }
-.btnSmDanger:hover { background: #f7e7e4; border-color: transparent; }
+.btnSmDanger:hover { background: rgba(196,83,63,0.18); border-color: transparent; }
 
 .rowActions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
 

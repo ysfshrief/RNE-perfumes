@@ -5,19 +5,35 @@ import { normalizeImageUrl } from "@/context/ProductContext";
 
 // Renders a real product photo when `image` is a URL,
 // otherwise an elegant placeholder "bottle" using the color.
-export default function ProductImage({ product, index = 0, className = "", showLabel = true }) {
+export default function ProductImage({ product, index = 0, className = "", showLabel = true, fit }) {
   const raw = product.images?.[index] ?? product.image;
   const val = isPhoto(raw) ? normalizeImageUrl(raw) : raw;
-  const alt = product.name;
+  // Isolated bottle renders should never be cropped; campaign/scene imagery may
+  // fill the frame. Products can opt in via `imageFit: "cover"`.
+  const resolvedFit = fit || product.imageFit || "contain";
+  const alt = product.inspiredBy
+    ? `${product.name} — inspired by ${product.inspiredBy}`
+    : product.name;
 
   if (isPhoto(val)) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={val} alt={alt} className={className} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} draggable={false} />;
+    return (
+      <img
+        src={val}
+        alt={alt}
+        className={className}
+        data-fit={resolvedFit}
+        loading="lazy"
+        decoding="async"
+        style={{ width: "100%", height: "100%", objectFit: resolvedFit, display: "block" }}
+        draggable={false}
+      />
+    );
   }
 
   // Placeholder bottle
   return (
-    <div className={className} style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", background: "linear-gradient(160deg, #f3f0ea 0%, #e6e0d4 100%)" }}>
+    <div className={className} style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", background: "linear-gradient(160deg, #1a1a1e 0%, #0c0c0e 100%)" }}>
       <div style={{ position: "relative", width: "40%", aspectRatio: "0.62 / 1", display: "flex", flexDirection: "column", alignItems: "center" }}>
         {/* cap */}
         <div style={{ width: "34%", height: "16%", background: "#15130f", borderRadius: "2px 2px 0 0" }} />

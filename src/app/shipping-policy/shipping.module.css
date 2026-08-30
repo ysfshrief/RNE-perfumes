@@ -23,7 +23,7 @@
 }
 .socialBtn:hover {
   background: var(--burgundy);
-  border-color: var(--burgundy);
+  border-color: var(--accent-text);
   color: #fff;
   transform: translateY(-2px);
 }

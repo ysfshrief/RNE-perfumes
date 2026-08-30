@@ -16,8 +16,10 @@
   font-size: 0.88rem;
   background: var(--paper);
 }
-.field input:focus, .field select:focus { outline: none; border-color: var(--amber); }
+.field input:focus, .field select:focus { outline: none; border-color: var(--accent-text); }
 
 @media (max-width: 800px) {
   .layout { grid-template-columns: 1fr; }
 }
+
+.limits { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.74rem; color: var(--ink-dim); }

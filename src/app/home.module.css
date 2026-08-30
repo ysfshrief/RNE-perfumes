@@ -13,7 +13,7 @@
   letter-spacing: 0.34em;
   font-size: 0.72rem;
   font-weight: 600;
-  color: var(--amber-deep);
+  color: var(--accent-text);
   margin-bottom: 1.5rem;
 }
 .heroTitle {
@@ -24,7 +24,7 @@
 .heroTitle em {
   font-style: italic;
   font-weight: 700;
-  color: var(--amber-deep);
+  color: var(--accent-text);
 }
 .heroLead {
   margin-top: 1.8rem;
@@ -108,12 +108,17 @@
 }
 .sectionTitle { font-size: clamp(1.8rem, 4vw, 2.6rem); margin-top: 0.5rem; }
 .seeAll {
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-fg);
+  border: 1px solid var(--btn-secondary-border);
+  backdrop-filter: var(--btn-blur);
+  -webkit-backdrop-filter: var(--btn-blur);
+
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 0.82rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--amber-deep);
   white-space: nowrap;
 }
 
@@ -131,8 +136,11 @@
 /* Editorial */
 .editorial {
   background: var(--ink);
-  color: var(--paper);
+  color: var(--on-ink);
   padding-block: clamp(4rem, 8vw, 6rem);
+  /* This band inverts the page, so the accent needs a lighter tint to stay
+     readable — brand burgundy is only ~2:1 on charcoal. */
+  --accent-text: #E39AA6;
 }
 .editorialInner { display: grid; grid-template-columns: 1fr 1.4fr; gap: 3rem; align-items: start; }
 .editEyebrow {
@@ -141,7 +149,7 @@
   letter-spacing: 0.3em;
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--amber);
+  color: var(--accent-text);
   margin-bottom: 1.2rem;
 }
 .editTitle { font-size: clamp(1.8rem, 3.6vw, 2.8rem); }
@@ -151,11 +159,11 @@
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 0.85rem;
-  color: var(--amber);
+  color: var(--accent-text);
   letter-spacing: 0.1em;
 }
 .editItem h4 { margin: 0.7rem 0 0.5rem; font-size: 1.05rem; }
-.editItem p { color: rgba(247,245,241,0.6); font-size: 0.9rem; line-height: 1.65; }
+.editItem p { color: rgba(250,248,245,0.78); font-size: 0.9rem; line-height: 1.65; }
 
 @media (max-width: 960px) {
   .grid, .grid4 { grid-template-columns: repeat(2, 1fr); }

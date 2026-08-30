@@ -16,9 +16,9 @@
 }
 .learn:hover {
   background: var(--ink);
-  color: var(--paper);
+  color: var(--on-ink);
   border-color: var(--ink);
 }
 .learn:active { transform: translateY(1px); }
-.icon { display: inline-flex; color: var(--amber-deep); transition: color 0.2s; }
-.learn:hover .icon { color: var(--amber); }
+.icon { display: inline-flex; color: var(--accent-text); transition: color 0.2s; }
+.learn:hover .icon { color: var(--accent-text); }

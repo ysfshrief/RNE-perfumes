@@ -8,16 +8,37 @@ import { writeDoc, subscribeDoc } from "@/lib/store";
 // production this comes from the backend.
 
 export const defaultConfig = {
-  // Site color theme (admin-editable)
+  // Cinematic hero — media is admin-configurable (Drive links supported via
+  // normalizeImageUrl). Copy lives in the content/translation system so it
+  // stays editable per language.
+  hero: {
+    image: "/products/hero.jpg",   // poster / still
+    video: "",                     // optional Drive or direct video URL
+    productSlug: "",               // optional: pin a product's price + notes to the hero
+  },
+
+  // Auth screens (login / register) background — Drive link supported
+  authBackground: {
+    image: "/products/hero.jpg",
+  },
+
+  // Brand story block
+  brandStory: {
+    image: "/products/silver-mountain-alt.jpg",
+    video: "",
+  },
+
+  // Site colour theme (admin-editable). These are now DARK-theme semantics:
+  // `ink` is the primary text colour on dark surfaces, `paper` the page bg.
   colors: {
-    ink: "#0a0a0a",
-    paper: "#fafaf8",
+    ink: "#16130F",          // primary text on the light ivory system
+    paper: "#FAF8F5",        // page background
     accent: "#8B1A2B",       // burgundy — the main accent color
     accentDeep: "#6e1422",
-    olive: "#8a8880",
-    line: "#e0ddd6",
-    success: "#4b6f4a",
-    danger: "#a23b2d",
+    olive: "#5C5650",
+    line: "rgba(22,19,15,0.10)",
+    success: "#3F6B45",
+    danger: "#A8392A",
   },
 
   // Visual effects toggle
@@ -43,12 +64,12 @@ export const defaultConfig = {
 
   // Payment methods (admin can enable/disable each)
   payments: {
-    cod: true,
-    card: true,
-    instapay: true,
-    vodafone: true,
-    orange: true,
-    etisalat: true,
+    cod: true,        // default — always available
+    card: false,
+    instapay: false,
+    vodafone: false,
+    orange: false,
+    etisalat: false,
   },
 
   // Advertising slider (Noon-style hero carousel)
@@ -78,12 +99,59 @@ export const defaultConfig = {
 
 const ConfigContext = createContext(null);
 
+/**
+ * Deep-merge saved settings over the defaults.
+ *
+ * A shallow spread replaced whole objects and arrays, so a config saved before
+ * a field existed (e.g. an ad slide without `titleEn`) rendered blank instead
+ * of falling back. Slides are merged per-id against their default.
+ */
+function mergeConfig(base, saved) {
+  if (!saved || typeof saved !== "object") return base;
+  const out = { ...base };
+
+  for (const key of Object.keys(base)) {
+    const b = base[key];
+    const v = saved[key];
+    if (v === undefined || v === null) continue;
+
+    if (Array.isArray(b)) {
+      if (!Array.isArray(v)) continue;
+      // Fill each saved entry's gaps from the matching default entry.
+      out[key] = v.map((item, i) => {
+        const fallback = b.find((d) => d && item && d.id === item.id) || b[i] || {};
+        if (!item || typeof item !== "object") return item;
+        // Drop empty values so they fall back to the default instead of
+        // rendering as a blank slide.
+        const cleaned = Object.fromEntries(
+          Object.entries(item).filter(([, val]) => val !== "" && val !== null && val !== undefined),
+        );
+        return { ...fallback, ...cleaned };
+      });
+      // Keep defaults the saved copy never had (e.g. a newly added slide).
+      if (b.length > v.length && key === "adSlides") {
+        out[key] = [...out[key], ...b.slice(v.length)];
+      }
+    } else if (b && typeof b === "object") {
+      out[key] = { ...b, ...(typeof v === "object" ? v : {}) };
+    } else {
+      out[key] = v;
+    }
+  }
+
+  // Preserve any keys the saved config has that defaults don't know about.
+  for (const key of Object.keys(saved)) {
+    if (!(key in out)) out[key] = saved[key];
+  }
+  return out;
+}
+
 export function ConfigProvider({ children }) {
   const [config, setConfig] = useState(defaultConfig);
 
   useEffect(() => {
     const unsub = subscribeDoc("config", defaultConfig, (data) => {
-      setConfig({ ...defaultConfig, ...(data || {}) });
+      setConfig(mergeConfig(defaultConfig, data));
     });
     return unsub;
   }, []);

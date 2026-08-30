@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useReducer } from "react";
+import { createContext, useContext, useEffect, useReducer, useRef } from "react";
 
 const ShopContext = createContext(null);
 
@@ -66,6 +66,7 @@ function reducer(state, action) {
 
 export function ShopProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const hydrated = useRef(false);
 
   // Hydrate from localStorage on mount
   useEffect(() => {
@@ -73,10 +74,14 @@ export function ShopProvider({ children }) {
       const saved = localStorage.getItem("rne-shop");
       if (saved) dispatch({ type: "HYDRATE", payload: JSON.parse(saved) });
     } catch (e) {}
+    hydrated.current = true;
   }, []);
 
-  // Persist on change
+  // Persist on change — but never before hydration. The persist effect also
+  // runs on the first render, and without this guard it wrote the empty
+  // initial state over a saved cart/session before it had been read back.
   useEffect(() => {
+    if (!hydrated.current) return;
     try {
       localStorage.setItem("rne-shop", JSON.stringify(state));
     } catch (e) {}

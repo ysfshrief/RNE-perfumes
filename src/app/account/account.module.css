@@ -40,7 +40,7 @@
   transition: color 0.2s, border-color 0.2s;
 }
 .tab:hover { color: var(--ink); }
-.tabOn { color: var(--ink); border-bottom-color: var(--amber); }
+.tabOn { color: var(--ink); border-bottom-color: var(--accent-text); }
 
 .panel { padding-block: 2rem 4rem; }
 
@@ -58,7 +58,7 @@
 .orderTop strong { font-family: var(--font-display); font-size: 1rem; }
 .orderDate { display: block; font-size: 0.78rem; color: var(--olive); margin-top: 0.2rem; }
 .status { font-family: var(--font-display); font-weight: 600; font-size: 0.82rem; }
-.orderItems { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.88rem; color: var(--ink-soft); }
+.orderItems { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.88rem; color: var(--ink-dim); }
 .orderFoot {
   display: flex;
   justify-content: space-between;
@@ -68,12 +68,18 @@
 }
 .orderTotal { font-family: var(--font-display); font-weight: 700; }
 .orderBtn {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  border: 1px solid var(--btn-primary-border);
+  box-shadow: var(--btn-shadow), var(--btn-inner);
+  backdrop-filter: var(--btn-blur);
+  -webkit-backdrop-filter: var(--btn-blur);
+
   font-family: var(--font-display);
   font-size: 0.78rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--amber-deep);
 }
 
 .profile { max-width: 520px; display: flex; flex-direction: column; gap: 0.2rem; }
@@ -102,9 +108,23 @@
   border-radius: var(--radius);
 }
 .address strong { font-family: var(--font-display); }
-.address p { margin-top: 0.5rem; color: var(--ink-soft); font-size: 0.9rem; }
+.address p { margin-top: 0.5rem; color: var(--ink-dim); font-size: 0.9rem; }
 .noneYet { color: var(--olive); }
 
 @media (max-width: 720px) {
   .orders { grid-template-columns: 1fr; }
 }
+
+.emptyOrders { padding: 2rem 0; text-align: center; color: var(--ink-faint); font-size: 0.9rem; }
+.orderDetail {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.86rem;
+}
+.detailRow { display: flex; justify-content: space-between; color: var(--ink-dim); }
+.detailTotal { font-weight: 700; color: var(--ink); padding-top: 0.4rem; border-top: 1px solid var(--line); }
+.detailAddress { margin-top: 0.4rem; color: var(--ink-faint); font-size: 0.82rem; }

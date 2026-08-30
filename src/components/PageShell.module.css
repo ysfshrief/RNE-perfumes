@@ -14,4 +14,4 @@
 .body :global(h3) { font-size: 1.15rem; margin: 1.5rem 0 0.6rem; }
 .body :global(p) { color: var(--ink-soft); line-height: 1.8; margin-bottom: 1rem; }
 .body :global(ul) { margin: 0 0 1.2rem 1.2rem; color: var(--ink-soft); line-height: 1.8; }
-.body :global(a) { color: var(--amber-deep); text-decoration: underline; }
+.body :global(a) { color: var(--accent-text); text-decoration: underline; }

@@ -4,34 +4,43 @@ import { useState } from "react";
 import Link from "next/link";
 import { useShop } from "@/context/ShopContext";
 import { useLang } from "@/context/LangContext";
+import { useConfig } from "@/context/ConfigContext";
+import { computeTotals, validateCoupon, lineTotal, egp } from "@/lib/pricing";
 import styles from "./cart.module.css";
 
-const COUPONS = {
-  RNE10: { type: "percent", value: 10, labelEn: "10% off", labelAr: "خصم ١٠٪" },
-  SAVE50: { type: "fixed", value: 50, labelEn: "50 EGP off", labelAr: "خصم ٥٠ ج.م" },
-};
-
 export default function CartPage() {
-  const { state, dispatch, cartTotal } = useShop();
+  const { state, dispatch } = useShop();
   const { t, lang } = useLang();
+  const { config } = useConfig();
   const [code, setCode] = useState("");
   const [coupon, setCoupon] = useState(null);
   const [err, setErr] = useState("");
   const cur = t("common.currency");
 
+  // Coupons come from the admin-managed list, and every figure below comes
+  // from the shared pricing module so the cart and the checkout can never
+  // disagree about a total.
+  const { subtotal: cartTotal, discount, total } = computeTotals({
+    cart: state.cart,
+    coupon,
+  });
+
   const applyCoupon = () => {
-    const c = COUPONS[code.trim().toUpperCase()];
-    if (!c) { setErr(t("cart.invalidCoupon")); setCoupon(null); return; }
-    setCoupon({ ...c, code: code.trim().toUpperCase() });
+    const res = validateCoupon(code, config.coupons, { subtotal: cartTotal });
+    if (!res.ok) {
+      setCoupon(null);
+      setErr(
+        res.reason === "minOrder"
+          ? t("cart.couponMinOrder", { n: egp(res.minOrder), cur })
+          : res.reason === "expired"
+          ? t("cart.couponExpired")
+          : t("cart.invalidCoupon")
+      );
+      return;
+    }
+    setCoupon(res.coupon);
     setErr("");
   };
-
-  const discount = coupon
-    ? coupon.type === "percent"
-      ? Math.round(cartTotal * (coupon.value / 100))
-      : coupon.value
-    : 0;
-  const total = Math.max(0, cartTotal - discount);
 
   if (state.cart.length === 0) {
     return (
@@ -73,7 +82,7 @@ export default function CartPage() {
                     aria-label="+"
                   >+</button>
                 </div>
-                <span className={styles.lineTotal}>{item.price * item.qty} {cur}</span>
+                <span className={styles.lineTotal}>{egp(lineTotal(item))} {cur}</span>
                 <button
                   className={styles.remove}
                   onClick={() => dispatch({ type: "REMOVE_FROM_CART", payload: { key: item.key } })}
@@ -100,16 +109,16 @@ export default function CartPage() {
           <p className={styles.hint}>{t("cart.couponHint")}</p>
 
           <div className={styles.rows}>
-            <div className={styles.row}><span>{t("cart.subtotal")}</span><span>{cartTotal} {cur}</span></div>
+            <div className={styles.row}><span>{t("cart.subtotal")}</span><span>{egp(cartTotal)} {cur}</span></div>
             {discount > 0 && (
-              <div className={styles.row}><span>{t("cart.discount")}</span><span>−{discount} {cur}</span></div>
+              <div className={styles.row}><span>{t("cart.discount")}</span><span>−{egp(discount)} {cur}</span></div>
             )}
             <div className={styles.row}><span>{t("cart.shipping")}</span><span>{t("cart.calcCheckout")}</span></div>
           </div>
 
           <div className={styles.total}>
             <span>{t("cart.total")}</span>
-            <span>{total} {cur}</span>
+            <span>{egp(total)} {cur}</span>
           </div>
 
           <Link href="/checkout" className="btn btn--solid btn--full">{t("cart.checkout")}</Link>

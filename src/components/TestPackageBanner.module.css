@@ -13,7 +13,7 @@
 .banner:hover {
   transform: translateY(-4px);
   box-shadow: 0 24px 50px rgba(10, 10, 10, 0.12);
-  border-color: var(--amber);
+  border-color: var(--accent-text);
 }
 
 /* Accent stripe on the side */
@@ -69,7 +69,7 @@
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--burgundy);
+  color: var(--accent-text);
 }
 .name {
   font-size: clamp(1.5rem, 3vw, 2rem);
@@ -109,11 +109,16 @@
   color: var(--ink);
 }
 .cta {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  border: 1px solid var(--btn-primary-border);
+  box-shadow: var(--btn-shadow), var(--btn-inner);
+  backdrop-filter: var(--btn-blur);
+  -webkit-backdrop-filter: var(--btn-blur);
+
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: var(--ink);
-  color: var(--paper);
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 0.85rem;
@@ -123,7 +128,13 @@
   transition: background 0.2s, gap 0.2s;
 }
 .banner:hover .cta {
-  background: var(--burgundy);
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  border: 1px solid var(--btn-primary-border);
+  box-shadow: var(--btn-shadow), var(--btn-inner);
+  backdrop-filter: var(--btn-blur);
+  -webkit-backdrop-filter: var(--btn-blur);
+
   gap: 0.8rem;
 }
 .arrow { transition: transform 0.2s; }
@@ -168,5 +179,12 @@ html[dir="rtl"] .arrow { transform: scaleX(-1); }
   .name { font-size: 1.5rem; }
   .desc { font-size: 0.9rem; }
   .foot { margin-top: 1rem; }
-  .cta { padding: 0.75rem 1.2rem; font-size: 0.8rem; }
+  .cta {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  border: 1px solid var(--btn-primary-border);
+  box-shadow: var(--btn-shadow), var(--btn-inner);
+  backdrop-filter: var(--btn-blur);
+  -webkit-backdrop-filter: var(--btn-blur);
+ padding: 0.75rem 1.2rem; font-size: 0.8rem; }
 }

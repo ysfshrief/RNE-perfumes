@@ -40,6 +40,12 @@ export function AuthProvider({ children }) {
     }
 
     let unsub = () => {};
+
+    // Safety net: if Firebase never answers (offline, blocked network, bad
+    // config) `ready` would stay false forever and every gated page would
+    // render blank. Resolve after a short wait so the UI can proceed.
+    const readyTimer = setTimeout(() => setReady(true), 4000);
+
     (async () => {
       const {
         onAuthStateChanged,
@@ -71,10 +77,11 @@ export function AuthProvider({ children }) {
           setUser(null);
           setIsAdmin(false);
         }
+        clearTimeout(readyTimer);
         setReady(true);
       });
     })();
-    return () => unsub();
+    return () => { clearTimeout(readyTimer); unsub(); };
   }, []);
 
   // ---- Email / Password sign in ----

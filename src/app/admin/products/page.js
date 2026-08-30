@@ -4,13 +4,15 @@ import { useState } from "react";
 import { useLang } from "@/context/LangContext";
 import { useProducts, normalizeImageUrl } from "@/context/ProductContext";
 import { productAr } from "@/data/productLocale";
+import { getMinPrice } from "@/data/products";
+import { placeholderProducts } from "@/data/placeholderProducts";
 import { isPhoto } from "@/data/products";
 import adminStyles from "../admin.module.css";
 import styles from "./products.module.css";
 
 export default function AdminProducts() {
   const { lang } = useLang();
-  const { allProducts, updateProduct, addProduct, deleteProduct, resetProduct, overrides } = useProducts();
+  const { allProducts, updateProduct, addProduct, addProducts, deleteProduct, deleteProducts, resetProduct, overrides } = useProducts();
   const [editingId, setEditingId] = useState(null);
   const [query, setQuery] = useState("");
   const [adding, setAdding] = useState(false);
@@ -36,6 +38,19 @@ export default function AdminProducts() {
     setEditingId(p.id);
   };
 
+  // ── Demo catalogue (opt-in) ──────────────────────────────
+  // Loads the fictional placeholder fragrances through the SAME custom-product
+  // pipeline as manually added products, so they are fully editable/removable.
+  const demoLoaded = allProducts.filter((p) => p._demo).length;
+
+  const loadDemo = () => {
+    if (demoLoaded > 0) return;
+    addProducts(placeholderProducts.map((d) => ({ ...d, _demo: true })));
+  };
+  const clearDemo = () => {
+    deleteProducts(allProducts.filter((p) => p._demo).map((p) => p.id));
+  };
+
   const filtered = allProducts.filter((p) =>
     p.name.toLowerCase().includes(query.toLowerCase()) ||
     (productAr[p.id]?.name || "").includes(query)
@@ -52,7 +67,18 @@ export default function AdminProducts() {
             {T(`${allProducts.length} منتج — اضغط على أي منتج لتعديله`, `${allProducts.length} products — tap any product to edit`)}
           </p>
         </div>
-        <button className={styles.addBtn} onClick={() => setAdding(true)}>+ {T("أضف منتج", "Add product")}</button>
+        <div className={styles.headActions}>
+          {demoLoaded > 0 ? (
+            <button className={styles.demoBtn} onClick={clearDemo}>
+              {T(`مسح كتالوج العرض (${demoLoaded})`, `Clear demo catalogue (${demoLoaded})`)}
+            </button>
+          ) : (
+            <button className={styles.demoBtn} onClick={loadDemo}>
+              {T(`تحميل كتالوج عرض (${placeholderProducts.length})`, `Load demo catalogue (${placeholderProducts.length})`)}
+            </button>
+          )}
+          <button className={styles.addBtn} onClick={() => setAdding(true)}>+ {T("أضف منتج", "Add product")}</button>
+        </div>
       </div>
 
       {adding && (
@@ -109,7 +135,7 @@ export default function AdminProducts() {
       {/* Product grid */}
       <div className={styles.grid}>
         {filtered.map((p) => {
-          const minPrice = Math.min(...p.sizes.map((s) => s.price));
+          const minPrice = getMinPrice(p);
           const totalStock = p.sizes.reduce((n, s) => n + s.stock, 0);
           const edited = !!overrides[p.id];
           const hasPhoto = isPhoto(p.images?.[0] ?? p.image);
@@ -174,7 +200,9 @@ function ProductEditor({ product, onClose, onSave, onReset, onDelete, isEdited, 
     set({ images });
   };
   const setSize = (i, field, val) => {
-    const sizes = form.sizes.map((s, idx) => (idx === i ? { ...s, [field]: field === "size" ? val : Number(val) || 0 } : s));
+    const sizes = form.sizes.map((s, idx) =>
+      idx === i ? { ...s, [field]: field === "size" ? val : val } : s,
+    );
     set({ sizes });
   };
 
@@ -186,7 +214,16 @@ function ProductEditor({ product, onClose, onSave, onReset, onDelete, isEdited, 
       hidden: form.hidden,
       bestSeller: form.bestSeller,
       images: form.images,
-      sizes: form.sizes,
+      // Coerce here, not on every keystroke — and drop rows that ended up
+      // without a usable price rather than saving them as 0.
+      sizes: form.sizes
+        .map((s) => ({
+          ...s,
+          price: Number(s.price) || 0,
+          oldPrice: s.oldPrice ? Number(s.oldPrice) || null : null,
+          stock: Number(s.stock) || 0,
+        }))
+        .filter((s) => s.price > 0),
     });
     setSavedFlash(true);
     setTimeout(() => setSavedFlash(false), 1500);

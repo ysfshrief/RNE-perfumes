@@ -5,7 +5,10 @@ import Link from "next/link";
 import { useShop } from "@/context/ShopContext";
 import { useLang } from "@/context/LangContext";
 import { useConfig } from "@/context/ConfigContext";
+import { useAuth } from "@/context/AuthContext";
+import { useProducts } from "@/context/ProductContext";
 import { addToCollection } from "@/lib/store";
+import { computeTotals, validateCoupon, lineTotal, egp } from "@/lib/pricing";
 import styles from "./checkout.module.css";
 
 const GOV_KEYS = [
@@ -21,7 +24,9 @@ const GOV_AR = {
 export default function CheckoutPage() {
   const { state, dispatch, cartTotal } = useShop();
   const { t, lang } = useLang();
-  const { config } = useConfig();
+  const { config, save: saveConfig } = useConfig();
+  const { user: authUser } = useAuth();
+  const { allProducts, updateProduct } = useProducts();
   const [pay, setPay] = useState("cod");
   const [placed, setPlaced] = useState(false);
   const [form, setForm] = useState({
@@ -47,37 +52,45 @@ export default function CheckoutPage() {
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState("");
+  const [placing, setPlacing] = useState(false);
 
   const applyCoupon = () => {
     setCouponError("");
-    const code = couponInput.trim().toUpperCase();
-    if (!code) return;
-    const coupons = config.coupons || [];
-    const found = coupons.find((c) => c.code.toUpperCase() === code && c.active !== false);
-    if (!found) {
+    const res = validateCoupon(couponInput, config.coupons, { subtotal: cartTotal });
+    if (!res.ok) {
       setAppliedCoupon(null);
-      setCouponError(lang === "ar" ? "الكود غير صحيح أو منتهي" : "Invalid or expired code");
+      if (res.reason === "empty") return;
+      setCouponError(
+        res.reason === "minOrder"
+          ? t("cart.couponMinOrder", { n: egp(res.minOrder), cur })
+          : res.reason === "expired"
+          ? t("cart.couponExpired")
+          : t("cart.invalidCoupon")
+      );
       return;
     }
-    setAppliedCoupon(found);
+    setAppliedCoupon(res.coupon);
   };
 
   const removeCoupon = () => { setAppliedCoupon(null); setCouponInput(""); setCouponError(""); };
 
-  // Calculate discount amount
-  let discount = 0;
-  if (appliedCoupon) {
-    const val = parseFloat(String(appliedCoupon.value).replace(/[^0-9.]/g, "")) || 0;
-    if (appliedCoupon.type === "percent") discount = Math.round((cartTotal * val) / 100);
-    else discount = Math.min(val, cartTotal);
-  }
-  const finalTotal = Math.max(0, cartTotal - discount);
+  // Same shared calculation the cart uses — totals cannot drift apart.
+  const totals = computeTotals({ cart: state.cart, coupon: appliedCoupon });
+  const discount = totals.discount;
+  const finalTotal = totals.total;
 
   const placeOrder = async () => {
-    if (!valid) return;
+    // Guard against a double-click creating two identical orders.
+    if (!valid || placing) return;
+    setPlacing(true);
     // Build the order record
     const order = {
       status: "New",
+      // Ownership. UID is the reliable key (email can change / differ between
+      // providers); the normalised email is kept as a fallback for orders
+      // placed as a guest and later claimed by the same address.
+      userId: authUser?.uid || null,
+      userEmail: (authUser?.email || form.email || "").trim().toLowerCase(),
       customer: {
         name: form.name,
         phone: form.phone,
@@ -86,22 +99,52 @@ export default function CheckoutPage() {
         city: form.city,
         address: form.address,
       },
+      // Snapshot of the transaction. Unit prices and line totals are stored so
+      // the order can never be re-priced later from the current catalogue.
       items: state.cart.map((it) => ({
-        id: it.product.id,
-        name: it.product.name,
-        size: it.size?.size,
-        price: it.size?.price,
+        id: it.id ?? it.product?.id,
+        name: it.name ?? it.product?.name,
+        size: it.size?.size ?? it.size,
+        unitPrice: egp(it.price ?? it.size?.price),
         qty: it.qty,
-        selectedScents: it.product._selectedScents || null,
+        lineTotal: egp(lineTotal(it)),
+        selectedScents: it.selectedScents || it.product?._selectedScents || null,
       })),
-      total: finalTotal,
-      subtotal: cartTotal,
-      discount: discount,
-      coupon: appliedCoupon ? appliedCoupon.code : null,
+      subtotal: egp(totals.subtotal),
+      discount: egp(totals.discount),
+      shipping: egp(totals.shipping),
+      total: egp(totals.total),
+      coupon: totals.couponCode,
+      couponType: appliedCoupon ? appliedCoupon.type : null,
+      couponValue: appliedCoupon ? appliedCoupon.value : null,
+      currency: "EGP",
       payment: pay,
       note: form.note || "",
     };
     await addToCollection("orders", order);
+
+    // Decrement stock for what was actually sold. Without this the same unit
+    // could be sold indefinitely — the cart enforced stock but the order never
+    // consumed it.
+    const sold = new Map(); // productId -> { size: qty }
+    state.cart.forEach((it) => {
+      const pid = it.id ?? it.product?.id;
+      const size = it.size?.size ?? it.size;
+      if (!pid || !size) return;
+      const bucket = sold.get(pid) || {};
+      bucket[size] = (bucket[size] || 0) + (Number(it.qty) || 0);
+      sold.set(pid, bucket);
+    });
+    sold.forEach((bySize, pid) => {
+      const product = allProducts.find((p) => p.id === pid);
+      if (!product) return;
+      const nextSizes = (product.sizes || []).map((sz) =>
+        bySize[sz.size]
+          ? { ...sz, stock: Math.max(0, (Number(sz.stock) || 0) - bySize[sz.size]) }
+          : sz,
+      );
+      updateProduct(pid, { sizes: nextSizes });
+    });
     // Also save/update the customer record
     await addToCollection("customers", {
       id: `cust_${form.email}`,
@@ -112,7 +155,20 @@ export default function CheckoutPage() {
       city: form.city,
       address: form.address,
     });
+    // Record redemption so usage limits are enforceable and the admin can
+    // see how often each code was actually used.
+    if (appliedCoupon) {
+      const next = (config.coupons || []).map((c) =>
+        String(c.code).toUpperCase() === totals.couponCode
+          ? { ...c, uses: (Number(c.uses) || 0) + 1 }
+          : c
+      );
+      saveConfig({ ...config, coupons: next });
+    }
+
+    // Cart is only cleared once the order actually exists.
     setPlaced(true);
+    setPlacing(false);
     dispatch({ type: "CLEAR_CART" });
     window.scrollTo({ top: 0 });
   };
@@ -198,17 +254,17 @@ export default function CheckoutPage() {
               <div key={i.key} className={styles.line}>
                 <span className={styles.lineDot} style={{ background: i.color }} />
                 <span className={styles.lineName}>{i.name} · {i.size} × {i.qty}</span>
-                <span className={styles.linePrice}>{i.price * i.qty} {cur}</span>
+                <span className={styles.linePrice}>{egp(lineTotal(i))} {cur}</span>
               </div>
             ))}
           </div>
           <div className={styles.totals}>
-            <div><span>{t("cart.subtotal")}</span><span>{cartTotal} {cur}</span></div>
+            <div><span>{t("cart.subtotal")}</span><span>{egp(cartTotal)} {cur}</span></div>
             <div><span>{t("cart.shipping")}</span><span>{t("checkout.shippingTbd")}</span></div>
             {discount > 0 && (
               <div className={styles.discountRow}>
                 <span>{t("checkout.discount")} ({appliedCoupon.code})</span>
-                <span>− {discount} {cur}</span>
+                <span>− {egp(discount)} {cur}</span>
               </div>
             )}
           </div>
@@ -235,10 +291,10 @@ export default function CheckoutPage() {
           </div>
 
           <div className={styles.total}>
-            <span>{t("cart.total")}</span><span>{finalTotal} {cur}</span>
+            <span>{t("cart.total")}</span><span>{egp(finalTotal)} {cur}</span>
           </div>
-          <button className="btn btn--solid btn--full" onClick={placeOrder} disabled={!valid}>
-            {t("checkout.placeOrder")}
+          <button className="btn btn--solid btn--full" onClick={placeOrder} disabled={!valid || placing}>
+            {placing ? "…" : t("checkout.placeOrder")}
           </button>
           {!valid && <p className={styles.fillNote}>{t("checkout.fillNote")}</p>}
         </aside>

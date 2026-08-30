@@ -12,7 +12,7 @@
   height: 56px;
   border-radius: 50%;
   background: var(--ink);
-  color: var(--amber);
+  color: #E39AA6;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
   justify-content: center;
   transition: transform 0.2s;
@@ -24,7 +24,7 @@
   font-size: 0.5rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--paper);
+  color: var(--on-ink);
 }
 html[dir="rtl"] .trigger { right: auto; left: 20px; }
 
@@ -120,7 +120,7 @@ html[dir="rtl"] .close { right: auto; left: 16px; }
   width: 100%;
   padding: 0.95rem;
   background: var(--ink);
-  color: var(--paper);
+  color: var(--on-ink);
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 0.9rem;
@@ -138,7 +138,7 @@ html[dir="rtl"] .close { right: auto; left: 16px; }
 .resultPrize {
   font-size: 1.8rem;
   font-weight: 800;
-  color: var(--amber-deep);
+  color: var(--accent-text);
   margin: 0.2rem 0 1rem;
   font-family: var(--font-display);
 }

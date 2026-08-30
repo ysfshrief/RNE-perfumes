@@ -93,11 +93,11 @@
   font-family: inherit;
   font-size: 0.85rem;
 }
-.coupon input:focus { outline: none; border-color: var(--amber); }
+.coupon input:focus { outline: none; border-color: var(--accent-text); }
 .coupon button {
   padding: 0 1.1rem;
   background: var(--ink);
-  color: var(--paper);
+  color: var(--on-ink);
   border-radius: var(--radius);
   font-family: var(--font-display);
   font-weight: 600;
@@ -110,7 +110,7 @@
 .hint { font-size: 0.72rem; color: var(--olive); }
 
 .rows { display: flex; flex-direction: column; gap: 0.7rem; padding-top: 0.5rem; border-top: 1px solid var(--line); }
-.row { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--ink-soft); }
+.row { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--ink-dim); }
 
 .total {
   display: flex;
@@ -129,7 +129,7 @@
   color: var(--olive);
   margin-top: 0.3rem;
 }
-.continue:hover { color: var(--amber-deep); }
+.continue:hover { color: var(--accent-text); }
 
 @media (max-width: 860px) {
   .layout { grid-template-columns: 1fr; }
@@ -140,3 +140,25 @@
   .thumb { width: 70px; height: 84px; }
   .itemControls { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; }
 }
+
+/* ═══ Dark luxury cart ═══════════════════════════════ */
+.row, .summary {
+  border-radius: var(--radius-card);
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+}
+.summary {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-color: var(--glass-border);
+}
+.thumb { border-radius: 12px; overflow: hidden; background: var(--bg-3); }
+.thumb :global(img) { object-fit: contain; }
+.qty {
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.04);
+  overflow: hidden;
+}
+.qty button { color: var(--ink); }

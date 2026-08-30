@@ -25,7 +25,7 @@
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--ink-soft);
+  color: var(--ink-dim);
 }
 .field input, .field select {
   padding: 0.75rem 0.9rem;
@@ -35,10 +35,10 @@
   font-size: 0.9rem;
   background: var(--paper);
 }
-.field input:focus, .field select:focus { outline: none; border-color: var(--amber); }
+.field input:focus, .field select:focus { outline: none; border-color: var(--accent-text); }
 
-.alt { margin-top: 1.4rem; font-size: 0.9rem; text-align: center; color: var(--ink-soft); }
-.alt a { color: var(--amber-deep); text-decoration: underline; }
+.alt { margin-top: 1.4rem; font-size: 0.9rem; text-align: center; color: var(--ink-dim); }
+.alt a { color: var(--accent-text); text-decoration: underline; }
 .note { margin-top: 0.8rem; font-size: 0.76rem; color: var(--olive); text-align: center; font-style: italic; }
 
 @media (max-width: 520px) {
@@ -47,7 +47,7 @@
 }
 
 .errorMsg {
-  background: #fde8e8;
+  background: rgba(196,83,63,0.18);
   color: #a23b2d;
   padding: 0.7rem 1rem;
   border-radius: var(--radius);

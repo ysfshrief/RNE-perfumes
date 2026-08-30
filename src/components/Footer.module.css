@@ -1,6 +1,7 @@
 .footer {
-  background: var(--ink);
-  color: var(--paper);
+  background: #16130F;
+  border-top: 1px solid var(--line);
+  color: #FAF8F5;
   padding-top: clamp(2.75rem, 6vw, 4.25rem);
   margin-top: 3rem;
 }
@@ -17,7 +18,7 @@
 .brandCol { max-width: 340px; }
 .tag {
   margin-top: 1.25rem;
-  color: rgba(247, 245, 241, 0.58);
+  color: rgba(250,248,245,0.55);
   font-size: 0.9rem;
   line-height: 1.75;
 }
@@ -34,13 +35,13 @@
   border-radius: 999px;
   display: grid;
   place-items: center;
-  color: var(--paper);
+  color: var(--ink);
   transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
 }
 .socialLink:hover {
   background: var(--amber);
-  color: var(--ink);
-  border-color: var(--amber);
+  color: var(--pure-white);
+  border-color: var(--accent-text);
   transform: translateY(-2px);
 }
 
@@ -53,19 +54,19 @@
   font-size: 0.72rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--amber);
+  color: var(--accent-text);
   margin-bottom: 1.1rem;
   font-family: var(--font-display);
 }
 .col ul { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
 .col a {
   font-size: 0.88rem;
-  color: rgba(247, 245, 241, 0.68);
+  color: rgba(250,248,245,0.72);
   transition: color 0.2s;
   line-height: 1.5;
   word-break: break-word;
 }
-.col a:hover { color: var(--paper); }
+.col a:hover { color: var(--ink); }
 
 /* ---- Bottom bar ---- */
 .bottom {
@@ -85,7 +86,7 @@
 .logoDivider {
   width: 1px;
   height: 34px;
-  background: rgba(247, 245, 241, 0.2);
+  background: var(--line);
 }
 .developer {
   display: inline-flex;

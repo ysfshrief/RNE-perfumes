@@ -59,9 +59,14 @@
   font-weight: 800;
 }
 .cta {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  border: 1px solid var(--btn-primary-border);
+  box-shadow: var(--btn-shadow), var(--btn-inner);
+  backdrop-filter: var(--btn-blur);
+  -webkit-backdrop-filter: var(--btn-blur);
+
   display: inline-block;
-  background: var(--paper);
-  color: var(--ink);
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 0.85rem;

@@ -15,7 +15,7 @@
 }
 .icon {
   font-size: 1.3rem;
-  color: var(--amber-deep);
+  color: var(--accent-text);
   flex-shrink: 0;
 }
 .a {

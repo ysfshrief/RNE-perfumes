@@ -5,7 +5,7 @@
 
 const RATIO = 480 / 295; // official artwork aspect ratio (with EAU DE PARFUM rule)
 
-export default function LogoRNE({ size = "md", light = false, onClick, className = "" }) {
+export default function LogoRNE({ size = "md", light = false, onClick = undefined, className = "" }) {
   // Heights tuned per placement; width derived from the true aspect ratio.
   const heights = { sm: 30, md: 38, lg: 46 };
   const height = heights[size] || heights.md;

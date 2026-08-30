@@ -7,7 +7,7 @@
   margin-bottom: 1.5rem;
 }
 .savedFlash {
-  background: #e4efe4;
+  background: rgba(106,146,104,0.2);
   color: var(--success);
   font-size: 0.8rem;
   font-weight: 600;
@@ -26,7 +26,7 @@
 }
 .langTabs {
   display: inline-flex;
-  background: #eceae4;
+  background: rgba(255,255,255,0.07);
   border-radius: 10px;
   padding: 4px;
   gap: 4px;
@@ -54,24 +54,29 @@
   font-size: 0.9rem;
   background: var(--white);
 }
-.search:focus { outline: none; border-color: var(--amber); }
+.search:focus { outline: none; border-color: var(--accent-text); }
 
 .overrideBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  background: #f6ecd8;
+  background: rgba(139,26,43,0.22);
   border: 1px solid #e8d5ad;
   border-radius: var(--radius);
   padding: 0.7rem 1rem;
   margin-bottom: 1.25rem;
   font-size: 0.85rem;
-  color: var(--amber-deep);
+  color: var(--accent-text);
   flex-wrap: wrap;
 }
 .resetBtn {
-  color: var(--danger);
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-fg);
+  border: 1px solid var(--btn-secondary-border);
+  backdrop-filter: var(--btn-blur);
+  -webkit-backdrop-filter: var(--btn-blur);
+
   font-weight: 600;
   font-size: 0.82rem;
   text-decoration: underline;
@@ -100,7 +105,7 @@
 .sectionHead:hover { background: var(--paper); }
 .sectionName { display: inline-flex; align-items: center; gap: 0.6rem; }
 .sectionCount {
-  background: #eceae4;
+  background: rgba(255,255,255,0.07);
   color: var(--olive);
   font-size: 0.68rem;
   font-weight: 700;
@@ -140,7 +145,7 @@
 }
 .revert {
   font-size: 0.72rem;
-  color: var(--amber-deep);
+  color: var(--accent-text);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -155,8 +160,8 @@
   resize: vertical;
   line-height: 1.6;
 }
-.input:focus { outline: none; border-color: var(--amber); background: var(--white); }
-.inputEdited { border-color: var(--amber); background: #fffdf8; }
+.input:focus { outline: none; border-color: var(--accent-text); background: var(--white); }
+.inputEdited { border-color: var(--accent-text); background: rgba(255,255,255,0.06); }
 
 .empty { color: var(--olive); padding: 2rem; text-align: center; }
 

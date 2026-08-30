@@ -11,13 +11,27 @@ import { useLang } from "@/context/LangContext";
 import { useProducts } from "@/context/ProductContext";
 import styles from "./shop.module.css";
 
-const SIZES = ["30ml", "50ml"];
+
 
 export default function ShopClient() {
   const params = useSearchParams();
   const { t, lang } = useLang();
   const { visibleProducts } = useProducts();
   const products = visibleProducts;
+
+  // Filter options are derived from the catalogue, not hardcoded: sizes were
+  // fixed at 30/50ml so 100ml was unfilterable, and the price ceiling was
+  // pinned at 1400 which hid anything more expensive.
+  const SIZES = useMemo(() => {
+    const seen = new Set();
+    products.forEach((p) => (p.sizes || []).forEach((s) => s?.size && seen.add(s.size)));
+    return [...seen].sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
+  }, [products]);
+
+  const priceCeiling = useMemo(() => {
+    const top = Math.max(0, ...products.map((p) => getMinPrice(p) || 0));
+    return Math.max(100, Math.ceil(top / 100) * 100);
+  }, [products]);
   const initialCat = params.get("category");
   const offersOnly = params.get("offers") === "true";
 
@@ -25,7 +39,7 @@ export default function ShopClient() {
   const [activeCats, setActiveCats] = useState(initialCat ? [initialCat] : []);
   const [activeSizes, setActiveSizes] = useState([]);
   const [minRating, setMinRating] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(1400);
+  const [maxPrice, setMaxPrice] = useState(null); // null = no ceiling applied yet
   const [bestOnly, setBestOnly] = useState(false);
   const [saleOnly, setSaleOnly] = useState(offersOnly);
   const [sort, setSort] = useState("featured");
@@ -47,9 +61,13 @@ export default function ShopClient() {
   const toggle = (list, setList, val) =>
     setList(list.includes(val) ? list.filter((x) => x !== val) : [...list, val]);
 
+  useEffect(() => {
+    setMaxPrice((cur) => (cur === null || cur > priceCeiling ? priceCeiling : cur));
+  }, [priceCeiling]);
+
   const filtered = useMemo(() => {
     let out = products.filter((p) => {
-      const haystack = `${p.name} ${p.tagline} ${p.gender} ${pName(p, "ar")} ${pTagline(p, "ar")}`.toLowerCase();
+      const haystack = `${p.name} ${p.tagline} ${p.gender} ${p.inspiredBy || ""} ${pName(p, "ar")} ${pTagline(p, "ar")}`.toLowerCase();
       if (search && !haystack.includes(search.toLowerCase())) return false;
       if (activeCats.length) {
         const inCat = activeCats.some((c) => p.gender === c || p.season.includes(c));
@@ -60,7 +78,7 @@ export default function ShopClient() {
         if (!hasSize) return false;
       }
       if (minRating && p.rating < minRating) return false;
-      if (getMinPrice(p) > maxPrice) return false;
+      if (maxPrice !== null && getMinPrice(p) > maxPrice) return false;
       if (bestOnly && !p.bestSeller) return false;
       if (saleOnly && !p.sizes.some((s) => s.oldPrice)) return false;
       return true;
@@ -79,7 +97,7 @@ export default function ShopClient() {
       return bp - ap;
     });
     return out;
-  }, [search, activeCats, activeSizes, minRating, maxPrice, bestOnly, saleOnly, sort]);
+  }, [products, search, activeCats, activeSizes, minRating, maxPrice, bestOnly, saleOnly, sort]);
 
   // Separate the Test Package (shown as a distinct feature) from regular products
   const testPackage = filtered.find((p) => p.isDiscoverySet);
@@ -131,8 +149,8 @@ export default function ShopClient() {
       <div className={styles.filterGroup}>
         <h4>{t("shop.maxPrice")} — {maxPrice} {t("common.currency")}</h4>
         <input
-          type="range" min="600" max="1400" step="50"
-          value={maxPrice}
+          type="range" min={0} max={priceCeiling} step={50}
+          value={maxPrice ?? priceCeiling}
           onChange={(e) => setMaxPrice(Number(e.target.value))}
           className={styles.range}
         />

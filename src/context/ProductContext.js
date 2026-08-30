@@ -48,10 +48,16 @@ export function ProductProvider({ children }) {
   const mergeProduct = useCallback((p) => {
     const o = overrides[p.id];
     if (!o) return p;
+    // An override saved with blank/zero prices would make the product show as
+    // "0 EGP". Fall back to the catalogue sizes rather than trusting it.
+    const validSizes =
+      Array.isArray(o.sizes) && o.sizes.some((s) => Number(s?.price) > 0)
+        ? o.sizes.filter((s) => Number(s?.price) > 0)
+        : p.sizes;
     return {
       ...p,
       ...o,
-      sizes: o.sizes || p.sizes,
+      sizes: validSizes,
       images: o.images || p.images,
     };
   }, [overrides]);
@@ -114,6 +120,48 @@ export function ProductProvider({ children }) {
     return newProduct;
   }, [overrides, customProducts, persist]);
 
+  // Bulk insert. Adding products one-by-one in a loop would read the same
+  // stale `overrides` each time and clobber previous inserts, so seeding must
+  // go through a single persist.
+  const addProducts = useCallback((list) => {
+    const stamp = Date.now();
+    const made = list.map((product, i) => {
+      const id = `custom_${stamp}_${i}`;
+      let slug = (product.slug || product.name || "")
+        .toLowerCase().trim()
+        .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      if (!slug) slug = id;
+      return {
+        id,
+        slug,
+        inspiredBy: null,
+        tagline: "",
+        description: "",
+        gender: "Unisex",
+        season: ["Summer"],
+        notes: { top: [], heart: [], base: [] },
+        ingredients: "",
+        sizes: [{ size: "50ml", price: 500, oldPrice: null, stock: 10 }],
+        rating: 5,
+        reviewCount: 0,
+        bestSeller: false,
+        images: product.image ? [product.image] : [],
+        ...product,
+        _custom: true,
+      };
+    });
+    persist({ ...overrides, __custom__: [...customProducts, ...made] });
+    return made;
+  }, [overrides, customProducts, persist]);
+
+  const deleteProducts = useCallback((ids) => {
+    const set = new Set(ids);
+    const nextCustom = (overrides.__custom__ || []).filter((p) => !set.has(p.id));
+    const next = { ...overrides, __custom__: nextCustom };
+    ids.forEach((id) => delete next[id]);
+    persist(next);
+  }, [overrides, persist]);
+
   const deleteProduct = useCallback((id) => {
     if (Array.isArray(overrides.__custom__)) {
       const nextCustom = overrides.__custom__.filter((p) => p.id !== id);
@@ -135,7 +183,7 @@ export function ProductProvider({ children }) {
 
   return (
     <ProductContext.Provider
-      value={{ ready, overrides, allProducts, visibleProducts, mergeProduct, updateProduct, addProduct, deleteProduct, resetProduct, resetAll, baseProducts, productAr }}
+      value={{ ready, overrides, allProducts, visibleProducts, mergeProduct, updateProduct, addProduct, addProducts, deleteProduct, deleteProducts, resetProduct, resetAll, baseProducts, productAr }}
     >
       {children}
     </ProductContext.Provider>

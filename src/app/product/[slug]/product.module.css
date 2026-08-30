@@ -5,7 +5,7 @@
   font-family: var(--font-display);
   letter-spacing: 0.04em;
 }
-.crumbs a:hover { color: var(--amber-deep); }
+.crumbs a:hover { color: var(--accent-text); }
 .crumbs span { color: var(--ink); }
 
 .top {
@@ -86,7 +86,7 @@
   transition: all 0.2s;
 }
 .sizeBtn:hover:not(:disabled) { border-color: var(--ink); }
-.sizeOn { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.sizeOn { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
 .sizeOut { opacity: 0.5; cursor: not-allowed; }
 .outTag {
   position: absolute;
@@ -152,7 +152,7 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: var(--amber-deep);
+  color: var(--accent-text);
 }
 .noteChips { display: flex; flex-wrap: wrap; gap: 0.6rem; }
 .chip {
@@ -209,4 +209,62 @@
   font-family: var(--font-display);
   letter-spacing: 0.02em;
 }
-.inspiredBy span { color: var(--amber-deep); font-weight: 600; }
+.inspiredBy span { color: var(--accent-text); font-weight: 600; }
+
+/* ═══ Cinematic product detail ═══════════════════════ */
+.mainImg {
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  background: linear-gradient(160deg, #17171a, #0c0c0e);
+  border: 1px solid var(--line);
+  aspect-ratio: 4 / 5;
+}
+.mainImg :global(img) { object-fit: contain; }
+
+/* Editorial product title */
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 5vw, 3.4rem);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+html[dir="rtl"] .title { font-family: var(--font-ar-display); line-height: 1.25; letter-spacing: 0; }
+
+/* Size chips */
+.sizeBtn {
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.04);
+  color: var(--ink-dim);
+  transition: all 0.22s ease;
+}
+.sizeBtn:hover:not(:disabled) { border-color: var(--line-strong); color: var(--ink); }
+.sizeOn {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--on-ink);
+}
+.sizeOut { opacity: 0.4; }
+
+/* Quantity control as glass */
+.qty {
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+.qty button { color: var(--ink); }
+
+/* Notes section on dark */
+.notesSection {
+  background: var(--bg-2);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.desc { color: var(--ink-dim); line-height: 1.75; }
+.reviews { color: var(--ink); }
+.noReviews { color: var(--ink-faint); }

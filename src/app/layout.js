@@ -4,8 +4,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { LangProvider } from "@/context/LangContext";
 import { ConfigProvider } from "@/context/ConfigContext";
 import { ProductProvider } from "@/context/ProductContext";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import StoreChrome from "@/components/StoreChrome";
 import ThemeApplier from "@/components/ThemeApplier";
 
 export const metadata = {
@@ -33,9 +32,7 @@ export default function RootLayout({ children }) {
               <AuthProvider>
                 <ShopProvider>
                 <ThemeApplier />
-              <Header />
-                <main>{children}</main>
-                <Footer />
+                <StoreChrome>{children}</StoreChrome>
               </ShopProvider>
               </AuthProvider>
             </ProductProvider>

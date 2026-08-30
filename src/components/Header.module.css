@@ -2,8 +2,9 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(247, 245, 241, 0.88);
-  backdrop-filter: blur(12px);
+  background: rgba(250, 248, 245, 0.78);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
   border-bottom: 1px solid var(--line);
 }
 
@@ -51,15 +52,26 @@
   .leftGroup { display: none; }
 }
 
+/* Nav items read as small glass pills, per the reference composition */
 .link {
-  font-family: var(--font-display);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ink);
+  color: var(--ink-dim);
   position: relative;
-  padding-bottom: 2px;
+  padding: 0.5rem 0.95rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+  white-space: nowrap;
+}
+html[dir="rtl"] .link { font-family: var(--font-ar); letter-spacing: 0.02em; font-size: 0.8rem; }
+.link:hover {
+  color: var(--ink);
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
 }
 .link::after {
   content: "";
@@ -69,7 +81,7 @@
   background: var(--amber-deep);
   transition: width 0.25s;
 }
-.link:hover::after { width: 100%; }
+.link:hover::after { width: 0; }
 
 .actions {
   display: flex;
@@ -91,7 +103,7 @@
   border-radius: 999px;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
-.langBtn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.langBtn:hover { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
 .langIcon { flex-shrink: 0; }
 .langText { line-height: 1; }
 html[dir="rtl"] .langBtn { font-family: var(--font-display); }
@@ -104,7 +116,7 @@ html[dir="rtl"] .langBtn { font-family: var(--font-display); }
   font-size: 0.85rem;
   padding: 0.7rem 0;
   text-align: start;
-  color: var(--amber-deep);
+  color: var(--accent-text);
 }
 
 .iconLink {
@@ -113,7 +125,7 @@ html[dir="rtl"] .langBtn { font-family: var(--font-display); }
   color: var(--ink);
   transition: color 0.2s;
 }
-.iconLink:hover { color: var(--amber-deep); }
+.iconLink:hover { color: var(--accent-text); }
 
 .count {
   position: absolute;

@@ -149,6 +149,65 @@ export default function AdminSettings() {
           </div>
         </div>
 
+        {/* ─── Cinematic media (hero + brand story) ─── */}
+        <div className={`${adminStyles.card} ${s.fullWidth}`}>
+          <h3 className={s.secTitle}>{T("🎬 الميديا السينمائية", "🎬 Cinematic media")}</h3>
+          <p className={s.secNote}>
+            {T("صورة/فيديو الهيرو وقصة البراند. الصق رابط Drive أو رابط مباشر. الفيديو اختياري — الصورة بتشتغل كـ poster.",
+               "Hero and brand-story media. Paste a Drive link or a direct URL. Video is optional — the image acts as its poster.")}
+          </p>
+
+          <div className={s.slidesList}>
+            <div className={s.slideCard} style={{ borderInlineStart: "4px solid var(--burgundy)" }}>
+              <strong className={s.slideNum}>{T("الهيرو", "Hero")}</strong>
+              <div className={s.slideFields}>
+                <div className={s.sfRow}>
+                  <label>{T("صورة الهيرو", "Hero image")}</label>
+                  <input dir="ltr" value={config.hero?.image || ""} placeholder="https://drive.google.com/file/d/..."
+                    onChange={(e) => { save({ ...config, hero: { ...config.hero, image: e.target.value } }); flash(); }} />
+                </div>
+                <div className={s.sfRow}>
+                  <label>{T("فيديو الهيرو (اختياري)", "Hero video (optional)")}</label>
+                  <input dir="ltr" value={config.hero?.video || ""} placeholder="https://…/clip.mp4"
+                    onChange={(e) => { save({ ...config, hero: { ...config.hero, video: e.target.value } }); flash(); }} />
+                </div>
+                <div className={s.sfRow}>
+                  <label>{T("منتج الهيرو (slug — اختياري)", "Hero product (slug — optional)")}</label>
+                  <input dir="ltr" value={config.hero?.productSlug || ""} placeholder="khamrah"
+                    onChange={(e) => { save({ ...config, hero: { ...config.hero, productSlug: e.target.value } }); flash(); }} />
+                </div>
+              </div>
+            </div>
+
+            <div className={s.slideCard} style={{ borderInlineStart: "4px solid var(--olive)" }}>
+              <strong className={s.slideNum}>{T("خلفية صفحات الدخول/التسجيل", "Login / Register background")}</strong>
+              <div className={s.slideFields}>
+                <div className={s.sfRow} style={{ gridColumn: "1 / -1" }}>
+                  <label>{T("رابط الصورة (Drive)", "Image link (Drive)")}</label>
+                  <input dir="ltr" value={config.authBackground?.image || ""} placeholder="https://drive.google.com/file/d/..."
+                    onChange={(e) => { save({ ...config, authBackground: { ...config.authBackground, image: e.target.value } }); flash(); }} />
+                </div>
+              </div>
+            </div>
+
+            <div className={s.slideCard} style={{ borderInlineStart: "4px solid var(--olive)" }}>
+              <strong className={s.slideNum}>{T("قصة البراند", "Brand story")}</strong>
+              <div className={s.slideFields}>
+                <div className={s.sfRow}>
+                  <label>{T("الصورة", "Image")}</label>
+                  <input dir="ltr" value={config.brandStory?.image || ""} placeholder="https://drive.google.com/file/d/..."
+                    onChange={(e) => { save({ ...config, brandStory: { ...config.brandStory, image: e.target.value } }); flash(); }} />
+                </div>
+                <div className={s.sfRow}>
+                  <label>{T("الفيديو (اختياري)", "Video (optional)")}</label>
+                  <input dir="ltr" value={config.brandStory?.video || ""} placeholder="https://…/clip.mp4"
+                    onChange={(e) => { save({ ...config, brandStory: { ...config.brandStory, video: e.target.value } }); flash(); }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* ─── Category Cards ─── */}
         <div className={`${adminStyles.card} ${s.fullWidth}`}>
           <h3 className={s.secTitle}>{T("🗂️ خانات الصفحة الرئيسية", "🗂️ Homepage Category Cards")}</h3>

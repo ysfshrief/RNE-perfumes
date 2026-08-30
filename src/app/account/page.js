@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useShop } from "@/context/ShopContext";
 import { useAuth } from "@/context/AuthContext";
 import { useLang } from "@/context/LangContext";
+import { subscribeCollection } from "@/lib/store";
 import styles from "./account.module.css";
 
-const MOCK_ORDERS = [];
+
 
 const STATUS_COLORS = {
   New: "var(--olive)", Confirmed: "var(--amber-deep)", Preparing: "var(--amber-deep)",
@@ -17,7 +18,30 @@ const STATUS_COLORS = {
 
 export default function AccountPage() {
   const { state, dispatch } = useShop();
-  const { signOut } = useAuth();
+  const { signOut, user: authUser, ready } = useAuth();
+  const [allOrders, setAllOrders] = useState([]);
+  const [openOrder, setOpenOrder] = useState(null);
+
+  // Live subscription: a new order shows up without a refresh or re-login.
+  useEffect(() => subscribeCollection("orders", setAllOrders), []);
+
+  // Only this customer's orders. Match on UID first; fall back to the
+  // normalised email so orders placed before signing in are still claimed.
+  // Use the merged profile, not authUser alone: while Firebase auth is still
+  // resolving (or offline) authUser is null, and keying off it hid the
+  // customer's own orders behind an empty state.
+  const myEmail = (authUser?.email || state.user?.email || "").trim().toLowerCase();
+  const myOrders = allOrders
+    .filter((o) =>
+      (authUser?.uid && o.userId === authUser.uid) ||
+      (myEmail && (o.userEmail || o.customer?.email || "").trim().toLowerCase() === myEmail),
+    )
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+  // Merge: identity from Firebase, extra profile details from the shop state.
+  const profile = authUser
+    ? { ...(state.user || {}), name: state.user?.name || authUser.name, email: authUser.email }
+    : state.user;
   const { t } = useLang();
   const [tab, setTab] = useState("Orders");
   const cur = t("common.currency");
@@ -28,7 +52,8 @@ export default function AccountPage() {
     { k: "Addresses", label: t("account.addresses") },
   ];
 
-  if (!state.user) {
+  if (!ready && !profile) return null;
+  if (!profile) {
     return (
       <div className={`container ${styles.guest}`}>
         <h1>{t("account.signInTitle")}</h1>
@@ -46,7 +71,7 @@ export default function AccountPage() {
       <div className={styles.head}>
         <div>
           <p className="eyebrow">{t("account.eyebrow")}</p>
-          <h1 className={styles.title}>{t("account.hello", { name: state.user.name })}</h1>
+          <h1 className={styles.title}>{t("account.hello", { name: profile.name })}</h1>
         </div>
         <button className="btn btn--ghost" onClick={() => { signOut(); dispatch({ type: "LOGOUT" }); }}>
           {t("account.signOut")}
@@ -69,12 +94,17 @@ export default function AccountPage() {
       <div className={styles.panel}>
         {tab === "Orders" && (
           <div className={styles.orders}>
-            {MOCK_ORDERS.map((o) => (
+            {myOrders.length === 0 && (
+              <p className={styles.emptyOrders}>{t("account.noOrders")}</p>
+            )}
+            {myOrders.map((o) => (
               <div key={o.id} className={styles.order}>
                 <div className={styles.orderTop}>
                   <div>
-                    <strong>{o.id}</strong>
-                    <span className={styles.orderDate}>{o.date}</span>
+                    <strong className="keep-latin">#{String(o.id).slice(0, 8)}</strong>
+                    <span className={styles.orderDate}>
+                      {o.createdAt ? new Date(o.createdAt).toLocaleDateString() : ""}
+                    </span>
                   </div>
                   <span className={styles.status} style={{ color: STATUS_COLORS[o.status] }}>
                     ● {t(`status.${o.status}`)}
@@ -87,8 +117,28 @@ export default function AccountPage() {
                 </div>
                 <div className={styles.orderFoot}>
                   <span className={styles.orderTotal}>{o.total} {cur}</span>
-                  <button className={styles.orderBtn}>{t("account.viewDetails")}</button>
+                  <button className={styles.orderBtn} onClick={() => setOpenOrder(openOrder === o.id ? null : o.id)}>
+                    {openOrder === o.id ? t("admin.close") : t("account.viewDetails")}
+                  </button>
                 </div>
+
+                {openOrder === o.id && (
+                  <div className={styles.orderDetail}>
+                    <div className={styles.detailRow}><span>{t("cart.subtotal")}</span><span>{o.subtotal ?? o.total} {cur}</span></div>
+                    {o.discount > 0 && (
+                      <div className={styles.detailRow}>
+                        <span>{t("checkout.discount")}{o.coupon ? ` (${o.coupon})` : ""}</span>
+                        <span>− {o.discount} {cur}</span>
+                      </div>
+                    )}
+                    <div className={`${styles.detailRow} ${styles.detailTotal}`}><span>{t("cart.total")}</span><span>{o.total} {cur}</span></div>
+                    {o.customer?.address && (
+                      <p className={styles.detailAddress}>
+                        {o.customer.address}, {o.customer.city}, {o.customer.governorate}
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -96,19 +146,19 @@ export default function AccountPage() {
 
         {tab === "Profile" && (
           <div className={styles.profile}>
-            <Row label={t("auth.fullName")} value={state.user.name} />
-            <Row label={t("auth.email")} value={state.user.email} />
-            <Row label={t("auth.phone")} value={state.user.phone || t("account.notSet")} />
+            <Row label={t("auth.fullName")} value={profile.name} />
+            <Row label={t("auth.email")} value={profile.email} />
+            <Row label={t("auth.phone")} value={profile.phone || t("account.notSet")} />
             <button className="btn btn--ghost">{t("account.editProfile")}</button>
           </div>
         )}
 
         {tab === "Addresses" && (
           <div className={styles.addresses}>
-            {state.user.address ? (
+            {profile.address ? (
               <div className={styles.address}>
                 <strong>{t("account.defaultAddress")}</strong>
-                <p>{state.user.address}, {state.user.city}, {state.user.governorate}</p>
+                <p>{profile.address}, {profile.city}, {profile.governorate}</p>
               </div>
             ) : (
               <p className={styles.noneYet}>{t("account.noAddresses")}</p>

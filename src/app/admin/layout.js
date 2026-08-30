@@ -1,17 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLang } from "@/context/LangContext";
 import { useAuth } from "@/context/AuthContext";
 import styles from "./admin.module.css";
+import { DashboardSidebar } from "@/components/ui/dashboard-sidebar";
+import { subscribeCollection } from "@/lib/store";
 
 export default function AdminLayout({ children }) {
   const pathname = usePathname();
   const { t } = useLang();
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
+  const [newOrders, setNewOrders] = useState(0);
+
+  useEffect(() => {
+    return subscribeCollection("orders", (list) =>
+      setNewOrders(list.filter((o) => o.status === "New").length),
+    );
+  }, []);
 
   const NAV = [
     { href: "/admin", label: t("admin.overview"), icon: "▤" },
@@ -27,27 +36,7 @@ export default function AdminLayout({ children }) {
   return (
     <div className={styles.shell}>
       <aside className={`${styles.sidebar} ${open ? styles.sidebarOpen : ""}`}>
-        <div className={styles.brand}>
-          <span className={`${styles.brandMark} keep-latin`}>RNE</span>
-          <span className={styles.brandSub}>{t("admin.brand")}</span>
-        </div>
-        <nav className={styles.nav}>
-          {NAV.map((n) => {
-            const active = pathname === n.href;
-            return (
-              <Link
-                key={n.href}
-                href={n.href}
-                className={`${styles.navLink} ${active ? styles.navActive : ""}`}
-                onClick={() => setOpen(false)}
-              >
-                <span className={styles.navIcon}>{n.icon}</span>
-                {n.label}
-              </Link>
-            );
-          })}
-        </nav>
-        <Link href="/" className={styles.backToSite}>{t("admin.viewStore")}</Link>
+        <DashboardSidebar onNavigate={() => setOpen(false)} counts={{ orders: newOrders }} />
       </aside>
 
       <div className={styles.content}>

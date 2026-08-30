@@ -5,18 +5,21 @@
   margin-bottom: 1.2rem;
 }
 .filterBtn {
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-fg);
+  border: 1px solid var(--btn-secondary-border);
+  backdrop-filter: var(--btn-blur);
+  -webkit-backdrop-filter: var(--btn-blur);
+
   font-family: var(--font-display);
   font-size: 0.76rem;
   font-weight: 600;
   padding: 0.45rem 0.9rem;
-  border: 1px solid var(--line);
   border-radius: 999px;
-  background: var(--white);
-  color: var(--ink-soft);
   transition: all 0.2s;
 }
 .filterBtn:hover { border-color: var(--ink); }
-.filterOn { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.filterOn { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
 
 .expandCell { background: #faf9f6 !important; padding: 0 !important; }
 .expand {
@@ -34,7 +37,7 @@
   margin: 0.8rem 0 0.4rem;
 }
 .expand h4:first-child { margin-top: 0; }
-.expand p { font-size: 0.86rem; color: var(--ink-soft); margin: 0.2rem 0; }
+.expand p { font-size: 0.86rem; color: var(--ink-dim); margin: 0.2rem 0; }
 
 .statusBtns { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.3rem; }
 .statusBtn {
@@ -48,7 +51,7 @@
   transition: all 0.2s;
 }
 .statusBtn:hover { border-color: var(--ink); }
-.statusBtnOn { background: var(--amber); color: var(--ink); border-color: var(--amber); }
+.statusBtnOn { background: var(--amber); color: var(--ink); border-color: var(--accent-text); }
 .hint { margin-top: 0.7rem !important; font-size: 0.78rem !important; color: var(--amber-deep) !important; font-style: italic; }
 
 @media (max-width: 600px) {

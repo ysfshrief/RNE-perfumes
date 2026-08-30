@@ -10,10 +10,10 @@
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: var(--amber-deep);
+  color: var(--accent-text);
   margin-bottom: 0.4rem;
 }
-.infoItem p { color: var(--ink-soft); margin: 0; }
+.infoItem p { color: var(--ink-dim); margin: 0; }
 
 .formWrap {
   background: var(--white);
@@ -28,7 +28,7 @@
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--ink-soft);
+  color: var(--ink-dim);
 }
 .field input, .field textarea {
   padding: 0.75rem 0.9rem;
@@ -39,7 +39,7 @@
   background: var(--paper);
   resize: vertical;
 }
-.field input:focus, .field textarea:focus { outline: none; border-color: var(--amber); }
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--accent-text); }
 
 .sent { text-align: center; padding: 2rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.8rem; }
 .sentMark {
@@ -82,7 +82,7 @@
 }
 .socialBtn:hover {
   background: var(--burgundy);
-  border-color: var(--burgundy);
+  border-color: var(--accent-text);
   color: #fff;
   transform: translateY(-2px);
 }

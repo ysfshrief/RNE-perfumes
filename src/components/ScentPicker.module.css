@@ -23,7 +23,7 @@
   transition: border-color 0.3s, background 0.3s;
 }
 .slotFilled {
-  border-color: var(--amber);
+  border-color: var(--accent-text);
   background: rgba(139, 26, 43, 0.03);
 }
 
@@ -55,7 +55,7 @@
 }
 .select:focus {
   outline: none;
-  border-color: var(--amber);
+  border-color: var(--accent-text);
   box-shadow: 0 0 0 3px rgba(139, 26, 43, 0.1);
 }
 .scentTag {
@@ -65,7 +65,7 @@
   transform: translateY(-50%);
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--amber);
+  color: var(--accent-text);
   pointer-events: none;
 }
 
@@ -85,6 +85,13 @@
 }
 
 .addBtn {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  border: 1px solid var(--btn-primary-border);
+  box-shadow: var(--btn-shadow), var(--btn-inner);
+  backdrop-filter: var(--btn-blur);
+  -webkit-backdrop-filter: var(--btn-blur);
+
   font-size: 0.95rem;
   padding: 1rem;
 }

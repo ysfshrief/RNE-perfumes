@@ -1,14 +1,20 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 import ProductCard from "@/components/ProductCard";
+import ProductRow from "@/components/ProductRow";
+import Discovery from "@/components/Discovery";
+import BrandStory from "@/components/BrandStory";
 import TestPackageBanner from "@/components/TestPackageBanner";
+import Hero from "@/components/Hero";
 import WhatsApp from "@/components/WhatsApp";
 import AdSlider from "@/components/AdSlider";
 import SpinWheel from "@/components/SpinWheel";
 import { useProducts, normalizeImageUrl } from "@/context/ProductContext";
 import { useLang } from "@/context/LangContext";
 import { useConfig } from "@/context/ConfigContext";
+import { familyKeys } from "@/data/productMeta";
 import styles from "./home.module.css";
 
 export default function HomePage() {
@@ -20,6 +26,26 @@ export default function HomePage() {
   const featured = products.filter((p) => p.bestSeller).slice(0, 3);
   const fresh = products.slice(0, 4);
 
+  // Collections are derived from the live catalogue. A collection is only
+  // rendered when it actually has products, so no empty decorative sections.
+  const collections = useMemo(() => {
+    const byFamily = (key) => products.filter((p) => familyKeys(p).includes(key));
+    const candidates = [
+      { key: "oud",    title: lang === "ar" ? "العود" : "Oud",    items: byFamily("oud") },
+      { key: "woody",  title: lang === "ar" ? "الأخشاب" : "Woody", items: byFamily("woody") },
+      { key: "floral", title: lang === "ar" ? "الزهور" : "Floral", items: byFamily("floral") },
+      { key: "fresh",  title: lang === "ar" ? "المنعش" : "Fresh",  items: [...byFamily("fresh"), ...byFamily("citrus")] },
+      { key: "summer", title: lang === "ar" ? "صيفي" : "Summer",  items: products.filter((p) => (p.season || []).includes("Summer")), category: "Summer" },
+      { key: "winter", title: lang === "ar" ? "شتوي" : "Winter",  items: products.filter((p) => (p.season || []).includes("Winter")), category: "Winter" },
+    ];
+    // De-duplicate items inside each collection, require at least 2 products,
+    // and cap the homepage at three collections so the page stays editorial.
+    return candidates
+      .map((c) => ({ ...c, items: [...new Map(c.items.map((p) => [p.id, p])).values()].slice(0, 3) }))
+      .filter((c) => c.items.length >= 2)
+      .slice(0, 3);
+  }, [products, lang]);
+
   const cats = (config.categories || []).map((c) => ({
     label: lang === "ar" ? c.label : c.labelEn,
     href: `/shop?category=${c.key}`,
@@ -29,21 +55,7 @@ export default function HomePage() {
 
   return (
     <>
-      <section className={styles.hero}>
-        <div className="container">
-          <p className={styles.heroEyebrow}>{t("home.heroEyebrow")}</p>
-          <h1 className={styles.heroTitle}>
-            {t("home.heroTitle1")} <em>{t("home.heroTitleEm")}</em>
-            <br /> {t("home.heroTitle2")}
-          </h1>
-          <p className={styles.heroLead}>{t("home.heroLead")}</p>
-          <div className={styles.heroActions}>
-            <Link href="/shop" className="btn btn--solid">{t("home.shopCollection")}</Link>
-            <Link href="/shop?offers=true" className="btn btn--ghost">{t("home.viewOffers")}</Link>
-          </div>
-        </div>
-        <div className={`${styles.heroMark} keep-latin`} aria-hidden="true">RNE</div>
-      </section>
+      <Hero />
 
       <AdSlider />
 
@@ -65,26 +77,34 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="section container">
-        <div className={styles.sectionHead}>
-          <div>
-            <p className="eyebrow">{t("home.bestSellers")}</p>
-            <h2 className={styles.sectionTitle}>{t("home.mostLoved")}</h2>
-          </div>
-          <Link href="/shop" className={styles.seeAll}>{t("common.viewAll")}</Link>
-        </div>
-        <div className={styles.grid}>
-          {featured.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
-      </section>
+      <ProductRow
+        id="featured"
+        eyebrow={t("home.bestSellers")}
+        title={t("home.mostLoved")}
+        products={featured}
+        href="/shop"
+      />
 
       {testPackage && (
         <section className="section container">
           <TestPackageBanner product={testPackage} />
         </section>
       )}
+
+      <Discovery />
+
+      {collections.map((c) => (
+        <ProductRow
+          key={c.key}
+          id={`collection-${c.key}`}
+          eyebrow={t("collection.label")}
+          title={c.title}
+          products={c.items}
+          href={`/shop?category=${c.category || ""}`}
+        />
+      ))}
+
+      <BrandStory />
 
       <section className={styles.editorial}>
         <div className="container">
