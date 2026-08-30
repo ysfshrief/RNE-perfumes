@@ -282,7 +282,13 @@ export function getProductBySlug(slug) {
 }
 
 export function getMinPrice(product) {
-  return Math.min(...product.sizes.map((s) => s.price));
+  // Defensive: a saved override could contain a blank/zero price (e.g. the
+  // field was momentarily empty while editing). Ignore non-positive values
+  // so the storefront never advertises a product at 0.
+  const prices = (product?.sizes || [])
+    .map((s) => Number(s?.price))
+    .filter((n) => Number.isFinite(n) && n > 0);
+  return prices.length ? Math.min(...prices) : 0;
 }
 
 export function isInStock(product) {

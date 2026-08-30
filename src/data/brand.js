@@ -12,12 +12,12 @@ export const socials = [
   {
     id: "facebook",
     label: "Facebook",
-    url: "https://www.facebook.com/share/1D6PjYWUKT/",
+    url: "https://www.facebook.com/profile.php?id=61593121110953",
   },
   {
     id: "instagram",
     label: "Instagram",
-    url: "https://www.instagram.com/raphael_nasim?igsh=MW4wcDh2eTg1NGp6MA==",
+    url: "https://www.instagram.com/rneperfumes/",
   },
   {
     id: "whatsapp",

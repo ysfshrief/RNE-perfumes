@@ -62,20 +62,21 @@ export async function readDoc(key, fallback) {
 // instantly, then syncs to Firestore in the background when enabled. This keeps
 // the admin (and this browser) responsive even if Firestore is slow/unreachable.
 export async function writeDoc(key, value) {
+  // Version stamp: if a Firestore write fails (e.g. security rules reject it),
+  // the next onSnapshot would push the *older* server copy back and silently
+  // undo the edit — a deleted coupon reappears, a new one vanishes. The stamp
+  // lets the subscriber ignore anything older than what we hold locally.
+  const stamped = { ...value, _v: Date.now() };
+
   // 1) Local-first: update cache and notify listeners immediately.
-  lsSet(key, value);
+  lsSet(key, stamped);
+  value = stamped;
 
   // 2) Sync to Firestore in the background (when enabled).
   if (isFirebaseEnabled && db) {
-    try {
-      const { doc, setDoc } = await loadFirestore();
-      await setDoc(doc(db, "settings", key), value, { merge: false });
-      return true;
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("Firestore write failed (kept local copy):", e?.message);
-      return false;
-    }
+    loadFirestore()
+      .then(({ doc, setDoc }) => setDoc(doc(db, "settings", key), value, { merge: false }))
+      .catch((e) => console.warn("Firestore write failed (kept local copy):", e?.message));
   }
   return true;
 }
@@ -113,6 +114,10 @@ export function subscribeDoc(key, fallback, callback) {
         (snap) => {
           if (snap.exists()) {
             const data = snap.data();
+            // Reject server copies older than the local one.
+            const localV = Number(lsGet(key, {})?._v || 0);
+            const remoteV = Number(data?._v || 0);
+            if (localV && remoteV < localV) return;
             // keep local cache in sync (without re-firing our own event loop)
             try { localStorage.setItem(LS_PREFIX + key, JSON.stringify(data)); } catch (e) {}
             callback(data);
@@ -146,15 +151,14 @@ export async function addToCollection(collectionName, item) {
   const next = [record, ...current];
   lsSet(`col:${collectionName}`, next);
 
-  // Firestore sync
+  // Firestore sync happens in the background. Awaiting it blocked the whole
+  // order flow whenever the network was slow or unreachable: the order was
+  // written locally, then everything after the await (stock decrement, coupon
+  // usage, cart clearing) silently never ran.
   if (isFirebaseEnabled && db) {
-    try {
-      const { doc, setDoc } = await loadFirestore();
-      await setDoc(doc(db, collectionName, id), record);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn(`Firestore add to ${collectionName} failed (kept local):`, e?.message);
-    }
+    loadFirestore()
+      .then(({ doc, setDoc }) => setDoc(doc(db, collectionName, id), record))
+      .catch((e) => console.warn(`Firestore add to ${collectionName} failed (kept local):`, e?.message));
   }
   return record;
 }
@@ -166,13 +170,9 @@ export async function updateInCollection(collectionName, id, patch) {
   lsSet(`col:${collectionName}`, next);
 
   if (isFirebaseEnabled && db) {
-    try {
-      const { doc, setDoc } = await loadFirestore();
-      await setDoc(doc(db, collectionName, id), patch, { merge: true });
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn(`Firestore update ${collectionName} failed:`, e?.message);
-    }
+    loadFirestore()
+      .then(({ doc, setDoc }) => setDoc(doc(db, collectionName, id), patch, { merge: true }))
+      .catch((e) => console.warn(`Firestore update ${collectionName} failed:`, e?.message));
   }
 }
 
