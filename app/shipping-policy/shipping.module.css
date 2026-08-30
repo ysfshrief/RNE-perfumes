@@ -1,0 +1,29 @@
+.socialBox {
+  margin-top: 2.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper);
+}
+.socialBox h3 { font-size: 1.05rem; margin-bottom: 0.4rem; }
+.socialBox p { color: var(--olive); font-size: 0.9rem; margin-bottom: 1rem; }
+.socialRow { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.socialBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--white);
+  transition: all 0.2s;
+}
+.socialBtn:hover {
+  background: var(--burgundy);
+  border-color: var(--accent-text);
+  color: #fff;
+  transform: translateY(-2px);
+}

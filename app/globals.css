@@ -1,0 +1,834 @@
+/* Tailwind runs alongside the existing CSS Modules. The design tokens
+   declared in :root below are the single source of truth for both. */
+@tailwind components;
+@tailwind utilities;
+
+/* Tailwind's filter/backdrop utilities compose from these custom properties,
+   which are normally emitted by @tailwind base. Preflight is disabled here
+   (it would restyle every existing CSS-Modules page), so the defaults are
+   declared manually — without them `backdrop-blur-*` resolves to `none`. */
+*, ::before, ::after {
+  --tw-blur: ;
+  --tw-brightness: ;
+  --tw-contrast: ;
+  --tw-grayscale: ;
+  --tw-hue-rotate: ;
+  --tw-invert: ;
+  --tw-saturate: ;
+  --tw-sepia: ;
+  --tw-drop-shadow: ;
+  --tw-backdrop-blur: ;
+  --tw-backdrop-brightness: ;
+  --tw-backdrop-contrast: ;
+  --tw-backdrop-grayscale: ;
+  --tw-backdrop-hue-rotate: ;
+  --tw-backdrop-invert: ;
+  --tw-backdrop-opacity: ;
+  --tw-backdrop-saturate: ;
+  --tw-backdrop-sepia: ;
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-ring-color: rgba(255,255,255,0.5);
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+}
+
+:root {
+  /* ── Surfaces: light, ivory, premium ───────────────── */
+  --bg: #FAF8F5;              /* page — warm ivory, not pure white */
+  --bg-2: #FFFFFF;            /* raised surface / cards */
+  --bg-3: #F2EFEA;            /* recessed / subtle bands */
+  --ink: #16130F;             /* primary text — warm charcoal */
+  --ink-dim: #5C5650;         /* secondary text */
+  --ink-faint: #8C857D;       /* tertiary / meta */
+  --on-ink: #FAF8F5;          /* text that sits ON an --ink filled surface */
+
+  /* Legacy aliases, kept so existing rules keep working. */
+  --paper: #FAF8F5;
+  --white: #FFFFFF;
+  --pure-white: #ffffff;
+  --sand: #F2EFEA;
+  --sand-deep: #E8E3DB;
+  --olive: #5C5650;
+  --line: rgba(22, 19, 15, 0.10);
+  --line-strong: rgba(22, 19, 15, 0.20);
+
+  /* Brand accent — burgundy, used sparingly */
+  --amber: #8B1A2B;
+  --amber-deep: #6e1422;
+  --burgundy: #8B1A2B;
+  --burgundy-soft: #a82438;
+  /* On a light background the brand burgundy already passes contrast,
+     so accent text uses the real brand colour. */
+  --accent-text: #8B1A2B;
+  --danger: #A8392A;
+  --success: #3F6B45;
+
+  /* ── Frosted white glass (Apple-style translucent acrylic) ── */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-strong: rgba(255, 255, 255, 0.86);
+  --glass-border: rgba(22, 19, 15, 0.08);
+  --glass-border-hi: rgba(22, 19, 15, 0.16);
+  --glass-blur: 20px;
+  --glass-shadow: 0 10px 34px -14px rgba(22, 19, 15, 0.22);
+
+  /* Type */
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Jost", system-ui, sans-serif;
+  --font-ar: "Rubik", "Cairo", system-ui, sans-serif;
+  --font-ar-display: "Cairo", "Rubik", system-ui, sans-serif;
+
+  /* Layout */
+  --max: 1440px;
+  --gutter: clamp(1rem, 4vw, 4rem);
+  --radius: 4px;
+  --radius-card: 18px;
+  --radius-pill: 999px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.container {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+  width: 100%;
+}
+
+/* Signature divider — echoes the logo's "— EAU DE PARFUM —" rule */
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--olive);
+  font-family: var(--font-display);
+}
+.rule::before,
+.rule::after {
+  content: "";
+  height: 1px;
+  background: var(--ink);
+  flex: 1;
+}
+.rule--short::before { flex: 0 0 40px; }
+.rule--short::after { flex: 0 0 40px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.95rem 1.8rem;
+  border-radius: var(--radius);
+  transition: background 0.25s, color 0.25s, border-color 0.25s, transform 0.1s;
+  border: 1px solid var(--ink);
+}
+.btn:active { transform: translateY(1px); }
+.btn--solid { background: var(--ink); color: var(--on-ink); }
+.btn--solid:hover { background: var(--amber-deep); border-color: var(--accent-text); }
+.btn--ghost { background: transparent; color: var(--ink); }
+.btn--ghost:hover { background: var(--ink); color: var(--on-ink); }
+.btn--full { width: 100%; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.eyebrow {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--accent-text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+.badge {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.28rem 0.6rem;
+  border-radius: var(--radius);
+}
+.badge--sale { background: var(--danger); color: var(--pure-white); }
+.badge--best { background: var(--amber); color: var(--pure-white); }
+.badge--out { background: var(--sand-deep); color: var(--ink-dim); }
+
+.price {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+.price__old {
+  color: var(--olive);
+  text-decoration: line-through;
+  font-weight: 500;
+  margin-left: 0.5rem;
+  font-size: 0.85em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.section {
+  padding-block: clamp(3.5rem, 8vw, 6.5rem);
+}
+
+.stars {
+  color: var(--amber);
+  letter-spacing: 0.1em;
+  font-size: 0.85rem;
+}
+
+/* ============================================
+   RTL / Arabic support
+   ============================================ */
+html[dir="rtl"] body {
+  font-family: var(--font-ar);
+  letter-spacing: 0;
+}
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3,
+html[dir="rtl"] h4 {
+  font-family: var(--font-ar-display);
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+html[dir="rtl"] .eyebrow,
+html[dir="rtl"] .rule,
+html[dir="rtl"] .btn,
+html[dir="rtl"] .badge {
+  font-family: var(--font-ar);
+  letter-spacing: 0.08em;
+}
+html[dir="rtl"] .price {
+  font-family: var(--font-ar);
+  font-weight: 700;
+}
+/* Arabic body reads better with a touch more line-height */
+html[dir="rtl"] p { line-height: 1.85; }
+
+/* Latin brand mark should stay Syne even in RTL */
+html[dir="rtl"] .keep-latin {
+  font-family: var(--font-display) !important;
+}
+
+/* Price line-through spacing flips */
+html[dir="rtl"] .price__old {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+/* Numerals: keep Latin digits for prices/quantities readability */
+.price, .qty span { font-feature-settings: "tnum"; }
+
+/* ============================================
+   Mobile-first polish
+   ============================================ */
+/* Prevent iOS input zoom (font-size >= 16px on inputs) */
+input, select, textarea { font-size: 16px; }
+
+/* Smoother tap targets on mobile */
+@media (max-width: 600px) {
+  .btn { padding: 0.9rem 1.4rem; }
+  a, button { -webkit-tap-highlight-color: transparent; }
+}
+
+/* Keep prices LTR even inside RTL so "650 ج.م" reads correctly */
+.price, .price__old { direction: ltr; unicode-bidi: isolate; }
+html[dir="rtl"] .price { text-align: inherit; }
+
+/* Isolate Latin brand text within RTL flow */
+.keep-latin { unicode-bidi: isolate; }
+
+/* ============================================
+   Premium responsive typography refinement
+   ============================================ */
+h1 { font-size: clamp(1.9rem, 5.2vw, 3.4rem); line-height: 1.06; }
+h2 { font-size: clamp(1.5rem, 3.6vw, 2.4rem); line-height: 1.12; }
+h3 { font-size: clamp(1.15rem, 2.4vw, 1.5rem); line-height: 1.2; }
+h4 { font-size: clamp(0.95rem, 1.8vw, 1.1rem); }
+
+body { font-size: 15.5px; }
+@media (min-width: 768px) { body { font-size: 16px; } }
+
+/* Comfortable minimum tap targets on mobile */
+@media (max-width: 600px) {
+  .btn { min-height: 46px; padding: 0.8rem 1.35rem; font-size: 0.8rem; }
+}
+
+/* ============================================
+   Global animations & transitions
+   ============================================ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Apply fade-up to main sections */
+section, .container > div {
+  animation: fadeUp 0.6s ease both;
+}
+
+/* Smooth transitions on interactive elements */
+a, button, input, select, textarea {
+  transition: all 0.25s ease;
+}
+
+/* Card hover lift */
+article, [class*="card"] {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Image hover scale */
+[class*="media"] img, [class*="thumb"] img {
+  transition: transform 0.4s ease;
+}
+[class*="media"]:hover img, [class*="thumb"]:hover img {
+  transform: scale(1.05);
+}
+
+/* Badge styling — burgundy */
+.badge {
+  background: var(--burgundy);
+  color: var(--pure-white);
+}
+.badge--best {
+  background: var(--ink);
+  color: var(--on-ink);
+}
+.badge--out {
+  background: var(--olive);
+}
+
+/* Button solid — burgundy accent */
+.btn--solid {
+  background: var(--ink);
+  color: var(--pure-white);
+  border-color: var(--ink);
+}
+.btn--solid:hover {
+  background: var(--burgundy);
+  border-color: var(--burgundy);
+  transform: translateY(-2px);
+}
+
+/* Stars — burgundy */
+.stars { color: var(--accent-text); }
+
+/* Price highlight */
+.price { color: var(--ink); font-weight: 700; }
+.price__old { color: var(--olive); text-decoration: line-through; }
+
+/* Eyebrow — burgundy accent */
+.eyebrow { color: var(--accent-text); }
+
+/* Rule line — use burgundy center dot */
+.rule::before { background: var(--burgundy); }
+
+/* ============================================
+   Disable effects via admin toggle classes
+   ============================================ */
+html.no-effects *, html.no-effects *::before, html.no-effects *::after {
+  animation: none !important;
+  transition: none !important;
+}
+html.no-fade section, html.no-fade .container > div {
+  animation: none !important;
+}
+html.no-hover-lift article:hover, html.no-hover-lift [class*="card"]:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+html.no-image-zoom [class*="media"]:hover img, html.no-image-zoom [class*="thumb"]:hover img {
+  transform: none !important;
+}
+html.no-transitions *, html.no-transitions *::before, html.no-transitions *::after {
+  transition-duration: 0s !important;
+}
+html.no-parallax [class*="heroMark"] {
+  animation: none !important;
+}
+
+/* ============================================
+   More impressive visual effects
+   ============================================ */
+
+/* Staggered fade-in for card grids */
+[class*="grid"] > *:nth-child(1) { animation-delay: 0.05s; }
+[class*="grid"] > *:nth-child(2) { animation-delay: 0.12s; }
+[class*="grid"] > *:nth-child(3) { animation-delay: 0.19s; }
+[class*="grid"] > *:nth-child(4) { animation-delay: 0.26s; }
+[class*="grid"] > *:nth-child(5) { animation-delay: 0.33s; }
+[class*="grid"] > *:nth-child(6) { animation-delay: 0.4s; }
+
+/* Smooth underline animation on links */
+a { position: relative; }
+
+/* Glowing accent border on focus */
+input:focus, select:focus, textarea:focus {
+  box-shadow: 0 0 0 3px rgba(139, 26, 43, 0.15) !important;
+}
+
+/* Card hover — elegant lift + shadow spread */
+article:hover, [class*="card"]:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(10, 10, 10, 0.1);
+}
+
+/* Button press effect */
+.btn:active, button:active {
+  transform: scale(0.97);
+}
+
+/* Subtle shimmer on badges */
+@keyframes shimmer {
+  0% { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
+}
+.badge {
+  background-size: 200% 100%;
+  background-image: linear-gradient(90deg, var(--burgundy) 0%, #a82440 45%, var(--burgundy) 55%, var(--burgundy) 100%);
+  animation: shimmer 3s ease infinite;
+}
+.badge--best {
+  background-image: none;
+  animation: none;
+}
+
+/* Page transition feel */
+main {
+  animation: fadeIn 0.5s ease both;
+}
+
+/* Smooth scroll behavior */
+html { scroll-behavior: smooth; }
+
+/* Hero watermark subtle float */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* WhatsApp button entrance */
+@keyframes bounceIn {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   LIQUID GLASS SYSTEM
+   Semi-transparent surfaces with backdrop blur, subtle
+   borders and a single soft top highlight. Background
+   media must stay visible through the glass.
+   ═══════════════════════════════════════════════════════ */
+.glass {
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--glass-shadow);
+}
+/* Single restrained highlight along the top edge */
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+  pointer-events: none;
+}
+.glass--strong { background: var(--glass-bg-strong); }
+
+/* Glass pill tag — used for fragrance families / notes / badges */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  line-height: 1;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  color: var(--ink-dim);
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+.pill--accent {
+  background: var(--burgundy);
+  border-color: var(--burgundy);
+  color: #fff;
+}
+
+/* ── Editorial typography ─────────────────────────────── */
+.editorial {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+}
+html[lang="ar"] .editorial, html[dir="rtl"] .editorial {
+  font-family: var(--font-ar-display);
+  letter-spacing: 0;
+  line-height: 1.15;
+}
+.editorial--hero { font-size: clamp(2.6rem, 9vw, 7rem); }
+.editorial--section { font-size: clamp(1.9rem, 5vw, 3.6rem); }
+
+/* Section eyebrow on dark */
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+html[dir="rtl"] .eyebrow { font-family: var(--font-ar); letter-spacing: 0.1em; }
+
+/* ── Buttons on dark ─────────────────────────────────── */
+.btn--solid {
+  background: var(--ink);
+  color: var(--on-ink);
+  border-color: var(--ink);
+}
+.btn--solid:hover { background: var(--burgundy); border-color: var(--burgundy); color: #fff; }
+.btn--solid:hover {
+  background: var(--burgundy);
+  border-color: var(--burgundy);
+  color: #fff;
+}
+.btn--ghost {
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.btn--ghost:hover { background: var(--glass-bg-strong); border-color: var(--ink); }
+
+/* Focus visibility (accessibility) */
+:focus-visible {
+  outline: 2px solid var(--burgundy);
+  outline-offset: 3px;
+}
+
+/* ── Reduced motion ──────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   FROSTED GLASS CONTROLS
+   Applied globally so buttons, inputs and selects share the
+   same translucent language as the product cards.
+   ═══════════════════════════════════════════════════════ */
+
+/* Ghost / secondary buttons */
+.btn--ghost,
+button.btn--ghost {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 16px -10px rgba(22, 19, 15, 0.25);
+}
+.btn--ghost:hover { background: var(--glass-bg-strong); border-color: var(--line-strong); }
+
+/* Solid buttons keep their weight but gain a soft lift */
+.btn--solid { box-shadow: 0 6px 20px -10px rgba(22, 19, 15, 0.45); }
+
+/* Form controls — frosted, not flat white */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+textarea,
+select {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px) saturate(130%);
+  -webkit-backdrop-filter: blur(12px) saturate(130%);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  color: var(--ink);
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+input:focus, textarea:focus, select:focus {
+  background: var(--glass-bg-strong);
+  border-color: var(--burgundy);
+  outline: none;
+}
+input::placeholder, textarea::placeholder { color: var(--ink-faint); }
+
+/* Surfaces that read as panels */
+.card, .panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--glass-shadow);
+}
+
+/* The auth pages sit on photography and need light-on-dark controls instead */
+[data-slot="glass-card"] input,
+[data-slot="glass-card"] textarea,
+[data-slot="glass-card"] select {
+  background: rgba(0, 0, 0, 0.35);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+[data-slot="glass-card"] input::placeholder { color: rgba(255, 255, 255, 0.6); }
+[data-slot="glass-card"] input:focus,
+[data-slot="glass-card"] textarea:focus,
+[data-slot="glass-card"] select:focus {
+  background: rgba(0, 0, 0, 0.45);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* ── Frosted glass on ALL buttons ───────────────────────
+   Primary buttons were opaque, so the glass language only
+   showed on inputs. These keep enough contrast to pass
+   while genuinely reading as frosted. */
+.btn,
+button.btn,
+.btn--solid,
+.btn--ghost {
+  position: relative;
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  border-radius: var(--radius-pill);
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Primary: tinted dark glass rather than flat charcoal */
+.btn--solid {
+  background: rgba(22, 19, 15, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--on-ink);
+  box-shadow: 0 8px 24px -12px rgba(22, 19, 15, 0.55),
+              inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+.btn--solid:hover {
+  background: rgba(139, 26, 43, 0.9);
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
+}
+
+/* Secondary: light frosted */
+.btn--ghost {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--glass-border);
+  color: var(--ink);
+  box-shadow: 0 6px 20px -14px rgba(22, 19, 15, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+.btn--ghost:hover { background: rgba(255, 255, 255, 0.78); transform: translateY(-1px); }
+
+/* Small/admin buttons pick up the same treatment */
+[class*="btnSm"], [class*="filterBtn"], [class*="sizeBtn"], [class*="chip"] {
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+}
+
+/* The auth cards sit on photography — keep their own dark glass buttons */
+[data-slot="glass-card"] .btn--solid,
+[data-slot="glass-card"] .btn--ghost { backdrop-filter: none; }
+
+
+/* ═══════════════════════════════════════════════════════
+   BUTTON DESIGN SYSTEM
+   One token set, three variants. Module-scoped buttons opt
+   in by using these tokens instead of redefining their own
+   surface, so every button in the app stays consistent.
+   ═══════════════════════════════════════════════════════ */
+:root {
+  --btn-radius: var(--radius-pill);
+  --btn-blur: blur(14px) saturate(150%);
+  --btn-ring: 0 0 0 3px rgba(139, 26, 43, 0.18);
+
+  /* Primary — tinted dark glass */
+  --btn-primary-bg: rgba(22, 19, 15, 0.82);
+  --btn-primary-bg-hover: rgba(139, 26, 43, 0.88);
+  --btn-primary-fg: var(--on-ink);
+  --btn-primary-border: rgba(255, 255, 255, 0.16);
+
+  /* Secondary — light frosted */
+  --btn-secondary-bg: rgba(255, 255, 255, 0.55);
+  --btn-secondary-bg-hover: rgba(255, 255, 255, 0.82);
+  --btn-secondary-fg: var(--ink);
+  --btn-secondary-border: var(--glass-border);
+
+  /* Quiet — text/icon buttons */
+  --btn-quiet-bg: transparent;
+  --btn-quiet-bg-hover: rgba(22, 19, 15, 0.06);
+  --btn-quiet-fg: var(--ink-dim);
+
+  --btn-shadow: 0 8px 24px -14px rgba(22, 19, 15, 0.5);
+  --btn-inner: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+/* Shared behaviour for every button variant */
+.btn,
+.btn--solid,
+.btn--ghost,
+.btn--quiet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--btn-radius);
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  backdrop-filter: var(--btn-blur);
+  -webkit-backdrop-filter: var(--btn-blur);
+  transition: background 0.25s ease, border-color 0.25s ease,
+              transform 0.2s ease, box-shadow 0.25s ease;
+  /* Comfortable touch target on every device */
+  min-height: 44px;
+}
+.btn:active, .btn--solid:active, .btn--ghost:active, .btn--quiet:active {
+  transform: translateY(0) scale(0.985);
+}
+.btn:focus-visible, .btn--solid:focus-visible,
+.btn--ghost:focus-visible, .btn--quiet:focus-visible {
+  outline: none;
+  box-shadow: var(--btn-ring);
+}
+.btn:disabled, .btn--solid:disabled, .btn--ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn--solid {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-fg);
+  border: 1px solid var(--btn-primary-border);
+  box-shadow: var(--btn-shadow), var(--btn-inner);
+}
+.btn--solid:hover:not(:disabled) {
+  background: var(--btn-primary-bg-hover);
+  border-color: rgba(255, 255, 255, 0.26);
+  transform: translateY(-1px);
+}
+
+.btn--ghost {
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-fg);
+  border: 1px solid var(--btn-secondary-border);
+  box-shadow: 0 6px 20px -16px rgba(22, 19, 15, 0.4),
+              inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+.btn--ghost:hover:not(:disabled) {
+  background: var(--btn-secondary-bg-hover);
+  transform: translateY(-1px);
+}
+
+.btn--quiet {
+  background: var(--btn-quiet-bg);
+  color: var(--btn-quiet-fg);
+  border: 1px solid transparent;
+  box-shadow: none;
+}
+.btn--quiet:hover:not(:disabled) { background: var(--btn-quiet-bg-hover); color: var(--ink); }

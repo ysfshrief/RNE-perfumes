@@ -1,0 +1,44 @@
+.savedFlash { background: rgba(106,146,104,0.2); color: var(--success); padding: 0.35rem 0.9rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; }
+
+.grid { display: flex; flex-direction: column; gap: 1.5rem; }
+.fullWidth { grid-column: 1 / -1; }
+.secTitle { font-size: 1rem; margin-bottom: 0.3rem; }
+.secNote { font-size: 0.8rem; color: var(--olive); margin-bottom: 1rem; }
+
+/* Colors */
+.colorGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+.colorField { display: flex; flex-direction: column; gap: 0.35rem; }
+.colorLabel { font-size: 0.82rem; font-weight: 500; }
+.colorInputWrap { display: flex; gap: 0.5rem; align-items: center; }
+.colorPicker { width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; padding: 2px; flex-shrink: 0; }
+.colorHex { flex: 1; padding: 0.5rem 0.6rem; border: 1px solid var(--line); border-radius: 8px; font-size: 0.85rem; font-family: var(--font-display); letter-spacing: 0.04em; }
+.colorHex:focus { outline: none; border-color: var(--accent-text); }
+.resetColors { margin-top: 0.8rem; color: var(--danger); font-size: 0.8rem; font-weight: 600; text-decoration: underline; }
+
+/* Effects */
+.effectsList { display: flex; flex-direction: column; gap: 0.9rem; }
+.effectRow { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid var(--line); }
+.effectRow:last-child { border-bottom: none; }
+.effectLabel { font-size: 0.9rem; font-weight: 500; display: block; }
+.effectDesc { font-size: 0.72rem; color: var(--olive); display: block; margin-top: 0.1rem; }
+.switch { width: 48px; height: 28px; border-radius: 999px; background: var(--line); position: relative; transition: background 0.2s; flex-shrink: 0; }
+.switchOn { background: var(--success); }
+.switch:disabled { opacity: 0.4; }
+.knob { position: absolute; top: 3px; inset-inline-start: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--white); transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.switchOn .knob { transform: translateX(20px); }
+html[dir="rtl"] .switchOn .knob { transform: translateX(-20px); }
+
+/* Slides */
+.slidesList { display: flex; flex-direction: column; gap: 1.2rem; }
+.slideCard { background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 1.1rem; }
+.slideNum { font-family: var(--font-display); font-size: 0.85rem; letter-spacing: 0.04em; display: block; margin-bottom: 0.8rem; }
+.slideFields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+.sfRow { display: flex; flex-direction: column; gap: 0.25rem; }
+.sfRow label { font-size: 0.72rem; color: var(--olive); text-transform: uppercase; letter-spacing: 0.04em; }
+.sfRow input { padding: 0.55rem 0.7rem; border: 1px solid var(--line); border-radius: 8px; font-size: 0.85rem; }
+.sfRow input:focus { outline: none; border-color: var(--accent-text); }
+
+@media (max-width: 600px) {
+  .colorGrid { grid-template-columns: 1fr; }
+  .slideFields { grid-template-columns: 1fr; }
+}

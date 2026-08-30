@@ -1,0 +1,17 @@
+.header {
+  background: var(--sand);
+  border-bottom: 1px solid var(--line);
+  padding-block: clamp(2.5rem, 6vw, 4.5rem);
+}
+.title { font-size: clamp(2rem, 5vw, 3.4rem); margin-top: 0.6rem; }
+.lead { margin-top: 1rem; max-width: 54ch; color: var(--ink-soft); font-size: 1.05rem; }
+
+.body {
+  padding-block: clamp(2.5rem, 6vw, 4rem);
+  max-width: 780px;
+}
+.body :global(h2) { font-size: 1.5rem; margin: 2rem 0 0.8rem; }
+.body :global(h3) { font-size: 1.15rem; margin: 1.5rem 0 0.6rem; }
+.body :global(p) { color: var(--ink-soft); line-height: 1.8; margin-bottom: 1rem; }
+.body :global(ul) { margin: 0 0 1.2rem 1.2rem; color: var(--ink-soft); line-height: 1.8; }
+.body :global(a) { color: var(--accent-text); text-decoration: underline; }
