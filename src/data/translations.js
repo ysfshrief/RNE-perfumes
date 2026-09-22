@@ -274,6 +274,9 @@ export const translations = {
     // Admin
     "admin.brand": "Admin",
     "admin.overview": "Overview",
+    "admin.homepage": "Homepage",
+    "admin.testers": "Testers",
+    "admin.signOut": "Sign out",
     "admin.storeGroup": "Store",
     "admin.marketingGroup": "Marketing",
     "admin.products": "Products",
@@ -737,6 +740,9 @@ export const translations = {
     // Admin
     "admin.brand": "الإدارة",
     "admin.overview": "نظرة عامة",
+    "admin.homepage": "الصفحة الرئيسية",
+    "admin.testers": "التيسترات",
+    "admin.signOut": "تسجيل الخروج",
     "admin.storeGroup": "المتجر",
     "admin.marketingGroup": "التسويق",
     "admin.products": "المنتجات",

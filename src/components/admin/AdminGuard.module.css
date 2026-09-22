@@ -1,0 +1,36 @@
+.wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+  background: var(--bg);
+}
+.box {
+  width: min(420px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 2rem;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--glass-shadow);
+  text-align: center;
+}
+.box h1 { font-size: var(--fs-h3); }
+.box p { color: var(--ink-dim); font-size: 0.95rem; }
+.lock { font-size: 1.8rem; }
+.muted { color: var(--ink-faint) !important; font-size: 0.82rem !important; }
+.input { padding: 0.8rem 1rem; text-align: center; letter-spacing: 0.4em; }
+.err { color: var(--danger) !important; font-size: 0.85rem !important; }
+.back { font-size: 0.85rem; color: var(--ink-dim); text-decoration: underline; }
+.spinner {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--line);
+  border-top-color: var(--ink);
+  animation: guardSpin 0.8s linear infinite;
+}
+@keyframes guardSpin { to { transform: rotate(360deg); } }

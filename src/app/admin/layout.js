@@ -1,17 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useLang } from "@/context/LangContext";
 import { useAuth } from "@/context/AuthContext";
 import styles from "./admin.module.css";
 import { DashboardSidebar } from "@/components/ui/dashboard-sidebar";
+import AdminGuard from "@/components/admin/AdminGuard";
+import { ToastProvider } from "@/components/admin/Toast";
 import { subscribeCollection } from "@/lib/store";
 
 export default function AdminLayout({ children }) {
-  const pathname = usePathname();
-  const { t } = useLang();
+  return (
+    <AdminGuard>
+      <ToastProvider>
+        <AdminShell>{children}</AdminShell>
+      </ToastProvider>
+    </AdminGuard>
+  );
+}
+
+// Only mounted once access is confirmed, so admin-only collections are never
+// subscribed to by an unauthorised visitor.
+function AdminShell({ children }) {
+  const { t, lang, toggle } = useLang();
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [newOrders, setNewOrders] = useState(0);
@@ -22,29 +33,34 @@ export default function AdminLayout({ children }) {
     );
   }, []);
 
-  const NAV = [
-    { href: "/admin", label: t("admin.overview"), icon: "▤" },
-    { href: "/admin/products", label: t("admin.products"), icon: "▦" },
-    { href: "/admin/orders", label: t("admin.orders"), icon: "▧" },
-    { href: "/admin/customers", label: t("admin.customers"), icon: "◉" },
-    { href: "/admin/reviews", label: t("admin.reviews"), icon: "★" },
-    { href: "/admin/discounts", label: t("admin.discounts"), icon: "%" },
-    { href: "/admin/content", label: t("admin.content"), icon: "▤" },
-    { href: "/admin/settings", label: t("admin.settings"), icon: "⚙" },
-  ];
+  // Close the mobile drawer with Escape.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   return (
     <div className={styles.shell}>
-      <aside className={`${styles.sidebar} ${open ? styles.sidebarOpen : ""}`}>
+      <aside className={`${styles.sidebar} ${open ? styles.sidebarOpen : ""}`} aria-label={t("admin.brand")}>
         <DashboardSidebar onNavigate={() => setOpen(false)} counts={{ orders: newOrders }} />
       </aside>
 
       <div className={styles.content}>
         <header className={styles.topbar}>
-          <button className={styles.menuBtn} onClick={() => setOpen((v) => !v)} aria-label="Menu">☰</button>
+          <button
+            className={styles.menuBtn}
+            onClick={() => setOpen((v) => !v)}
+            aria-label="Menu"
+            aria-expanded={open}
+          >☰</button>
           <div className={styles.topbarRight}>
-            <span className={styles.adminName}>{t("admin.brand")} · {user?.name || user?.email || t("admin.brand")}</span>
-            <span className={`${styles.avatar} keep-latin`}>R</span>
+            <button type="button" className={styles.langSwitch} onClick={toggle} aria-label="Switch language">
+              {lang === "ar" ? "EN" : "ع"}
+            </button>
+            <span className={styles.adminName}>{user?.name || user?.email || t("admin.brand")}</span>
+            <span className={`${styles.avatar} keep-latin`} aria-hidden="true">R</span>
           </div>
         </header>
         <div className={styles.main}>{children}</div>

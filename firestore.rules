@@ -30,10 +30,21 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Orders
+    // Orders — a customer can only create an order that belongs to them and
+    // starts in the "New" state (they cannot mark their own order Delivered).
     match /orders/{orderId} {
-      allow create: if request.auth != null;
-      allow read, update, delete: if isAdmin();
+      allow create: if request.auth != null
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == "New";
+      allow read: if isAdmin()
+        || (request.auth != null && resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // Customer records written at checkout (id: cust_<email>)
+    match /customers/{customerId} {
+      allow create, update: if request.auth != null;
+      allow read, delete: if isAdmin();
     }
 
     // Customer accounts (each user can read/write their own doc)

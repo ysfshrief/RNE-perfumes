@@ -5,10 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Package, ShoppingBag, Users, Star, Percent,
-  FileText, Settings, LogOut, Store, ChevronRight,
+  FileText, Settings, LogOut, Store, ChevronRight, Home, FlaskConical,
 } from "lucide-react";
 import { useLang } from "@/context/LangContext";
 import { useAuth } from "@/context/AuthContext";
+import { lockDemo } from "@/lib/adminAccess";
+import { useRouter } from "next/navigation";
 
 type NavItemData = {
   href: string;
@@ -71,8 +73,14 @@ export function DashboardSidebar({
   counts?: Record<string, number>;
 }) {
   const { t } = useLang();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
+  const logout = async () => {
+    lockDemo();
+    await signOut();
+    router.push("/");
+  };
 
   const groups: NavGroupData[] = [
     {
@@ -82,6 +90,7 @@ export function DashboardSidebar({
       heading: t("admin.storeGroup"),
       items: [
         { href: "/admin/products", title: t("admin.products"), icon: Package },
+        { href: "/admin/testers", title: t("admin.testers"), icon: FlaskConical },
         { href: "/admin/orders", title: t("admin.orders"), icon: ShoppingBag, badge: counts.orders || undefined },
         { href: "/admin/customers", title: t("admin.customers"), icon: Users },
         { href: "/admin/reviews", title: t("admin.reviews"), icon: Star },
@@ -90,6 +99,7 @@ export function DashboardSidebar({
     {
       heading: t("admin.marketingGroup"),
       items: [
+        { href: "/admin/homepage", title: t("admin.homepage"), icon: Home },
         { href: "/admin/discounts", title: t("admin.discounts"), icon: Percent },
         { href: "/admin/content", title: t("admin.content"), icon: FileText },
       ],
@@ -152,6 +162,14 @@ export function DashboardSidebar({
             </span>
           </div>
         </div>
+        <button
+          type="button"
+          onClick={logout}
+          className="mt-1 flex items-center gap-2.5 rounded-[6px] px-2.5 py-[7px] text-start text-[13px] text-white/60 transition-colors hover:bg-white/5 hover:text-white"
+        >
+          <LogOut className="h-4 w-4 rtl:rotate-180" strokeWidth={1.5} />
+          {t("admin.signOut")}
+        </button>
       </div>
     </div>
   );
