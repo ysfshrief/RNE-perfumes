@@ -524,10 +524,9 @@ input:focus, select:focus, textarea:focus {
   animation: none;
 }
 
-/* Page transition feel */
-main {
-  animation: fadeIn 0.5s ease both;
-}
+/* (No animation on <main>: a filled opacity animation makes it a stacking
+   context, which trapped every drawer/overlay inside the page beneath the
+   sticky header. Sections already fade in individually.) */
 
 /* Smooth scroll behavior */
 html { scroll-behavior: smooth; }

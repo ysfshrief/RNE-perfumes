@@ -134,7 +134,7 @@ html[dir="rtl"] .desc { font-size: 1.1rem; }
   font-size: 0.85rem;
   letter-spacing: 0.04em;
   padding: 0.85rem 1.5rem;
-  border-radius: var(--radius);
+  border-radius: var(--radius-pill);
   transition: background 0.2s, gap 0.2s;
 }
 .banner:hover .cta {

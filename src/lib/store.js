@@ -192,8 +192,11 @@ export async function deleteFromCollection(collectionName, id) {
   }
 }
 
-// Subscribe to a whole collection (live). Returns unsubscribe.
-export function subscribeCollection(collectionName, callback) {
+// Subscribe to a collection (live). Returns unsubscribe.
+// `opts.where = [field, value]` limits the Firestore query to matching docs —
+// needed for customers, whom the security rules only allow to read their own
+// orders (an unfiltered query is rejected outright).
+export function subscribeCollection(collectionName, callback, opts = {}) {
   // seed from local
   const seeded = lsGet(`col:${collectionName}`, []);
   callback(seeded);
@@ -216,8 +219,27 @@ export function subscribeCollection(collectionName, callback) {
   if (isFirebaseEnabled && db) {
     let unsub = () => {};
     let cancelled = false;
-    loadFirestore().then(({ collection, onSnapshot, query, orderBy }) => {
+    loadFirestore().then(({ collection, onSnapshot, query, orderBy, where }) => {
       if (cancelled) return;
+      if (Array.isArray(opts.where)) {
+        // Filtered view: merge server matches into the local cache instead of
+        // replacing it (the cache also holds other people's data on shared
+        // admin devices). No orderBy → no composite index needed.
+        const [field, value] = opts.where;
+        unsub = onSnapshot(
+          query(collection(db, collectionName), where(field, "==", value)),
+          (snap) => {
+            const remote = snap.docs.map((d) => d.data());
+            const local = lsGet(`col:${collectionName}`, []);
+            const ids = new Set(remote.map((r) => r.id));
+            const merged = [...remote, ...local.filter((l) => !ids.has(l.id))]
+              .sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+            callback(merged);
+          },
+          (err) => console.warn(`Firestore subscribe ${collectionName} error:`, err?.message)
+        );
+        return;
+      }
       const handleSnap = (snap) => {
         const items = snap.docs.map((d) => d.data());
         // Never let an empty Firestore result wipe existing local data.

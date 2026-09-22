@@ -23,7 +23,13 @@ export default function AccountPage() {
   const [openOrder, setOpenOrder] = useState(null);
 
   // Live subscription: a new order shows up without a refresh or re-login.
-  useEffect(() => subscribeCollection("orders", setAllOrders), []);
+  // Customers may only read their own orders (Firestore rules), so the
+  // query is scoped to their UID when signed in with Firebase.
+  const uid = authUser?.uid && authUser.uid !== "local" ? authUser.uid : null;
+  useEffect(
+    () => subscribeCollection("orders", setAllOrders, uid ? { where: ["userId", uid] } : {}),
+    [uid]
+  );
 
   // Only this customer's orders. Match on UID first; fall back to the
   // normalised email so orders placed before signing in are still claimed.
