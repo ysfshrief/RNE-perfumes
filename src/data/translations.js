@@ -5,8 +5,8 @@ export const translations = {
   en: {
     // Common
     "common.currency": "EGP",
-    "common.viewAll": "See all →",
-    "common.view": "View →",
+    "common.viewAll": "See all",
+    "common.view": "View",
     "common.loading": "Loading…",
     "common.search": "Search",
     "common.apply": "Apply",
@@ -43,6 +43,7 @@ export const translations = {
     "home.shopCollection": "Shop the collection",
     "home.viewOffers": "View offers",
     "home.theCollection": "The Collection",
+    "home.shopCat": "Shop now",
     "home.forMen": "For Men",
     "home.forWomen": "For Women",
     "home.summer": "Summer",
@@ -476,8 +477,8 @@ export const translations = {
   ar: {
     // Common
     "common.currency": "ج.م",
-    "common.viewAll": "عرض الكل ←",
-    "common.view": "عرض ←",
+    "common.viewAll": "عرض الكل",
+    "common.view": "عرض",
     "common.loading": "جارٍ التحميل…",
     "common.search": "بحث",
     "common.apply": "تطبيق",
@@ -514,6 +515,7 @@ export const translations = {
     "home.shopCollection": "تسوّق المجموعة",
     "home.viewOffers": "شاهد العروض",
     "home.theCollection": "المجموعة",
+    "home.shopCat": "تسوّق الآن",
     "home.forMen": "رجالي",
     "home.forWomen": "حريمي",
     "home.summer": "صيفي",

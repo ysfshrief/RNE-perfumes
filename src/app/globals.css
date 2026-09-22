@@ -868,3 +868,32 @@ button.btn,
   box-shadow: none;
 }
 .btn--quiet:hover:not(:disabled) { background: var(--btn-quiet-bg-hover); color: var(--ink); }
+
+/* ═══════════════════════════════════════════════════════
+   "View all" link — one style for every section header.
+   Transparent with a hairline border (no white fill), ink on hover.
+   ═══════════════════════════════════════════════════════ */
+.link-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 42px;
+  padding: 0.55rem 1.15rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+html[dir="rtl"] .link-pill { letter-spacing: 0; font-size: 0.9rem; }
+.link-pill:hover { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
+.link-pill__arrow { transition: transform 0.25s ease; }
+html[dir="rtl"] .link-pill__arrow { transform: scaleX(-1); }
+.link-pill:hover .link-pill__arrow { transform: translate(2px, -2px); }
+html[dir="rtl"] .link-pill:hover .link-pill__arrow { transform: scaleX(-1) translate(2px, -2px); }

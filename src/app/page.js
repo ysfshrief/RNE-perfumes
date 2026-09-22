@@ -11,6 +11,7 @@ import Hero from "@/components/Hero";
 import WhatsApp from "@/components/WhatsApp";
 import AdSlider from "@/components/AdSlider";
 import SpinWheel from "@/components/SpinWheel";
+import { ArrowUpRight } from "@/components/icons";
 import { useProducts, normalizeImageUrl } from "@/context/ProductContext";
 import { useLang } from "@/context/LangContext";
 import { useConfig } from "@/context/ConfigContext";
@@ -50,7 +51,7 @@ export default function HomePage() {
     label: lang === "ar" ? c.label : c.labelEn,
     href: `/shop?category=${c.key}`,
     c: c.color,
-    img: c.image ? normalizeImageUrl(c.image) : null,
+    img: c.image ? normalizeImageUrl(c.image, 800) : null,
   }));
 
   return (
@@ -61,16 +62,20 @@ export default function HomePage() {
 
       <section className={styles.catStrip}>
         <div className="container">
-          <div className="rule">{t("home.theCollection")}</div>
+          <h2 className={`rule rule--lg ${styles.collectionRule}`}>{t("home.theCollection")}</h2>
           <div className={styles.cats}>
             {cats.map((cat) => (
-              <Link key={cat.href} href={cat.href} className={styles.cat} style={{ "--c": cat.c }}>
+              <Link key={cat.href} href={cat.href} className={styles.cat} style={{ "--c": cat.c }} data-zoom>
                 {cat.img && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={cat.img} alt="" className={styles.catImg} />
+                  <img src={cat.img} alt="" className={styles.catImg} loading="lazy" decoding="async"
+                    onError={(e) => { e.currentTarget.style.display = "none"; }} />
                 )}
-                <span className={styles.catLabel}>{cat.label}</span>
-                <span className={styles.catArrow}>→</span>
+                <span className={styles.catText}>
+                  <span className={styles.catLabel}>{cat.label}</span>
+                  <span className={styles.catCta}>{t("home.shopCat")}</span>
+                </span>
+                <span className={styles.catArrow} aria-hidden="true"><ArrowUpRight size={18} /></span>
               </Link>
             ))}
           </div>
@@ -140,7 +145,10 @@ export default function HomePage() {
             <p className="eyebrow">{t("home.theRange")}</p>
             <h2 className={styles.sectionTitle}>{t("home.exploreEvery")}</h2>
           </div>
-          <Link href="/shop" className={styles.seeAll}>{t("common.viewAll")}</Link>
+          <Link href="/shop" className="link-pill">
+            <span>{t("common.viewAll")}</span>
+            <ArrowUpRight size={16} className="link-pill__arrow" />
+          </Link>
         </div>
         <div className={styles.grid4}>
           {fresh.map((p) => (

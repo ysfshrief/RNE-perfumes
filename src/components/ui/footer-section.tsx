@@ -9,24 +9,30 @@ import { contact, socials } from "@/data/brand";
 import LogoRNE from "@/components/LogoRNE";
 import LogoJoe from "@/components/LogoJoe";
 import FooterAdminTrigger from "@/components/FooterAdminTrigger";
+import social from "./footer-social.module.css";
 
 // Brand marks are inline SVGs: lucide dropped third-party brand icons, and
 // this keeps the footer on the same icon system as the rest of the site.
 const SOCIAL_ICONS: Record<string, React.ReactNode> = {
   facebook: (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="size-[18px]" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z" />
     </svg>
   ),
   instagram: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-[18px]" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
       <rect x="2" y="2" width="20" height="20" rx="5" />
       <circle cx="12" cy="12" r="4" />
       <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
     </svg>
   ),
+  tiktok: (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6 0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64 0 3.33 2.76 5.7 5.69 5.7 3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48z" />
+    </svg>
+  ),
   whatsapp: (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="size-[18px]" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm5.5 14.1c-.2.6-1.2 1.1-1.7 1.2-.4.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.5-2.6-1.1-4.3-3.8-4.4-4-.1-.2-1-1.4-1-2.6 0-1.2.6-1.8.9-2.1.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.1.1.3 0 .5l-.4.5-.3.3c-.1.1-.3.3-.1.5.1.3.6 1 1.3 1.6.9.8 1.6 1 1.9 1.2.2.1.4.1.5-.1l.6-.7c.2-.2.3-.2.5-.1l1.7.8c.2.1.4.2.5.3.1.2.1.7-.1 1.3z" />
     </svg>
   ),
@@ -88,20 +94,22 @@ export function Footer() {
           <LogoRNE light size="lg" />
           <p className="max-w-xs text-sm text-white/70">{t("footer.tag")}</p>
 
-          <div className="flex gap-3 pt-2" aria-label={t("footer.followUs")}>
+          <ul className={`${social.list} m-0 list-none p-0`} aria-label={t("footer.followUs")}>
             {socials.map((s) => (
+              <li key={s.id}>
                 <a
-                  key={s.id}
                   href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.label}
-                  className="grid size-10 place-items-center rounded-full border border-white/20 text-white/80 transition-colors duration-300 hover:border-white hover:bg-white hover:text-[#16130F]"
+                  title={s.label}
+                  className={`${social.link} ${social[s.id] || ""}`}
                 >
-                  {SOCIAL_ICONS[s.id] ?? s.label[0]}
+                  {SOCIAL_ICONS[s.id] ?? <span aria-hidden="true">{s.label[0]}</span>}
                 </a>
+              </li>
             ))}
-          </div>
+          </ul>
         </AnimatedContainer>
 
         <div className="grid grid-cols-2 gap-8 md:grid-cols-3 xl:col-span-2">
