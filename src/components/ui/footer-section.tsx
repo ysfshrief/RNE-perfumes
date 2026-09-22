@@ -53,8 +53,8 @@ export function Footer() {
       links: [
         { title: t("footer.home"), href: "/" },
         { title: t("footer.allFragrances"), href: "/shop" },
-        { title: t("nav.men"), href: "/shop?category=Men" },
-        { title: t("nav.women"), href: "/shop?category=Women" },
+        { title: t("nav.men"), href: "/shop?gender=Men" },
+        { title: t("nav.women"), href: "/shop?gender=Women" },
       ],
     },
     {

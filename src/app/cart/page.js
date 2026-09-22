@@ -6,6 +6,7 @@ import { useShop } from "@/context/ShopContext";
 import { useLang } from "@/context/LangContext";
 import { useConfig } from "@/context/ConfigContext";
 import { computeTotals, validateCoupon, lineTotal, egp } from "@/lib/pricing";
+import { normalizeImageUrl, isImageUrl } from "@/lib/media";
 import styles from "./cart.module.css";
 
 export default function CartPage() {
@@ -40,6 +41,8 @@ export default function CartPage() {
     }
     setCoupon(res.coupon);
     setErr("");
+    // Carry the code to checkout so the customer doesn't have to re-enter it.
+    try { sessionStorage.setItem("rne-coupon", res.coupon.code); } catch (e) {}
   };
 
   if (state.cart.length === 0) {
@@ -61,35 +64,55 @@ export default function CartPage() {
 
       <div className={styles.layout}>
         <div className={styles.items}>
-          {state.cart.map((item) => (
+          {state.cart.map((item) => {
+            const img = item.image || item.color; // `color` = legacy cart items
+            const name = lang === "ar" ? item.nameAr || item.name : item.name;
+            return (
             <div key={item.key} className={styles.item}>
-              <Link href={`/product/${item.slug}`} className={styles.thumb} style={{ background: item.color }} />
+              <Link href={`/product/${item.slug}`} className={styles.thumb} aria-label={name}>
+                {isImageUrl(img) ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={normalizeImageUrl(img, 300)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} />
+                ) : null}
+              </Link>
               <div className={styles.itemInfo}>
-                <Link href={`/product/${item.slug}`}><h3>{item.name}</h3></Link>
-                <span className={styles.size}>{t("cart.sizeLabel")} {item.size}</span>
-                <span className={styles.itemPrice}>{item.price} {cur}</span>
+                <Link href={`/product/${item.slug}`}><h3>{name}</h3></Link>
+                <span className={styles.size}>{t("cart.sizeLabel")} <span dir="ltr">{item.size}</span></span>
+                {item.selectedScents?.length > 0 && (
+                  <ul className={styles.scents} aria-label={t("discovery.testers")}>
+                    {item.selectedScents.map((sc) => (
+                      <li key={sc.id}>{lang === "ar" ? sc.nameAr || sc.name : sc.name}</li>
+                    ))}
+                  </ul>
+                )}
+                <span className={`price ${styles.itemPrice}`}>{item.price} {cur}</span>
               </div>
               <div className={styles.itemControls}>
                 <div className={styles.qty}>
                   <button
+                    type="button"
                     onClick={() => dispatch({ type: "SET_QTY", payload: { key: item.key, qty: item.qty - 1 } })}
-                    aria-label="-"
+                    disabled={item.qty <= 1}
+                    aria-label={lang === "ar" ? "تقليل الكمية" : "Decrease quantity"}
                   >−</button>
                   <span>{item.qty}</span>
                   <button
                     onClick={() => dispatch({ type: "SET_QTY", payload: { key: item.key, qty: item.qty + 1 } })}
+                    type="button"
                     disabled={item.qty >= item.stock}
-                    aria-label="+"
+                    aria-label={lang === "ar" ? "زيادة الكمية" : "Increase quantity"}
                   >+</button>
                 </div>
-                <span className={styles.lineTotal}>{egp(lineTotal(item))} {cur}</span>
+                <span className={`price ${styles.lineTotal}`}>{egp(lineTotal(item))} {cur}</span>
                 <button
+                  type="button"
                   className={styles.remove}
                   onClick={() => dispatch({ type: "REMOVE_FROM_CART", payload: { key: item.key } })}
                 >{t("cart.remove")}</button>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <aside className={styles.summary}>
@@ -98,14 +121,17 @@ export default function CartPage() {
           <div className={styles.coupon}>
             <input
               type="text"
+              dir="ltr"
               placeholder={t("cart.coupon")}
+              aria-label={t("cart.coupon")}
               value={code}
               onChange={(e) => setCode(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") applyCoupon(); }}
             />
-            <button onClick={applyCoupon}>{t("common.apply")}</button>
+            <button type="button" onClick={applyCoupon}>{t("common.apply")}</button>
           </div>
           {err && <p className={styles.err}>{err}</p>}
-          {coupon && <p className={styles.ok}>{t("cart.applied", { label: lang === "ar" ? coupon.labelAr : coupon.labelEn, code: coupon.code })}</p>}
+          {coupon && <p className={styles.ok}>{t("cart.applied", { label: (lang === "ar" ? coupon.labelAr : coupon.labelEn) || coupon.code, code: coupon.code })}</p>}
           <p className={styles.hint}>{t("cart.couponHint")}</p>
 
           <div className={styles.rows}>

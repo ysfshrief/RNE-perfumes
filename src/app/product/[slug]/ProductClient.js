@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useShop } from "@/context/ShopContext";
 import { useLang } from "@/context/LangContext";
-import { reviews as allReviews, products } from "@/data/products";
+import { reviews as allReviews } from "@/data/products";
 import { pName, pTagline, pDescription, pIngredients, tNote, tGender, tSeason } from "@/data/productLocale";
+import { familyKeys } from "@/data/productMeta";
 import ProductCard from "@/components/ProductCard";
-import ProductImage from "@/components/ProductImage";
+import ProductGallery from "@/components/ProductGallery";
 import LearnMore from "@/components/LearnMore";
 import ScentPicker from "@/components/ScentPicker";
 import WhatsApp from "@/components/WhatsApp";
@@ -17,76 +18,93 @@ import styles from "./product.module.css";
 export default function ProductClient({ product: baseProduct, slug }) {
   const { dispatch, state } = useShop();
   const { t, lang } = useLang();
-  const { mergeProduct, allProducts, ready } = useProducts();
+  const { mergeProduct, allProducts, visibleProducts, ready } = useProducts();
   // Static product if it exists; otherwise find a custom product by slug from context.
   // Slugs may be URL-encoded (Arabic names), so decode before comparing.
   const decodedSlug = (() => { try { return decodeURIComponent(slug); } catch (e) { return slug; } })();
   const resolved = baseProduct || allProducts.find((p) => p.slug === slug || p.slug === decodedSlug) || null;
   const product = resolved ? mergeProduct(resolved) : null;
 
-  const [sizeIdx, setSizeIdx] = useState(0);
+  // Default to the first size that is actually in stock.
+  const firstInStock = product ? Math.max(0, product.sizes.findIndex((s) => Number(s.stock) > 0)) : 0;
+  const [sizeIdx, setSizeIdx] = useState(firstInStock);
   const [qty, setQty] = useState(1);
-  const [imgIdx, setImgIdx] = useState(0);
   const [added, setAdded] = useState(false);
+  useEffect(() => { setSizeIdx(firstInStock); setQty(1); }, [product?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!added) return;
+    const id = setTimeout(() => setAdded(false), 2200);
+    return () => clearTimeout(id);
+  }, [added]);
 
-  if (!product) {
+  const related = useMemo(() => {
+    if (!product) return [];
+    const fam = new Set(familyKeys(product));
+    return visibleProducts
+      .filter((p) => p.id !== product.id && !p.isDiscoverySet)
+      .map((p) => ({ p, score: (p.gender === product.gender ? 2 : 0) + familyKeys(p).filter((k) => fam.has(k)).length }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .map((x) => x.p);
+  }, [product, visibleProducts]);
+
+  if (!product || (product.hidden && ready)) {
     return (
-      <div className="container" style={{ padding: "4rem 0", textAlign: "center" }}>
-        <p>{!ready ? "..." : (lang === "ar" ? "المنتج غير موجود" : "Product not found")}</p>
+      <div className={`container ${styles.notFound}`}>
+        {!ready ? (
+          <div className={styles.loading} aria-busy="true"><span className={styles.spinner} /></div>
+        ) : (
+          <>
+            <h1>{lang === "ar" ? "المنتج غير موجود" : "Product not found"}</h1>
+            <p>{lang === "ar" ? "ربما تم نقله أو لم يعد متاحًا." : "It may have moved or is no longer available."}</p>
+            <Link href="/shop" className="btn btn--solid">{t("cart.shopBtn")}</Link>
+          </>
+        )}
       </div>
     );
   }
 
-  const size = product.sizes[sizeIdx] || product.sizes[0];
+  const size = product.sizes[sizeIdx] || product.sizes[0] || { size: "", price: 0, stock: 0 };
   const saved = state.wishlist.includes(product.id);
   const reviews = allReviews[product.id] || [];
-  const related = products.filter((p) => p.id !== product.id && p.gender === product.gender).slice(0, 3);
   const cur = t("common.currency");
+  const name = pName(product, lang);
+  const stock = Number(size.stock) || 0;
 
   const addToCart = () => {
-    if (size.stock <= 0) return;
+    if (stock <= 0) return;
     dispatch({ type: "ADD_TO_CART", payload: { product, size, qty } });
     setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
   };
+
+  const badges = (
+    <>
+      {size.oldPrice && <span className="pill pill--accent">{t("badge.sale")}</span>}
+      {product.bestSeller && <span className="pill">{t("badge.best")}</span>}
+    </>
+  );
 
   return (
     <>
-      <div className={`container ${styles.crumbs}`}>
-        <Link href="/">{t("product.home")}</Link> / <Link href="/shop">{t("product.shop")}</Link> /{" "}
-        <span>{pName(product, lang)}</span>
-      </div>
+      <nav className={`container ${styles.crumbs}`} aria-label={lang === "ar" ? "مسار التصفح" : "Breadcrumb"}>
+        <Link href="/">{t("product.home")}</Link> <span aria-hidden="true">/</span> <Link href="/shop">{t("product.shop")}</Link>{" "}
+        <span aria-hidden="true">/</span> <span aria-current="page">{name}</span>
+      </nav>
 
       <section className={`container ${styles.top}`}>
-        <div className={styles.gallery}>
-          <div className={styles.mainImg}>
-            <ProductImage product={product} index={imgIdx} />
-            <div className={styles.imgBadges}>
-              {size.oldPrice && <span className="badge badge--sale">{t("badge.sale")}</span>}
-              {product.bestSeller && <span className="badge badge--best">{t("badge.best")}</span>}
-            </div>
-          </div>
-          <div className={styles.thumbs}>
-            {product.images.map((c, i) => (
-              <button
-                key={i}
-                className={`${styles.thumb} ${i === imgIdx ? styles.thumbOn : ""}`}
-                onClick={() => setImgIdx(i)}
-                aria-label={`${i + 1}`}
-              >
-                <ProductImage product={product} index={i} showLabel={false} />
-              </button>
-            ))}
-          </div>
-        </div>
+        <ProductGallery product={product} name={name} badges={badges} lang={lang} />
 
         <div className={styles.info}>
           <div className={styles.infoMeta}>
             <span>{tGender(product.gender, lang)}</span>
-            <span>·</span>
-            <span>{product.season.map((s) => tSeason(s, lang)).join(" / ")}</span>
+            {product.season?.length > 0 && (
+              <>
+                <span aria-hidden="true">·</span>
+                <span>{product.season.map((s) => tSeason(s, lang)).join(" / ")}</span>
+              </>
+            )}
           </div>
-          <h1 className={styles.name}>{pName(product, lang)}</h1>
+          <h1 className={styles.name}>{name}</h1>
           {product.inspiredBy && (
             <p className={styles.inspiredBy}>
               {t("product.inspiredBy")} <span className="keep-latin">{product.inspiredBy}</span>
@@ -94,12 +112,14 @@ export default function ProductClient({ product: baseProduct, slug }) {
           )}
           <p className={styles.tagline}>{pTagline(product, lang)}</p>
 
-          <div className={styles.ratingRow}>
-            <span className="stars">{"★".repeat(Math.round(product.rating))}</span>
-            <span className={styles.ratingText}>
-              {product.rating} · {product.reviewCount} {t("product.reviews")}
-            </span>
-          </div>
+          {product.reviewCount > 0 && (
+            <div className={styles.ratingRow}>
+              <span className="stars" aria-hidden="true">{"★".repeat(Math.round(product.rating))}</span>
+              <span className={styles.ratingText}>
+                {product.rating} · {product.reviewCount} {t("product.reviews")}
+              </span>
+            </div>
+          )}
 
           <div className={styles.priceRow}>
             <span className="price">{size.price} {cur}</span>
@@ -108,37 +128,35 @@ export default function ProductClient({ product: baseProduct, slug }) {
 
           {product.isDiscoverySet ? (
             <>
-              <p className={styles.desc}>{t("discovery.description")}</p>
-              <div className={styles.priceRow}>
-                <span className="price">{product.sizes[0].price} {cur}</span>
-              </div>
+              <p className={styles.desc}>{pDescription(product, lang)}</p>
               <ScentPicker product={product} />
             </>
           ) : (
             <>
               <div className={styles.block}>
-                <h4>{t("product.size")}</h4>
-                <div className={styles.sizes}>
+                <h2 className={styles.blockTitle} id="size-label">{t("product.size")}</h2>
+                <div className={styles.sizes} role="radiogroup" aria-labelledby="size-label">
                   {product.sizes.map((s, i) => (
                     <button
                       key={s.size}
-                      className={`${styles.sizeBtn} ${i === sizeIdx ? styles.sizeOn : ""} ${
-                        s.stock <= 0 ? styles.sizeOut : ""
-                      }`}
+                      type="button"
+                      role="radio"
+                      aria-checked={i === sizeIdx}
+                      className={`${styles.sizeBtn} ${i === sizeIdx ? styles.sizeOn : ""} ${Number(s.stock) <= 0 ? styles.sizeOut : ""}`}
                       onClick={() => { setSizeIdx(i); setQty(1); }}
-                      disabled={s.stock <= 0}
+                      disabled={Number(s.stock) <= 0}
                     >
-                      {s.size}
-                      {s.stock <= 0 && <span className={styles.outTag}>{t("badge.soldOut")}</span>}
+                      <span dir="ltr">{s.size}</span>
+                      {Number(s.stock) <= 0 && <span className={styles.outTag}>{t("badge.soldOut")}</span>}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className={styles.stockNote}>
-                {size.stock > 0 ? (
-                  size.stock <= 5 ? (
-                    <span className={styles.low}>● {t("product.onlyLeft", { n: size.stock })}</span>
+              <div className={styles.stockNote} aria-live="polite">
+                {stock > 0 ? (
+                  stock <= 5 ? (
+                    <span className={styles.low}>● {t("product.onlyLeft", { n: stock })}</span>
                   ) : (
                     <span className={styles.avail}>● {t("product.inStock")}</span>
                   )
@@ -148,29 +166,39 @@ export default function ProductClient({ product: baseProduct, slug }) {
               </div>
 
               <div className={styles.buyRow}>
-                <div className={styles.qty}>
-                  <button onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="-">−</button>
-                  <span>{qty}</span>
+                <div className={styles.qty} role="group" aria-label={lang === "ar" ? "الكمية" : "Quantity"}>
+                  <button type="button" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1} aria-label={lang === "ar" ? "تقليل الكمية" : "Decrease quantity"}>−</button>
+                  <span aria-live="polite">{qty}</span>
                   <button
-                    onClick={() => setQty((q) => Math.min(size.stock, q + 1))}
-                    disabled={qty >= size.stock}
-                    aria-label="+"
+                    type="button"
+                    onClick={() => setQty((q) => Math.min(stock, q + 1))}
+                    disabled={qty >= stock}
+                    aria-label={lang === "ar" ? "زيادة الكمية" : "Increase quantity"}
                   >+</button>
                 </div>
                 <button
-                  className="btn btn--solid"
-                  style={{ flex: 1 }}
+                  type="button"
+                  className={`btn btn--solid ${styles.cartBtn} ${added ? styles.btnDone : ""}`}
                   onClick={addToCart}
-                  disabled={size.stock <= 0}
+                  disabled={stock <= 0}
                 >
-                  {added ? t("product.added") : size.stock > 0 ? t("product.addToCart") : t("product.soldOut")}
+                  {added ? t("product.added") : stock > 0 ? t("product.addToCart") : t("product.soldOut")}
                 </button>
               </div>
+              {added && (
+                <Link href="/cart" className={styles.viewCart}>{t("discovery.viewCart")} →</Link>
+              )}
 
+              {/* Saved state uses the same solid treatment as "Add to cart". */}
               <button
-                className={`btn btn--ghost btn--full ${styles.wishBtn}`}
+                type="button"
+                className={`btn btn--full ${saved ? "btn--solid" : "btn--ghost"} ${styles.wishBtn} ${saved ? styles.wishOn : ""}`}
+                aria-pressed={saved}
                 onClick={() => dispatch({ type: "TOGGLE_WISHLIST", payload: product.id })}
               >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill={saved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" aria-hidden="true" className={styles.heart}>
+                  <path d="M12 21C7 17 3 13.5 3 9a4.5 4.5 0 0 1 9-1 4.5 4.5 0 0 1 9 1c0 4.5-4 8-9 12z" />
+                </svg>
                 {saved ? t("product.savedWishlist") : t("product.addWishlist")}
               </button>
 
@@ -182,48 +210,42 @@ export default function ProductClient({ product: baseProduct, slug }) {
       </section>
 
       {!product.isDiscoverySet && product.notes?.top?.length > 0 && (
-      <section className={styles.notesSection}>
-        <div className="container">
-          <div className="rule">{t("product.fragranceNotes")}</div>
-          <div className={styles.pyramid}>
-            <div className={styles.noteRow}>
-              <span className={styles.noteTier}>{t("product.top")}</span>
-              <div className={styles.noteChips}>
-                {product.notes.top.map((n) => <span key={n} className={styles.chip}>{tNote(n, lang)}</span>)}
-              </div>
+        <section className={styles.notesSection}>
+          <div className="container">
+            <h2 className="rule">{t("product.fragranceNotes")}</h2>
+            <div className={styles.pyramid}>
+              {["top", "heart", "base"].map((tier) => (
+                (product.notes[tier] || []).length > 0 && (
+                  <div key={tier} className={styles.noteRow}>
+                    <span className={styles.noteTier}>{t(`product.${tier}`)}</span>
+                    <div className={styles.noteChips}>
+                      {product.notes[tier].map((n) => <span key={n} className={styles.chip}>{tNote(n, lang)}</span>)}
+                    </div>
+                  </div>
+                )
+              ))}
             </div>
-            <div className={styles.noteRow}>
-              <span className={styles.noteTier}>{t("product.heart")}</span>
-              <div className={styles.noteChips}>
-                {product.notes.heart.map((n) => <span key={n} className={styles.chip}>{tNote(n, lang)}</span>)}
+            {pIngredients(product, lang) && (
+              <div className={styles.ingredients}>
+                <h3>{t("product.ingredients")}</h3>
+                <p>{pIngredients(product, lang)}</p>
               </div>
-            </div>
-            <div className={styles.noteRow}>
-              <span className={styles.noteTier}>{t("product.base")}</span>
-              <div className={styles.noteChips}>
-                {product.notes.base.map((n) => <span key={n} className={styles.chip}>{tNote(n, lang)}</span>)}
-              </div>
-            </div>
+            )}
           </div>
-          <div className={styles.ingredients}>
-            <h4>{t("product.ingredients")}</h4>
-            <p>{pIngredients(product, lang)}</p>
-          </div>
-        </div>
-      </section>
+        </section>
       )}
 
       <section className={`container ${styles.reviews}`}>
-        <div className="rule rule--short">{t("product.reviewsHead")}</div>
+        <h2 className="rule rule--short">{t("product.reviewsHead")}</h2>
         {reviews.length === 0 ? (
           <p className={styles.noReviews}>{t("product.noReviews")}</p>
         ) : (
           <div className={styles.reviewList}>
             {reviews.map((r, i) => (
-              <div key={i} className={styles.review}>
+              <div key={`${r.name}-${i}`} className={styles.review}>
                 <div className={styles.reviewHead}>
                   <strong>{r.name}</strong>
-                  <span className="stars">{"★".repeat(r.rating)}</span>
+                  <span className="stars" aria-label={`${r.rating}/5`}>{"★".repeat(r.rating)}</span>
                 </div>
                 <p className={styles.reviewText}>{r.text}</p>
                 <span className={styles.reviewDate}>{r.date}</span>

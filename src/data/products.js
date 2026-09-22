@@ -254,21 +254,22 @@ export const products = [
     slug: "discovery-set",
     name: "Test Package",
     inspiredBy: null,
-    tagline: "Choose 6 testers and find your signature",
+    // {n} is replaced with testerCount everywhere it is displayed.
+    tagline: "Choose {n} testers and find your signature",
     description:
-      "Can't decide? Try before you commit. Pick any 6 fragrances from our collection — each as a 5ml tester vial — and discover your perfect scent. One of each, no repeats.",
+      "Can't decide? Try before you commit. Pick any {n} fragrances from our collection — each as a 5ml tester vial — and discover your perfect scent. One of each, no repeats.",
     gender: "Unisex",
     season: ["Summer", "Winter"],
     notes: { top: [], heart: [], base: [] },
     ingredients: "",
     sizes: [
-      { size: "6 × 5ml", price: 350, oldPrice: null, stock: 50 },
+      { size: "5 × 5ml", price: 350, oldPrice: null, stock: 50 },
     ],
     rating: 4.9,
     reviewCount: 0,
     bestSeller: true,
     isDiscoverySet: true,
-    testerCount: 6,
+    testerCount: 5,       // single source of truth — admin-editable (Admin → Testers)
     maxPerScent: 1,
     image: "/products/test-package.jpg",
     images: ["/products/test-package.jpg"],
@@ -292,7 +293,20 @@ export function getMinPrice(product) {
 }
 
 export function isInStock(product) {
-  return product.sizes.some((s) => s.stock > 0);
+  return (product?.sizes || []).some((s) => Number(s.stock) > 0);
+}
+
+export const DEFAULT_TESTER_COUNT = 5;
+
+/** How many testers the package contains (admin-editable, 2–12). */
+export function testerCount(product) {
+  const n = Number(product?.testerCount);
+  return Number.isInteger(n) && n >= 2 && n <= 12 ? n : DEFAULT_TESTER_COUNT;
+}
+
+/** Number formatted for the UI language (Arabic-Indic digits in Arabic). */
+export function localNum(n, lang) {
+  return lang === "ar" ? Number(n).toLocaleString("ar-EG") : String(n);
 }
 
 // Helper: is this image value a real photo URL or local path vs a color placeholder?

@@ -389,9 +389,12 @@ body { font-size: 15.5px; }
 /* ============================================
    Global animations & transitions
    ============================================ */
+/* Ends at `transform: none` (not translateY(0)): a lingering transform turns
+   every section into the containing block for position:fixed children, so
+   overlays/lightboxes inside a section could not cover the page. */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 @keyframes fadeIn {
   from { opacity: 0; }

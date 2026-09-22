@@ -1,3 +1,5 @@
+import { testerCount, localNum } from "./products";
+
 // Arabic localized content for products, keyed by product id.
 
 export const productAr = {
@@ -59,9 +61,9 @@ export const productAr = {
   },
   "rne-discovery": {
     name: "تيست باكيدچ",
-    tagline: "اختار ٦ تيسترات واكتشف عطرك المفضّل",
+    tagline: "اختار {n} تيسترات واكتشف عطرك المفضّل",
     description:
-      "مش متأكد؟ جرّب قبل ما تشتري. اختار أي ٦ عطور من مجموعتنا — كل واحد كتيستر ٥ مل — واكتشف ريحتك المفضّلة. نوع واحد من كل عطر، بدون تكرار.",
+      "مش متأكد؟ جرّب قبل ما تشتري. اختار أي {n} عطور من مجموعتنا — كل واحد كتيستر ٥ مل — واكتشف ريحتك المفضّلة. نوع واحد من كل عطر، بدون تكرار.",
     ingredients: "",
   },
   "rne-09": {
@@ -100,17 +102,37 @@ export const noteMap = {
 const genderMap = { Men: "رجالي", Women: "حريمي", Unisex: "للجنسين" };
 const seasonMap = { Summer: "صيفي", Winter: "شتوي" };
 
+// Localised product text. Order of precedence:
+//   1. admin-entered field on the product (nameAr / taglineAr / …)
+//   2. the built-in Arabic catalogue above
+//   3. the English value
+// "{n}" is filled with the tester count so the Test Package copy always
+// matches the configured number of testers.
+function fill(str, product, lang) {
+  if (typeof str !== "string" || !str.includes("{n}")) return str;
+  return str.split("{n}").join(localNum(testerCount(product), lang));
+}
+function localized(product, field, lang) {
+  if (!product) return "";
+  if (lang === "ar") {
+    const own = product[`${field}Ar`];
+    const v = (typeof own === "string" && own.trim()) ? own : productAr[product.id]?.[field] || product[field];
+    return fill(v, product, lang);
+  }
+  return fill(product[field], product, lang);
+}
+
 export function pName(product, lang) {
-  return lang === "ar" ? productAr[product.id]?.name || product.name : product.name;
+  return localized(product, "name", lang);
 }
 export function pTagline(product, lang) {
-  return lang === "ar" ? productAr[product.id]?.tagline || product.tagline : product.tagline;
+  return localized(product, "tagline", lang);
 }
 export function pDescription(product, lang) {
-  return lang === "ar" ? productAr[product.id]?.description || product.description : product.description;
+  return localized(product, "description", lang);
 }
 export function pIngredients(product, lang) {
-  return lang === "ar" ? productAr[product.id]?.ingredients || product.ingredients : product.ingredients;
+  return localized(product, "ingredients", lang);
 }
 export function tNote(note, lang) {
   return lang === "ar" ? noteMap[note] || note : note;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useConfig } from "@/context/ConfigContext";
 import { useLang } from "@/context/LangContext";
 import styles from "./SpinWheel.module.css";
@@ -17,7 +17,7 @@ export default function SpinWheel() {
   const [alreadyPlayed, setAlreadyPlayed] = useState(false);
   const canvasRef = useRef(null);
 
-  const segments = wheel?.segments || [];
+  const segments = useMemo(() => wheel?.segments || [], [wheel?.segments]);
   const label = (s) => (lang === "ar" ? s.label : s.labelEn);
 
   // Check if already played this session
@@ -61,7 +61,7 @@ export default function SpinWheel() {
       ctx.textAlign = "right";
       ctx.fillStyle = "#f7f5f1";
       ctx.font = "600 15px 'IBM Plex Sans Arabic', 'Jost', system-ui, sans-serif";
-      ctx.fillText(label(seg), radius - 16, 6);
+      ctx.fillText(lang === "ar" ? seg.label : seg.labelEn, radius - 16, 6);
       ctx.restore();
     });
 

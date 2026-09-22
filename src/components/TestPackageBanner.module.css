@@ -9,6 +9,8 @@
   margin-bottom: 1.5rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   position: relative;
+  /* One accent for the whole package: tag, stripe, eyebrow and name. */
+  --pkg: var(--accent-text);
 }
 .banner:hover {
   transform: translateY(-4px);
@@ -24,7 +26,7 @@
   inset-inline-start: 0;
   width: 4px;
   height: 100%;
-  background: var(--burgundy);
+  background: var(--pkg);
   z-index: 3;
 }
 
@@ -44,7 +46,7 @@
   position: absolute;
   top: 14px;
   inset-inline-start: 14px;
-  background: var(--burgundy);
+  background: var(--pkg);
   color: #fff;
   font-family: var(--font-ui);
   font-size: 0.66rem;
@@ -63,25 +65,32 @@
   justify-content: center;
   gap: 0.5rem;
 }
+/* "Try before you buy" — same visual language as the description line
+   ("Choose 5 testers…"): body face, sentence case, just bolder and in the
+   package accent so it reads as the headline promise. */
 .eyebrow {
   font-family: var(--font-ui);
-  font-size: 0.7rem;
+  font-size: 1.02rem;
   font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--accent-text);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--pkg);
 }
+html[dir="rtl"] .eyebrow { font-size: 1.1rem; }
 .name {
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  line-height: 1.1;
-  margin: 0.15rem 0;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  line-height: 1.15;
+  margin: 0.1rem 0 0.2rem;
+  color: var(--pkg);
 }
 .desc {
-  color: var(--olive);
-  font-size: 0.95rem;
+  font-family: var(--font-ui);
+  color: var(--ink-dim);
+  font-size: 1.02rem;
   line-height: 1.6;
   max-width: 46ch;
 }
+html[dir="rtl"] .desc { font-size: 1.1rem; }
 
 .foot {
   display: flex;
@@ -102,10 +111,11 @@
   letter-spacing: 0.08em;
   color: var(--olive);
 }
+/* Same price typography as the product cards (global .price + card size). */
 .price {
   font-family: var(--font-price);
-  font-weight: 800;
-  font-size: 1.5rem;
+  font-weight: 700;
+  font-size: var(--fs-price);
   color: var(--ink);
 }
 .cta {

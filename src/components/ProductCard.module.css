@@ -159,10 +159,10 @@ html[dir="rtl"] .name { font-family: var(--font-ar-display); font-size: 1.25rem;
   border-top: 1px solid var(--line);
 }
 .priceWrap { display: inline-flex; align-items: baseline; gap: 0.35rem; }
-.fromLabel { font-size: 0.68rem; color: var(--ink-faint); }
+.fromLabel { font-size: 0.72rem; color: var(--ink-faint); }
 .price {
   font-family: var(--font-price);
-  font-size: 1.22rem;
+  font-size: var(--fs-price);
   font-weight: 700;
   color: var(--ink);
   letter-spacing: 0.01em;

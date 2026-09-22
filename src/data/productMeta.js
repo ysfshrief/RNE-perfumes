@@ -75,3 +75,57 @@ export function isDay(product) {
 }
 
 export const FAMILIES = FAMILY_RULES.map(({ key, en, ar }) => ({ key, en, ar }));
+
+// ─────────────────────────────────────────────────────────────
+// Shop "collections" (المجموعة) — the four groups customers filter by.
+// Each product belongs to one or more. The admin can set them explicitly
+// (product.families); otherwise they are inferred from the notes using the
+// detailed families above, so existing products work with no data entry.
+// ─────────────────────────────────────────────────────────────
+export const COLLECTIONS = [
+  { key: "floral", en: "Floral", ar: "زهور", from: ["floral"],
+    words: ["floral", "flower", "rose", "jasmine", "peony", "gardenia", "iris", "tuberose", "زهري", "زهور", "ورد", "ياسمين"] },
+  { key: "woody", en: "Woody", ar: "أخشاب", from: ["woody", "oud"],
+    words: ["wood", "cedar", "sandal", "oud", "vetiver", "guaiac", "خشب", "أخشاب", "عود", "صندل"] },
+  { key: "fresh", en: "Fresh", ar: "منعش", from: ["fresh", "citrus"],
+    words: ["fresh", "citrus", "aquatic", "marine", "green", "mint", "tea", "منعش", "حمضي", "حمضيات", "بحري"] },
+  { key: "warm", en: "Warm", ar: "دافئ", from: ["sweet", "spicy", "amber", "oud"],
+    words: ["warm", "sweet", "amber", "spice", "spiced", "vanilla", "honey", "gourmand", "oriental", "دافئ", "حلو", "عنبر", "توابل"] },
+];
+const COLLECTION_KEYS = new Set(COLLECTIONS.map((c) => c.key));
+
+function tierFamilies(list) {
+  const hay = (list || []).join(" ").toLowerCase();
+  return FAMILY_RULES.filter((r) => r.match.some((m) => hay.includes(m))).map((r) => r.key);
+}
+
+/**
+ * Collection keys for a product. An explicit admin choice (product.families)
+ * always wins. Otherwise we score the product's own description of itself
+ * (the tagline) highest, then heart/base notes, and top notes least — top
+ * notes are mostly citrus and would otherwise make everything "fresh".
+ */
+export function collectionKeys(product) {
+  if (Array.isArray(product?.families) && product.families.length) {
+    return product.families.filter((k) => COLLECTION_KEYS.has(k));
+  }
+  if (!product || product.isDiscoverySet) return [];
+  const tagline = `${product.tagline || ""} ${product.taglineAr || ""}`.toLowerCase();
+  const n = product.notes || {};
+  const top = tierFamilies(n.top);
+  const deep = [...tierFamilies(n.heart), ...tierFamilies(n.base)];
+  const scores = COLLECTIONS.map((c) => {
+    let score = 0;
+    if (c.words.some((w) => tagline.includes(w))) score += 3;
+    score += deep.filter((f) => c.from.includes(f)).length;
+    score += top.filter((f) => c.from.includes(f)).length * 0.5;
+    return { key: c.key, score };
+  });
+  const max = Math.max(...scores.map((x) => x.score));
+  if (max <= 0) return [];
+  return scores.filter((x) => x.score >= Math.max(2, max * 0.75)).map((x) => x.key);
+}
+export function collectionLabel(key, lang) {
+  const c = COLLECTIONS.find((x) => x.key === key);
+  return c ? (lang === "ar" ? c.ar : c.en) : key;
+}

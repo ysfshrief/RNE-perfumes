@@ -1,118 +1,205 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useMemo, useState, useEffect, useCallback, useRef } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import TestPackageBanner from "@/components/TestPackageBanner";
 import WhatsApp from "@/components/WhatsApp";
-import { products as baseProducts, categories, getMinPrice } from "@/data/products";
+import { getMinPrice } from "@/data/products";
 import { pName, pTagline } from "@/data/productLocale";
+import { COLLECTIONS, collectionKeys, collectionLabel } from "@/data/productMeta";
 import { useLang } from "@/context/LangContext";
 import { useProducts } from "@/context/ProductContext";
 import styles from "./shop.module.css";
 
+const GENDERS = ["Men", "Women", "Unisex"];
+const SEASONS = ["Summer", "Winter"];
+const FAMILIES = COLLECTIONS.map((c) => c.key);
 
+const list = (v) => (v ? String(v).split(",").map((x) => x.trim()).filter(Boolean) : []);
+
+/**
+ * Read filters from the URL. The URL is the single source of truth, so a
+ * filtered view can be shared, survives refresh, and the back button undoes
+ * the last filter change. Legacy links (?category=Men, ?offers=true) still work.
+ */
+function readFilters(params) {
+  const legacy = list(params.get("category"));
+  const gender = [...new Set([...list(params.get("gender")), ...legacy.filter((c) => GENDERS.includes(c))])].filter((g) => GENDERS.includes(g));
+  const season = [...new Set([...list(params.get("season")), ...legacy.filter((c) => SEASONS.includes(c))])].filter((s) => SEASONS.includes(s));
+  const family = list(params.get("family")).filter((f) => FAMILIES.includes(f));
+  const max = Number(params.get("max")) || null;
+  return {
+    gender,
+    season,
+    family,
+    size: list(params.get("size")),
+    q: params.get("q") || "",
+    sort: params.get("sort") || "featured",
+    sale: params.get("sale") === "1" || params.get("offers") === "true",
+    best: params.get("best") === "1",
+    max,
+  };
+}
+
+function writeFilters(f) {
+  const p = new URLSearchParams();
+  if (f.gender.length) p.set("gender", f.gender.join(","));
+  if (f.season.length) p.set("season", f.season.join(","));
+  if (f.family.length) p.set("family", f.family.join(","));
+  if (f.size.length) p.set("size", f.size.join(","));
+  if (f.q.trim()) p.set("q", f.q.trim());
+  if (f.sort && f.sort !== "featured") p.set("sort", f.sort);
+  if (f.sale) p.set("sale", "1");
+  if (f.best) p.set("best", "1");
+  if (f.max) p.set("max", String(f.max));
+  const s = p.toString();
+  return s ? `?${s}` : "";
+}
 
 export default function ShopClient() {
   const params = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const { t, lang } = useLang();
-  const { visibleProducts } = useProducts();
-  const products = visibleProducts;
+  const { visibleProducts: products, ready } = useProducts();
+  const [drawer, setDrawer] = useState(false);
+  const drawerRef = useRef(null);
 
-  // Filter options are derived from the catalogue, not hardcoded: sizes were
-  // fixed at 30/50ml so 100ml was unfilterable, and the price ceiling was
-  // pinned at 1400 which hid anything more expensive.
+  const filters = useMemo(() => readFilters(params), [params]);
+
+  // Search box is local while typing, then written to the URL (debounced).
+  const [search, setSearch] = useState(filters.q);
+  useEffect(() => { setSearch(filters.q); }, [filters.q]);
+
+  const apply = useCallback((patch, { replace = false } = {}) => {
+    const next = { ...filters, ...patch };
+    const url = `${pathname}${writeFilters(next)}`;
+    if (replace) router.replace(url, { scroll: false });
+    else router.push(url, { scroll: false });
+  }, [filters, pathname, router]);
+
+  useEffect(() => {
+    if (search === filters.q) return;
+    const id = setTimeout(() => apply({ q: search }, { replace: true }), 300);
+    return () => clearTimeout(id);
+  }, [search]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const toggleIn = (key, val) => {
+    const cur = filters[key];
+    apply({ [key]: cur.includes(val) ? cur.filter((x) => x !== val) : [...cur, val] });
+  };
+
   const SIZES = useMemo(() => {
     const seen = new Set();
-    products.forEach((p) => (p.sizes || []).forEach((s) => s?.size && seen.add(s.size)));
+    products.filter((p) => !p.isDiscoverySet).forEach((p) => (p.sizes || []).forEach((s) => s?.size && seen.add(s.size)));
     return [...seen].sort((a, b) => (parseInt(a) || 0) - (parseInt(b) || 0));
   }, [products]);
 
   const priceCeiling = useMemo(() => {
     const top = Math.max(0, ...products.map((p) => getMinPrice(p) || 0));
-    return Math.max(100, Math.ceil(top / 100) * 100);
+    return Math.max(100, Math.ceil(top / 50) * 50);
   }, [products]);
-  const initialCat = params.get("category");
-  const offersOnly = params.get("offers") === "true";
 
-  const [search, setSearch] = useState("");
-  const [activeCats, setActiveCats] = useState(initialCat ? [initialCat] : []);
-  const [activeSizes, setActiveSizes] = useState([]);
-  const [minRating, setMinRating] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(null); // null = no ceiling applied yet
-  const [bestOnly, setBestOnly] = useState(false);
-  const [saleOnly, setSaleOnly] = useState(offersOnly);
-  const [sort, setSort] = useState("featured");
-  const [drawer, setDrawer] = useState(false);
+  // Does product p pass every filter group except `skip`? (used for counts)
+  const passes = useCallback((p, f, skip) => {
+    if (skip !== "q" && f.q) {
+      const hay = `${p.name} ${p.tagline} ${p.inspiredBy || ""} ${pName(p, "ar")} ${pTagline(p, "ar")}`.toLowerCase();
+      if (!hay.includes(f.q.toLowerCase())) return false;
+    }
+    if (skip !== "gender" && f.gender.length && !f.gender.includes(p.gender)) return false;
+    if (skip !== "season" && f.season.length && !(p.season || []).some((s) => f.season.includes(s))) return false;
+    if (skip !== "family" && f.family.length && !collectionKeys(p).some((k) => f.family.includes(k))) return false;
+    if (skip !== "size" && f.size.length && !(p.sizes || []).some((s) => f.size.includes(s.size))) return false;
+    if (f.max && getMinPrice(p) > f.max) return false;
+    if (f.best && !p.bestSeller) return false;
+    if (f.sale && !(p.sizes || []).some((s) => s.oldPrice)) return false;
+    return true;
+  }, []);
 
-  const SORTS = [
-    { v: "featured", l: t("sort.featured") },
-    { v: "price-asc", l: t("sort.priceAsc") },
-    { v: "price-desc", l: t("sort.priceDesc") },
-    { v: "rating", l: t("sort.rating") },
-  ];
-  const catLabels = { Men: t("g.Men"), Women: t("g.Women"), Summer: t("s.Summer"), Winter: t("s.Winter") };
+  // Anything narrower than "everything" hides the Test Package banner (it is
+  // not a fragrance, so it cannot match a gender/season/family choice).
+  const narrowed = filters.gender.length || filters.season.length || filters.family.length || filters.size.length || filters.q || filters.sale || filters.best || filters.max;
 
-  useEffect(() => {
-    if (initialCat) setActiveCats([initialCat]);
-    if (offersOnly) setSaleOnly(true);
-  }, [initialCat, offersOnly]);
-
-  const toggle = (list, setList, val) =>
-    setList(list.includes(val) ? list.filter((x) => x !== val) : [...list, val]);
-
-  useEffect(() => {
-    setMaxPrice((cur) => (cur === null || cur > priceCeiling ? priceCeiling : cur));
-  }, [priceCeiling]);
+  const regular = useMemo(() => products.filter((p) => !p.isDiscoverySet), [products]);
+  const testPackage = !narrowed ? products.find((p) => p.isDiscoverySet) : null;
 
   const filtered = useMemo(() => {
-    let out = products.filter((p) => {
-      const haystack = `${p.name} ${p.tagline} ${p.gender} ${p.inspiredBy || ""} ${pName(p, "ar")} ${pTagline(p, "ar")}`.toLowerCase();
-      if (search && !haystack.includes(search.toLowerCase())) return false;
-      if (activeCats.length) {
-        const inCat = activeCats.some((c) => p.gender === c || p.season.includes(c));
-        if (!inCat) return false;
-      }
-      if (activeSizes.length) {
-        const hasSize = p.sizes.some((s) => activeSizes.includes(s.size));
-        if (!hasSize) return false;
-      }
-      if (minRating && p.rating < minRating) return false;
-      if (maxPrice !== null && getMinPrice(p) > maxPrice) return false;
-      if (bestOnly && !p.bestSeller) return false;
-      if (saleOnly && !p.sizes.some((s) => s.oldPrice)) return false;
-      return true;
-    });
-
-    switch (sort) {
+    let out = regular.filter((p) => passes(p, filters));
+    switch (filters.sort) {
       case "price-asc": out = [...out].sort((a, b) => getMinPrice(a) - getMinPrice(b)); break;
       case "price-desc": out = [...out].sort((a, b) => getMinPrice(b) - getMinPrice(a)); break;
-      case "rating": out = [...out].sort((a, b) => b.rating - a.rating); break;
+      case "rating": out = [...out].sort((a, b) => (b.rating || 0) - (a.rating || 0)); break;
       default: out = [...out].sort((a, b) => (b.bestSeller ? 1 : 0) - (a.bestSeller ? 1 : 0));
     }
-    // Test Package always pinned first, regardless of sort
-    out = [...out].sort((a, b) => {
-      const ap = a.isDiscoverySet || a.pinned ? 1 : 0;
-      const bp = b.isDiscoverySet || b.pinned ? 1 : 0;
-      return bp - ap;
-    });
     return out;
-  }, [products, search, activeCats, activeSizes, minRating, maxPrice, bestOnly, saleOnly, sort]);
+  }, [regular, filters, passes]);
 
-  // Separate the Test Package (shown as a distinct feature) from regular products
-  const testPackage = filtered.find((p) => p.isDiscoverySet);
-  const regularProducts = filtered.filter((p) => !p.isDiscoverySet);
+  // How many products this option would show, given the other active groups.
+  const countFor = (group, val) =>
+    regular.filter((p) => passes(p, { ...filters, [group]: [val] })).length;
 
-  const clearAll = () => {
-    setActiveCats([]); setActiveSizes([]); setMinRating(0);
-    setMaxPrice(1400); setBestOnly(false); setSaleOnly(false); setSearch("");
+  const clearAll = () => { setSearch(""); router.push(pathname, { scroll: false }); };
+
+  // Drawer: Escape closes, background doesn't scroll, focus moves inside.
+  useEffect(() => {
+    if (!drawer) return;
+    const onKey = (e) => e.key === "Escape" && setDrawer(false);
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    drawerRef.current?.querySelector("button, input")?.focus();
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+  }, [drawer]);
+
+  const labelOf = {
+    gender: (v) => t(`g.${v}`),
+    season: (v) => t(`s.${v}`),
+    family: (v) => collectionLabel(v, lang),
+    size: (v) => v,
   };
+
+  const activeChips = [
+    ...filters.gender.map((v) => ({ group: "gender", v })),
+    ...filters.season.map((v) => ({ group: "season", v })),
+    ...filters.family.map((v) => ({ group: "family", v })),
+    ...filters.size.map((v) => ({ group: "size", v })),
+  ];
+  const moreActive = filters.size.length + (filters.sale ? 1 : 0) + (filters.best ? 1 : 0) + (filters.max ? 1 : 0);
+  const activeCount = activeChips.length + (filters.sale ? 1 : 0) + (filters.best ? 1 : 0) + (filters.max ? 1 : 0);
+
+  // A render helper (not a component) so buttons keep focus across updates.
+  const group_ = ({ id, title, group, options }) => (
+    <fieldset className={styles.filterGroup}>
+      <legend className={styles.groupTitle} id={id}>{title}</legend>
+      <div className={styles.options}>
+        {options.map((v) => {
+          const on = filters[group].includes(v);
+          const n = countFor(group, v);
+          return (
+            <button
+              key={v}
+              type="button"
+              className={`${styles.option} ${on ? styles.optionOn : ""}`}
+              aria-pressed={on}
+              disabled={!on && n === 0}
+              onClick={() => toggleIn(group, v)}
+            >
+              <span>{labelOf[group](v)}</span>
+              <span className={styles.optionCount}>{n}</span>
+            </button>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
 
   const Filters = (
     <>
       <div className={styles.filterGroup}>
-        <h4>{t("common.search")}</h4>
+        <label className={styles.groupTitle} htmlFor="shop-search">{t("common.search")}</label>
         <input
+          id="shop-search"
           className={styles.searchInput}
           type="search"
           placeholder={t("shop.searchPlaceholder")}
@@ -121,70 +208,57 @@ export default function ShopClient() {
         />
       </div>
 
-      <div className={styles.filterGroup}>
-        <h4>{t("shop.category")}</h4>
-        {categories.map((c) => (
-          <label key={c} className={styles.check}>
-            <input type="checkbox" checked={activeCats.includes(c)} onChange={() => toggle(activeCats, setActiveCats, c)} />
-            <span>{catLabels[c]}</span>
+      {group_({ id: "f-gender", title: t("shop.gender"), group: "gender", options: GENDERS })}
+      {group_({ id: "f-season", title: t("shop.season"), group: "season", options: SEASONS })}
+      {group_({ id: "f-family", title: t("shop.family"), group: "family", options: FAMILIES })}
+
+      <details className={styles.more} open={moreActive > 0 || undefined}>
+        <summary>{t("shop.more")}{moreActive > 0 ? ` (${moreActive})` : ""}</summary>
+        <div className={styles.moreBody}>
+          {SIZES.length > 1 && group_({ id: "f-size", title: t("shop.size"), group: "size", options: SIZES })}
+
+          <div className={styles.filterGroup}>
+            <label className={styles.groupTitle} htmlFor="shop-price">
+              {t("shop.maxPrice")} — <span className="price">{filters.max ? `${filters.max} ${t("common.currency")}` : t("shop.priceAny")}</span>
+            </label>
+            <input
+              id="shop-price"
+              type="range"
+              min={Math.min(100, priceCeiling)}
+              max={priceCeiling}
+              step={50}
+              value={filters.max ?? priceCeiling}
+              onChange={(e) => {
+                const v = Number(e.target.value);
+                apply({ max: v >= priceCeiling ? null : v }, { replace: true });
+              }}
+              className={styles.range}
+            />
+          </div>
+
+          <label className={styles.check}>
+            <input type="checkbox" checked={filters.sale} onChange={() => apply({ sale: !filters.sale })} />
+            <span>{t("shop.saleOnly")}</span>
           </label>
-        ))}
-      </div>
-
-      <div className={styles.filterGroup}>
-        <h4>{t("shop.size")}</h4>
-        <div className={styles.pills}>
-          {SIZES.map((s) => (
-            <button
-              key={s}
-              className={`${styles.pill} ${activeSizes.includes(s) ? styles.pillOn : ""}`}
-              onClick={() => toggle(activeSizes, setActiveSizes, s)}
-            >
-              {s}
-            </button>
-          ))}
+          <label className={styles.check}>
+            <input type="checkbox" checked={filters.best} onChange={() => apply({ best: !filters.best })} />
+            <span>{t("shop.bestOnly")}</span>
+          </label>
         </div>
-      </div>
+      </details>
 
-      <div className={styles.filterGroup}>
-        <h4>{t("shop.maxPrice")} — {maxPrice} {t("common.currency")}</h4>
-        <input
-          type="range" min={0} max={priceCeiling} step={50}
-          value={maxPrice ?? priceCeiling}
-          onChange={(e) => setMaxPrice(Number(e.target.value))}
-          className={styles.range}
-        />
-      </div>
-
-      <div className={styles.filterGroup}>
-        <h4>{t("shop.minRating")}</h4>
-        <div className={styles.pills}>
-          {[0, 4, 4.5].map((r) => (
-            <button
-              key={r}
-              className={`${styles.pill} ${minRating === r ? styles.pillOn : ""}`}
-              onClick={() => setMinRating(r)}
-            >
-              {r === 0 ? t("shop.any") : `${r}★+`}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className={styles.filterGroup}>
-        <label className={styles.check}>
-          <input type="checkbox" checked={bestOnly} onChange={() => setBestOnly((v) => !v)} />
-          <span>{t("shop.bestOnly")}</span>
-        </label>
-        <label className={styles.check}>
-          <input type="checkbox" checked={saleOnly} onChange={() => setSaleOnly((v) => !v)} />
-          <span>{t("shop.saleOnly")}</span>
-        </label>
-      </div>
-
-      <button className="btn btn--ghost btn--full" onClick={clearAll}>{t("shop.clearFilters")}</button>
+      {activeCount > 0 && (
+        <button type="button" className="btn btn--ghost btn--full" onClick={clearAll}>{t("shop.clearFilters")}</button>
+      )}
     </>
   );
+
+  const SORTS = [
+    { v: "featured", l: t("sort.featured") },
+    { v: "price-asc", l: t("sort.priceAsc") },
+    { v: "price-desc", l: t("sort.priceDesc") },
+    { v: "rating", l: t("sort.rating") },
+  ];
 
   return (
     <>
@@ -192,31 +266,51 @@ export default function ShopClient() {
         <div className="container">
           <p className="eyebrow">{t("shop.eyebrow")}</p>
           <h1 className={styles.title}>{t("shop.title")}</h1>
-          <p className={styles.sub}>{t("shop.count", { shown: filtered.length, total: products.length })}</p>
+          <p className={styles.sub} aria-live="polite">{t("shop.count", { shown: filtered.length, total: regular.length })}</p>
         </div>
       </div>
 
       <div className={`container ${styles.layout}`}>
-        <aside className={styles.sidebar}>{Filters}</aside>
+        <aside className={styles.sidebar} aria-label={t("shop.filters")}>{Filters}</aside>
 
         <div className={styles.main}>
           <div className={styles.toolbar}>
-            <button className={styles.filterBtn} onClick={() => setDrawer(true)}>
-              {t("shop.filters")}
+            <button type="button" className={styles.filterBtn} onClick={() => setDrawer(true)} aria-expanded={drawer} aria-controls="shop-drawer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4" /></svg>
+              {t("shop.filters")}{activeCount > 0 && <span className={styles.badge}>{activeCount}</span>}
             </button>
-            <select className={styles.sort} value={sort} onChange={(e) => setSort(e.target.value)}>
+            <label className="sr-only" htmlFor="shop-sort">{t("shop.sortBy")}</label>
+            <select id="shop-sort" className={styles.sort} value={filters.sort} onChange={(e) => apply({ sort: e.target.value }, { replace: true })}>
               {SORTS.map((s) => <option key={s.v} value={s.v}>{s.l}</option>)}
             </select>
           </div>
 
-          {filtered.length === 0 ? (
+          {activeChips.length + (filters.sale ? 1 : 0) + (filters.best ? 1 : 0) + (filters.max ? 1 : 0) > 0 && (
+            <div className={styles.chips} aria-label={t("shop.active")}>
+              {activeChips.map(({ group, v }) => (
+                <button key={`${group}-${v}`} type="button" className={styles.chip} onClick={() => toggleIn(group, v)} aria-label={`${labelOf[group](v)} ×`}>
+                  {labelOf[group](v)} <span aria-hidden="true">×</span>
+                </button>
+              ))}
+              {filters.sale && <button type="button" className={styles.chip} onClick={() => apply({ sale: false })}>{t("shop.saleOnly")} <span aria-hidden="true">×</span></button>}
+              {filters.best && <button type="button" className={styles.chip} onClick={() => apply({ best: false })}>{t("shop.bestOnly")} <span aria-hidden="true">×</span></button>}
+              {filters.max && <button type="button" className={styles.chip} onClick={() => apply({ max: null })}><span className="price">≤ {filters.max} {t("common.currency")}</span> <span aria-hidden="true">×</span></button>}
+              <button type="button" className={styles.clearLink} onClick={clearAll}>{t("shop.clearFilters")}</button>
+            </div>
+          )}
+
+          {!ready && products.length === 0 ? (
+            <div className={styles.grid} aria-busy="true">
+              {Array.from({ length: 6 }, (_, i) => <div key={i} className={styles.skeleton} />)}
+            </div>
+          ) : filtered.length === 0 ? (
             <div className={styles.empty}>
-              <p>{t("shop.noMatch")}</p>
-              <button className="btn btn--solid" onClick={clearAll}>{t("shop.resetFilters")}</button>
+              <p className={styles.emptyTitle}>{t("shop.noMatch")}</p>
+              <p>{t("shop.noMatchHint")}</p>
+              <button type="button" className="btn btn--solid" onClick={clearAll}>{t("shop.resetFilters")}</button>
             </div>
           ) : (
             <>
-              {/* Test Package — shown as a distinct wide feature, separated from products */}
               {testPackage && (
                 <>
                   <TestPackageBanner product={testPackage} />
@@ -226,7 +320,7 @@ export default function ShopClient() {
                 </>
               )}
               <div className={styles.grid}>
-                {regularProducts.map((p) => <ProductCard key={p.id} product={p} />)}
+                {filtered.map((p) => <ProductCard key={p.id} product={p} />)}
               </div>
             </>
           )}
@@ -235,15 +329,25 @@ export default function ShopClient() {
 
       {drawer && (
         <div className={styles.drawerWrap} onClick={() => setDrawer(false)}>
-          <div className={styles.drawer} onClick={(e) => e.stopPropagation()}>
+          <div
+            id="shop-drawer"
+            ref={drawerRef}
+            className={styles.drawer}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("shop.filters")}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className={styles.drawerHead}>
-              <h3>{t("shop.filters")}</h3>
-              <button onClick={() => setDrawer(false)} aria-label={t("common.close")}>✕</button>
+              <h2>{t("shop.filters")}</h2>
+              <button type="button" onClick={() => setDrawer(false)} aria-label={t("common.close")}>✕</button>
             </div>
-            {Filters}
-            <button className="btn btn--solid btn--full" onClick={() => setDrawer(false)}>
-              {t("shop.showResults", { n: filtered.length })}
-            </button>
+            <div className={styles.drawerBody}>{Filters}</div>
+            <div className={styles.drawerFoot}>
+              <button type="button" className="btn btn--solid btn--full" onClick={() => setDrawer(false)}>
+                {t("shop.showResults", { n: filtered.length })}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -240,7 +240,7 @@ export default function AdminHomepage() {
               </div>
             ))}
             <div className={u.grid}>
-              <Field label={T("رابط الزر", "Button link")} help={T("مثال: /shop أو /shop?category=Men", "e.g. /shop or /shop?category=Men")} error={errors["hero.cta"]}>
+              <Field label={T("رابط الزر", "Button link")} help={T("مثال: /shop أو /shop?gender=Men", "e.g. /shop or /shop?gender=Men")} error={errors["hero.cta"]}>
                 <TextInput dir="ltr" value={hero.ctaHref} onChange={(v) => setHero((h) => ({ ...h, ctaHref: v }))} invalid={!!errors["hero.cta"]} />
               </Field>
               <Field label={T("العطر المعروض (السعر والنوتات)", "Featured fragrance (price & notes)")} help={T("تلقائي = أول عطر من الأكثر مبيعًا", "Automatic = first best-seller")}>
