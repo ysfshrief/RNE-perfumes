@@ -7,6 +7,9 @@ import { useProducts } from "@/context/ProductContext";
 import { subscribeCollection } from "@/lib/store";
 import { egp } from "@/lib/pricing";
 import { pName } from "@/data/productLocale";
+import { productImages, isImageUrl } from "@/lib/media";
+import { useConfig } from "@/context/ConfigContext";
+import { resolveHeroSlides } from "@/lib/heroSlides";
 import styles from "./admin.module.css";
 import over from "./overview.module.css";
 
@@ -73,6 +76,28 @@ export default function AdminOverview() {
   );
 
   const recent = scoped.slice(0, 6);
+  const { config } = useConfig();
+  const T = (a, e) => (lang === "ar" ? a : e);
+
+  // Things the owner should fix, each linking to the right admin page.
+  const health = useMemo(() => {
+    const fragrances = allProducts.filter((p) => !p.isDiscoverySet);
+    const noImage = fragrances.filter((p) => !productImages(p).some(isImageUrl));
+    const single = fragrances.filter((p) => productImages(p).length === 1);
+    const hidden = allProducts.filter((p) => p.hidden);
+    const soldOut = fragrances.filter((p) => !(p.sizes || []).some((s) => Number(s.stock) > 0));
+    const heroCount = resolveHeroSlides(config.hero || {}).length;
+    const pkg = allProducts.find((p) => p.isDiscoverySet);
+    return [
+      { ok: noImage.length === 0, label: T(`${noImage.length} عطر بدون صورة`, `${noImage.length} fragrances without a photo`), href: "/admin/products" },
+      { ok: single.length === 0, info: true, label: T(`${single.length} عطر بصورة واحدة فقط (أضف صورًا للمعرض)`, `${single.length} fragrances with only one image (add gallery images)`), href: "/admin/products" },
+      { ok: soldOut.length === 0, label: T(`${soldOut.length} عطر نفد بالكامل`, `${soldOut.length} fragrances fully sold out`), href: "/admin/products" },
+      { ok: true, info: true, label: T(`${hidden.length} منتج مخفي من المتجر`, `${hidden.length} products hidden from the store`), href: "/admin/products" },
+      { ok: heroCount > 0, label: T(`${heroCount} صورة في الهيرو`, `${heroCount} hero image(s)`), href: "/admin/homepage" },
+      { ok: !!pkg && !pkg.hidden && (pkg.sizes?.[0]?.stock || 0) > 0, label: pkg ? T(`التيست باكيدچ: ${pkg.hidden ? "مخفي" : "ظاهر"} · مخزون ${pkg.sizes?.[0]?.stock ?? 0}`, `Test Package: ${pkg.hidden ? "hidden" : "live"} · stock ${pkg.sizes?.[0]?.stock ?? 0}`) : T("لا يوجد تيست باكيدچ", "No Test Package"), href: "/admin/testers" },
+    ];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allProducts, config.hero, lang]);
 
   const RANGES = [
     { key: "all", label: t("admin.rangeAll") },
@@ -118,6 +143,13 @@ export default function AdminOverview() {
         ))}
       </div>
 
+      <div className={over.quick}>
+        <Link href="/admin/products" className={over.quickLink}>＋ {T("منتج جديد / تعديل منتج", "Add / edit a product")}</Link>
+        <Link href="/admin/homepage" className={over.quickLink}>▣ {T("صور ونصوص الصفحة الرئيسية", "Homepage images & text")}</Link>
+        <Link href="/admin/testers" className={over.quickLink}>◎ {T("التيسترات", "Testers")}</Link>
+        <Link href="/admin/discounts" className={over.quickLink}>％ {T("كوبون خصم", "Discount code")}</Link>
+      </div>
+
       <div className={over.grid}>
         <div className={styles.card}>
           <div className={over.cardHead}>
@@ -140,6 +172,22 @@ export default function AdminOverview() {
               </tbody>
             </table>
           )}
+        </div>
+
+        <div className={styles.card}>
+          <div className={over.cardHead}>
+            <h3>{T("صحة الكتالوج", "Catalogue health")}</h3>
+          </div>
+          <ul className={over.health}>
+            {health.map((h, i) => (
+              <li key={i}>
+                <Link href={h.href} className={over.healthRow}>
+                  <span className={h.ok ? over.dotOk : h.info ? over.dotInfo : over.dotWarn} aria-hidden="true" />
+                  <span>{h.label}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
 
         <div className={styles.card}>

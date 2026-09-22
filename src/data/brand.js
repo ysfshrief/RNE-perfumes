@@ -25,3 +25,13 @@ export const socials = [
     url: "https://wa.me/201142648668",
   },
 ];
+
+export const SOCIAL_PLATFORMS = [
+  { id: "facebook", label: "Facebook" },
+  { id: "instagram", label: "Instagram" },
+  { id: "whatsapp", label: "WhatsApp" },
+  { id: "tiktok", label: "TikTok" },
+  { id: "youtube", label: "YouTube" },
+  { id: "x", label: "X" },
+  { id: "snapchat", label: "Snapchat" },
+];

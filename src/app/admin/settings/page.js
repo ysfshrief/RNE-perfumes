@@ -4,6 +4,9 @@ import { useLang } from "@/context/LangContext";
 import { useConfig, defaultConfig } from "@/context/ConfigContext";
 import adminStyles from "../admin.module.css";
 import { useToast } from "@/components/admin/Toast";
+import { useState } from "react";
+import { Field, TextInput, adminUi as u } from "@/components/admin/ui";
+import { contact as defaultContact, socials as defaultSocials, SOCIAL_PLATFORMS } from "@/data/brand";
 import s from "./settings.module.css";
 
 export default function AdminSettings() {
@@ -178,6 +181,11 @@ export default function AdminSettings() {
           </div>
         </div>
 
+        {/* ─── Contact & social ─── */}
+        <div className={`${adminStyles.card} ${s.fullWidth}`}>
+          <ContactSettings config={config} save={save} T={T} toast={toast} />
+        </div>
+
         {/* ─── Feature flags ─── */}
         <div className={`${adminStyles.card} ${s.fullWidth}`}>
           <h3 className={s.secTitle}>{T("🧩 الخصائص", "🧩 Features")}</h3>
@@ -272,6 +280,59 @@ export default function AdminSettings() {
         </div>
 
       </div>
+    </>
+  );
+}
+
+/** Contact details + social links used by the footer, contact page and WhatsApp buttons. */
+function ContactSettings({ config, save, T, toast }) {
+  const initial = () => {
+    const socials = {};
+    SOCIAL_PLATFORMS.forEach((p) => {
+      socials[p.id] = config.socials ? config.socials[p.id] || "" : (defaultSocials.find((x) => x.id === p.id)?.url || "");
+    });
+    return {
+      whatsapp: config.contact?.whatsapp || defaultContact.whatsapp,
+      email: config.contact?.email || defaultContact.email,
+      socials,
+    };
+  };
+  const [form, setForm] = useState(initial);
+  const [clean, setClean] = useState(() => JSON.stringify(initial()));
+  const dirty = JSON.stringify(form) !== clean;
+  const errors = {};
+  if (!/^\d{10,15}$/.test(String(form.whatsapp).replace(/\D/g, "")) ) errors.whatsapp = T("رقم دولي بدون + (مثال: 201012345678)", "International number without + (e.g. 201012345678)");
+  if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email)) errors.email = T("إيميل غير صالح", "Invalid email");
+  SOCIAL_PLATFORMS.forEach((p) => { if (form.socials[p.id] && !/^https?:\/\//.test(form.socials[p.id])) errors[p.id] = T("الرابط يبدأ بـ https://", "Link must start with https://"); });
+  const onSave = () => {
+    if (Object.keys(errors).length) return;
+    save({ ...config, contact: { whatsapp: String(form.whatsapp).replace(/\D/g, ""), email: form.email.trim() }, socials: form.socials });
+    setClean(JSON.stringify(form));
+    toast(T("تم حفظ بيانات التواصل", "Contact details saved"));
+  };
+  return (
+    <>
+      <h3 className={s.secTitle}>{T("📞 التواصل والسوشيال ميديا", "📞 Contact & social media")}</h3>
+      <p className={s.secNote}>{T("تظهر في الفوتر، صفحة التواصل، وأزرار واتساب. اترك رابط المنصة فارغًا لإخفائها.", "Used in the footer, contact page and WhatsApp buttons. Leave a platform empty to hide it.")}</p>
+      <div className={u.grid}>
+        <Field label={T("رقم واتساب", "WhatsApp number")} error={errors.whatsapp}>
+          <TextInput dir="ltr" value={form.whatsapp} onChange={(v) => setForm((f) => ({ ...f, whatsapp: v }))} invalid={!!errors.whatsapp} />
+        </Field>
+        <Field label={T("الإيميل", "Email")} error={errors.email}>
+          <TextInput dir="ltr" type="email" value={form.email} onChange={(v) => setForm((f) => ({ ...f, email: v }))} invalid={!!errors.email} />
+        </Field>
+        {SOCIAL_PLATFORMS.map((p) => (
+          <Field key={p.id} label={p.label} error={errors[p.id]}>
+            <TextInput dir="ltr" value={form.socials[p.id]} placeholder="https://…" onChange={(v) => setForm((f) => ({ ...f, socials: { ...f.socials, [p.id]: v } }))} invalid={!!errors[p.id]} />
+          </Field>
+        ))}
+      </div>
+      {dirty && (
+        <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end", marginTop: "1rem" }}>
+          <button type="button" className={u.btnGhost} onClick={() => setForm(initial())}>{T("تراجع", "Discard")}</button>
+          <button type="button" className={u.btnSolid} onClick={onSave} disabled={Object.keys(errors).length > 0}>{T("حفظ", "Save")}</button>
+        </div>
+      )}
     </>
   );
 }

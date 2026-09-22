@@ -8,6 +8,7 @@ import { DashboardSidebar } from "@/components/ui/dashboard-sidebar";
 import AdminGuard from "@/components/admin/AdminGuard";
 import { ToastProvider } from "@/components/admin/Toast";
 import { subscribeCollection } from "@/lib/store";
+import { isFirebaseEnabled } from "@/lib/firebase";
 
 export default function AdminLayout({ children }) {
   return (
@@ -63,6 +64,14 @@ function AdminShell({ children }) {
             <span className={`${styles.avatar} keep-latin`} aria-hidden="true">R</span>
           </div>
         </header>
+        {!isFirebaseEnabled && (
+          <div className={styles.modeBanner} role="note">
+            <strong>{lang === "ar" ? "وضع تجريبي:" : "Demo mode:"}</strong>{" "}
+            {lang === "ar"
+              ? "Firebase غير متصل، فكل التعديلات والطلبات محفوظة في هذا المتصفح فقط ولن يراها الزوار. أضف مفاتيح Firebase (راجع SETUP.md) لتفعيل الحفظ الحقيقي."
+              : "Firebase is not connected, so edits and orders are stored in this browser only and visitors won't see them. Add the Firebase keys (see SETUP.md) to go live."}
+          </div>
+        )}
         <div className={styles.main}>{children}</div>
       </div>
 

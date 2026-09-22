@@ -57,3 +57,19 @@
 @media (max-width: 600px) {
   .expand { grid-template-columns: 1fr; gap: 1rem; }
 }
+.toolbar { margin-bottom: 0.9rem; max-width: 420px; }
+.count { margin-inline-start: 0.35rem; font-family: var(--font-price); opacity: 0.65; }
+.contactRow { display: flex; gap: 0.8rem; align-items: center; flex-wrap: wrap; }
+.contactRow a, .expand a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+.wa { color: #128C7E !important; font-weight: 600; }
+.items { list-style: none; display: flex; flex-direction: column; gap: 0.45rem; margin: 0.3rem 0 0.8rem; }
+.items li { display: grid; grid-template-columns: 1fr auto; gap: 0.2rem 0.8rem; font-size: 0.88rem; color: var(--ink); }
+.scents { grid-column: 1 / -1; font-size: 0.8rem; color: var(--ink-dim); background: var(--bg-3); padding: 0.35rem 0.6rem; border-radius: 8px; }
+.totals { display: grid; grid-template-columns: 1fr auto; gap: 0.3rem 0.8rem; font-size: 0.86rem; color: var(--ink-dim); padding-top: 0.6rem; border-top: 1px solid var(--line); }
+.totals strong { color: var(--ink); }
+.statusDanger { color: var(--danger); }
+.statusBtnOn { background: var(--ink) !important; color: var(--on-ink) !important; border-color: var(--ink) !important; }
+.statusDanger.statusBtnOn { background: var(--danger) !important; border-color: var(--danger) !important; }
+.meta { font-size: 0.78rem !important; color: var(--ink-faint) !important; margin-top: 0.5rem !important; }
+.empty { padding: 2rem; text-align: center; color: var(--ink-dim); }
+.hint { font-style: normal !important; color: var(--ink-dim) !important; }

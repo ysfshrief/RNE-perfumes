@@ -1,13 +1,13 @@
 .stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 1rem;
   margin-bottom: 1.6rem;
 }
 .stat {
   background: var(--white);
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 14px;
   padding: 1.3rem;
   display: flex;
   flex-direction: column;
@@ -20,25 +20,24 @@
   letter-spacing: 0.1em;
   color: var(--olive);
 }
-.statValue { font-family: var(--font-ui); font-weight: 700; font-size: 1.7rem; }
+.statValue { font-family: var(--font-price); font-weight: 600; font-size: 1.6rem; font-variant-numeric: lining-nums tabular-nums; }
 .statDelta { font-size: 0.78rem; font-weight: 600; }
 .up { color: var(--success); }
 .down { color: var(--danger); }
 
-.grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 1.2rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.2rem; align-items: start; }
+.grid > :first-child { grid-column: 1 / -1; }
 .cardHead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
 .cardHead h3 { font-size: 1.15rem; }
 .seeAll {
-  background: var(--btn-secondary-bg);
-  color: var(--btn-secondary-fg);
-  border: 1px solid var(--btn-secondary-border);
-  backdrop-filter: var(--btn-blur);
-  -webkit-backdrop-filter: var(--btn-blur);
-
   font-family: var(--font-ui);
-  font-size: 0.76rem;
-  font-weight: 600;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
+.seeAll:hover { color: var(--burgundy); }
 
 .miniTable { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
 .miniTable td { padding: 0.7rem 0.4rem; border-bottom: 1px solid var(--line); }
@@ -56,12 +55,9 @@
 .lowItem:last-child { border-bottom: none; }
 .lowQty { color: var(--danger); font-weight: 600; font-size: 0.8rem; }
 
-@media (max-width: 1000px) {
+@media (max-width: 500px) {
   .stats { grid-template-columns: repeat(2, 1fr); }
   .grid { grid-template-columns: 1fr; }
-}
-@media (max-width: 500px) {
-  .stats { grid-template-columns: 1fr; }
 }
 
 /* Date-range filter — actually drives every figure below it */
@@ -83,3 +79,31 @@
 .rangeOn { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
 .emptyNote { padding: 1.5rem 0; text-align: center; color: var(--ink-faint); font-size: 0.85rem; }
 .statusDot { font-weight: 600; font-size: 0.8rem; color: var(--ink-dim); }
+
+.quick { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.4rem; }
+.quickLink {
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-2);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+.quickLink:hover { border-color: var(--ink); }
+.health { list-style: none; display: flex; flex-direction: column; }
+.healthRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+.health li:last-child .healthRow { border-bottom: 0; }
+.healthRow:hover { color: var(--burgundy); }
+.dotOk, .dotWarn, .dotInfo { flex-shrink: 0; width: 9px; height: 9px; border-radius: 50%; }
+.dotOk { background: var(--success); }
+.dotWarn { background: var(--danger); }
+.dotInfo { background: #c9a24a; }

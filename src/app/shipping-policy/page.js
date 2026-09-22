@@ -3,11 +3,12 @@
 import PageShell from "@/components/PageShell";
 import { useLang } from "@/context/LangContext";
 import { shippingPolicy } from "@/data/content";
-import { socials } from "@/data/brand";
+import { useBrand } from "@/lib/useBrand";
 import styles from "./shipping.module.css";
 
 export default function ShippingPolicyPage() {
   const { t, lang } = useLang();
+  const { socials } = useBrand();
   const items = shippingPolicy[lang] || shippingPolicy.en;
   return (
     <PageShell eyebrow={t("policy.policies")} title={t("shipping.title")}>

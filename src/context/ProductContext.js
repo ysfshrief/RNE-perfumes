@@ -109,6 +109,25 @@ export function ProductProvider({ children }) {
     persist(next);
   }, [overrides, customProducts, persist]);
 
+  /**
+   * Patch several products in ONE write. Calling updateProduct in a loop
+   * reads the same `overrides` snapshot each time, so every call overwrote
+   * the previous one — an order with two products only decremented one.
+   */
+  const updateProducts = useCallback((patches) => {
+    const next = { ...overrides };
+    let custom = customProducts;
+    Object.entries(patches || {}).forEach(([id, patch]) => {
+      if (custom.some((p) => p.id === id)) {
+        custom = custom.map((p) => (p.id === id ? { ...p, ...patch } : p));
+      } else {
+        next[id] = { ...(next[id] || {}), ...patch };
+      }
+    });
+    if (custom !== customProducts) next.__custom__ = custom;
+    persist(next);
+  }, [overrides, customProducts, persist]);
+
   const makeSlug = (raw, fallback) => {
     // ASCII-safe slug; Arabic-only names fall back to the id so URLs stay clean.
     const slug = String(raw || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -126,6 +145,7 @@ export function ProductProvider({ children }) {
   const buildProduct = (product, id) => {
     const images = productImages(product);
     return {
+      ...product, // keep any extra fields the editor sends (imageFit, hidden, ingredientsAr…)
       id,
       slug: uniqueSlug(makeSlug(product.slug || product.name, id), id),
       name: product.name || "New Product",
@@ -163,7 +183,7 @@ export function ProductProvider({ children }) {
   // go through a single persist.
   const addProducts = useCallback((list) => {
     const stamp = Date.now();
-    const made = list.map((product, i) => ({ ...product, ...buildProduct(product, `custom_${stamp}_${i}`) }));
+    const made = list.map((product, i) => buildProduct(product, `custom_${stamp}_${i}`));
     persist({ ...overrides, __custom__: [...customProducts, ...made] });
     return made;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -189,8 +209,8 @@ export function ProductProvider({ children }) {
   }, [persist]);
 
   const value = useMemo(
-    () => ({ ready, overrides, allProducts, visibleProducts, mergeProduct, updateProduct, addProduct, addProducts, deleteProduct, deleteProducts, resetProduct, resetAll, baseProducts, productAr }),
-    [ready, overrides, allProducts, visibleProducts, mergeProduct, updateProduct, addProduct, addProducts, deleteProduct, deleteProducts, resetProduct, resetAll]
+    () => ({ ready, overrides, allProducts, visibleProducts, mergeProduct, updateProduct, updateProducts, addProduct, addProducts, deleteProduct, deleteProducts, resetProduct, resetAll, baseProducts, productAr }),
+    [ready, overrides, allProducts, visibleProducts, mergeProduct, updateProduct, updateProducts, addProduct, addProducts, deleteProduct, deleteProducts, resetProduct, resetAll]
   );
 
   return <ProductContext.Provider value={value}>{children}</ProductContext.Provider>;

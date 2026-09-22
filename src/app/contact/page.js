@@ -3,11 +3,12 @@
 import { useState } from "react";
 import PageShell from "@/components/PageShell";
 import { useLang } from "@/context/LangContext";
-import { socials, contact } from "@/data/brand";
+import { useBrand } from "@/lib/useBrand";
 import styles from "./contact.module.css";
 
 export default function ContactPage() {
   const { t } = useLang();
+  const { socials, contact } = useBrand();
   const [sent, setSent] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));

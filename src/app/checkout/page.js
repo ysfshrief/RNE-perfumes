@@ -33,7 +33,7 @@ export default function CheckoutPage() {
   const { t, lang } = useLang();
   const { config, save: saveConfig } = useConfig();
   const { user: authUser, ready: authReady } = useAuth();
-  const { allProducts, updateProduct } = useProducts();
+  const { allProducts, updateProducts } = useProducts();
   const [pay, setPay] = useState("cod");
   const [placed, setPlaced] = useState(false);
   const [form, setForm] = useState({
@@ -199,16 +199,19 @@ export default function CheckoutPage() {
       bucket[size] = (bucket[size] || 0) + (Number(it.qty) || 0);
       sold.set(pid, bucket);
     });
+    const stockPatches = {};
     sold.forEach((bySize, pid) => {
       const product = allProducts.find((p) => p.id === pid);
       if (!product) return;
-      const nextSizes = (product.sizes || []).map((sz) =>
-        bySize[sz.size]
-          ? { ...sz, stock: Math.max(0, (Number(sz.stock) || 0) - bySize[sz.size]) }
-          : sz,
-      );
-      updateProduct(pid, { sizes: nextSizes });
+      stockPatches[pid] = {
+        sizes: (product.sizes || []).map((sz) =>
+          bySize[sz.size]
+            ? { ...sz, stock: Math.max(0, (Number(sz.stock) || 0) - bySize[sz.size]) }
+            : sz,
+        ),
+      };
     });
+    updateProducts(stockPatches); // one write — see ProductContext.updateProducts
     // Also save/update the customer record
     await addToCollection("customers", {
       id: `cust_${form.email}`,

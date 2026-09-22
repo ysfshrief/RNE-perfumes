@@ -8,7 +8,7 @@ import r from "./reviews.module.css";
 const SEED = [];
 
 export default function AdminReviews() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [reviews, setReviews] = useState(SEED);
   const STATUS_STYLE = {
     pending: { bg: "#f6ecd8", c: "var(--amber-deep)", label: t("admin.pending") },
@@ -26,6 +26,13 @@ export default function AdminReviews() {
         <p className={styles.pageSub}>{t("admin.reviewsNote")}</p>
       </div>
       <div className={r.list}>
+        {reviews.length === 0 && (
+          <div className={styles.card} style={{ textAlign: "center", color: "var(--ink-dim)" }}>
+            {lang === "ar"
+              ? "لا توجد تقييمات بعد. التقييمات تظهر هنا عندما يكتبها العملاء، وتحتاج موافقتك قبل ظهورها في المتجر."
+              : "No reviews yet. Customer reviews will appear here and need your approval before showing on the store."}
+          </div>
+        )}
         {reviews.map((rv) => (
           <div key={rv.id} className={styles.card}>
             <div className={r.top}>
@@ -33,8 +40,8 @@ export default function AdminReviews() {
                 <strong className={`${r.product} keep-latin`}>{rv.product}</strong>
                 <span className={`${r.meta} keep-latin`}>{rv.name} · {rv.date}</span>
               </div>
-              <span className={styles.pill} style={{ background: STATUS_STYLE[rv.status].bg, color: STATUS_STYLE[rv.status].c }}>
-                {STATUS_STYLE[rv.status].label}
+              <span className={styles.pill} style={{ background: (STATUS_STYLE[rv.status] || STATUS_STYLE.pending).bg, color: (STATUS_STYLE[rv.status] || STATUS_STYLE.pending).c }}>
+                {(STATUS_STYLE[rv.status] || STATUS_STYLE.pending).label}
               </span>
             </div>
             <div className="stars" style={{ margin: "0.4rem 0" }}>{"★".repeat(rv.rating)}{"☆".repeat(5 - rv.rating)}</div>

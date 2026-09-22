@@ -23,3 +23,6 @@
 }
 
 .limits { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.74rem; color: var(--ink-dim); }
+.err { font-size: 0.76rem; color: var(--danger); }
+.warn { font-size: 0.76rem; color: var(--amber-deep); }
+.field input[aria-invalid="true"] { border-color: var(--danger) !important; }

@@ -5,7 +5,7 @@ import type { ComponentProps, ReactNode } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import { useLang } from "@/context/LangContext";
-import { contact, socials } from "@/data/brand";
+import { useBrand } from "@/lib/useBrand";
 import LogoRNE from "@/components/LogoRNE";
 import LogoJoe from "@/components/LogoJoe";
 import FooterAdminTrigger from "@/components/FooterAdminTrigger";
@@ -46,6 +46,7 @@ const SOCIAL_ICONS: Record<string, React.ReactNode> = {
  */
 export function Footer() {
   const { t } = useLang();
+  const { contact, socials } = useBrand();
 
   const sections = [
     {
