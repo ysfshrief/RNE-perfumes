@@ -3,19 +3,21 @@
 import Link from "next/link";
 import { useLang } from "@/context/LangContext";
 import { useConfig } from "@/context/ConfigContext";
-import { useProducts, normalizeImageUrl } from "@/context/ProductContext";
+import { useProducts } from "@/context/ProductContext";
+import { normalizeImageUrl } from "@/lib/media";
+import { resolveHeroSlides, heroInterval } from "@/lib/heroSlides";
 import { getMinPrice } from "@/data/products";
 import { pName } from "@/data/productLocale";
 import FadingVideo from "./FadingVideo";
+import HeroSlideshow from "./HeroSlideshow";
 import { ArrowUpRight } from "./icons";
 import styles from "./Hero.module.css";
 
 /**
  * Cinematic campaign hero.
- * Media (image or video) comes from site settings — never hardcoded.
- * A hero product can optionally be pinned in settings; otherwise the first
- * best-seller from the live product data is used, so the price and note pills
- * are always real product data rather than decoration.
+ * Media comes from Admin → Homepage (an ordered list of images, or an
+ * optional video). Copy comes from the content system, so it is editable per
+ * language. The price/notes cluster uses real product data.
  */
 export default function Hero() {
   const { t, lang } = useLang();
@@ -23,44 +25,43 @@ export default function Hero() {
   const { visibleProducts } = useProducts();
 
   const heroCfg = config.hero || {};
-  const pool = visibleProducts.filter((p) => !p.isDiscoverySet);
-  const pinned = heroCfg.productSlug
-    ? pool.find((p) => p.slug === heroCfg.productSlug)
-    : null;
-  const product = pinned || pool.find((p) => p.bestSeller) || pool[0] || null;
-
-  const poster = heroCfg.image ? normalizeImageUrl(heroCfg.image) : null;
+  const slides = resolveHeroSlides(heroCfg);
   const video = heroCfg.video ? normalizeImageUrl(heroCfg.video) : "";
+  const overlay = Math.min(90, Math.max(20, Number(heroCfg.overlay ?? 55))) / 100;
+  const ctaHref = heroCfg.ctaHref || "/shop";
+  const showProduct = heroCfg.showProduct !== false;
 
-  // Real fragrance notes → the pill row in the reference composition
+  const pool = visibleProducts.filter((p) => !p.isDiscoverySet);
+  const pinned = heroCfg.productSlug ? pool.find((p) => p.slug === heroCfg.productSlug) : null;
+  const product = showProduct ? pinned || pool.find((p) => p.bestSeller) || pool[0] || null : null;
+
   const notes = product
-    ? [
-        ...(product.notes?.top || []),
-        ...(product.notes?.heart || []),
-        ...(product.notes?.base || []),
-      ].slice(0, 5)
+    ? [...(product.notes?.top || []), ...(product.notes?.heart || []), ...(product.notes?.base || [])].slice(0, 5)
     : [];
 
   return (
-    <section className={styles.hero} aria-label={t("home.heroEyebrow")}>
-      {/* Full-bleed cinematic media — no global dark overlay */}
-      <div className={styles.media} aria-hidden="true">
-        <FadingVideo
-          src={video}
-          poster={poster}
-          alt=""
-          fit="cover"
-          className={styles.mediaInner}
-        />
-        {/* Local, directional scrim only where type sits — keeps the image cinematic */}
-        <div className={styles.scrim} />
+    <section className={styles.hero} aria-labelledby="hero-title" style={{ "--scrim": overlay }}>
+      <div className={styles.media}>
+        {video ? (
+          <FadingVideo src={video} poster={slides[0]?.url} alt="" fit="cover" className={styles.mediaInner} />
+        ) : (
+          <HeroSlideshow
+            slides={slides}
+            interval={heroInterval(heroCfg)}
+            label={t("home.heroEyebrow")}
+            dotsLabel={lang === "ar" ? "صورة" : "Image"}
+          />
+        )}
+        {/* Directional scrim sized to where the copy sits — keeps the text
+            legible on any photo without flattening the whole image. */}
+        <div className={styles.scrim} aria-hidden="true" />
       </div>
 
       <div className={styles.inner}>
         <div className={styles.copy}>
-          <p className={`eyebrow ${styles.eyebrow}`}>{t("home.heroEyebrow")}</p>
+          <p className={styles.eyebrow}>{t("home.heroEyebrow")}</p>
 
-          <h1 className={styles.title}>
+          <h1 id="hero-title" className={styles.title}>
             <span className={styles.titleBright}>{t("home.heroTitle1")}</span>
             <span className={styles.titleMuted}>{t("home.heroTitleEm")}</span>
           </h1>
@@ -68,7 +69,7 @@ export default function Hero() {
           <p className={styles.lead}>{t("home.heroLead")}</p>
 
           <div className={styles.actions}>
-            <Link href="/shop" className={styles.cta}>
+            <Link href={ctaHref} className={styles.cta}>
               <span>{t("home.shopCollection")}</span>
               <ArrowUpRight size={18} className={styles.ctaArrow} />
             </Link>
@@ -84,23 +85,20 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Note pills — real notes from the featured product */}
         {notes.length > 0 && (
           <div className={styles.notes}>
-            <ul className={styles.noteList}>
+            <ul className={styles.noteList} aria-label={pName(product, lang)}>
               {notes.map((n) => (
-                <li key={n} className="pill">{n}</li>
+                <li key={n} className={styles.notePill}>{n}</li>
               ))}
             </ul>
-            {product && (
-              <Link
-                href={`/product/${product.slug}`}
-                className={styles.noteAction}
-                aria-label={`${t("common.view")} — ${pName(product, lang)}`}
-              >
-                <ArrowUpRight size={18} />
-              </Link>
-            )}
+            <Link
+              href={`/product/${product.slug}`}
+              className={styles.noteAction}
+              aria-label={`${t("common.view")} — ${pName(product, lang)}`}
+            >
+              <ArrowUpRight size={18} />
+            </Link>
           </div>
         )}
       </div>

@@ -12,20 +12,8 @@ import { readDoc, writeDoc, subscribeDoc } from "@/lib/store";
 const ProductContext = createContext(null);
 const STORE_KEY = "products"; // settings/products doc (or rne-products in LS)
 
-// Convert a Google Drive share link to a direct-view image URL.
-export function normalizeImageUrl(url) {
-  if (!url || typeof url !== "string") return url;
-  const u = url.trim();
-  if (!u) return u;
-  let id = null;
-  let m = u.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if (m) id = m[1];
-  if (!id) { m = u.match(/[?&]id=([a-zA-Z0-9_-]+)/); if (m) id = m[1]; }
-  if (id) {
-    return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
-  }
-  return u;
-}
+// Kept as a re-export so existing imports keep working.
+export { normalizeImageUrl } from "@/lib/media";
 
 export function ProductProvider({ children }) {
   const [overrides, setOverrides] = useState({}); // { [id]: {...override} }

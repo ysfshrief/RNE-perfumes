@@ -153,13 +153,13 @@ html[dir="rtl"] .name { font-family: var(--font-ar-display); font-size: 1.25rem;
 .priceWrap { display: inline-flex; align-items: baseline; gap: 0.35rem; }
 .fromLabel { font-size: 0.68rem; color: var(--ink-faint); }
 .price {
-  font-family: var(--font-display);
+  font-family: var(--font-price);
   font-size: 1.22rem;
   font-weight: 700;
   color: var(--ink);
   letter-spacing: 0.01em;
 }
-html[dir="rtl"] .price { font-family: var(--font-ar-display); font-size: 1.05rem; }
+
 
 .action {
   display: inline-flex;

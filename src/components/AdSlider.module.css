@@ -14,9 +14,10 @@
 
 .track {
   display: flex;
-  transition: transform 0.55s cubic-bezier(0.4, 0, 0.15, 1);
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.15, 1);
   will-change: transform;
 }
+@media (prefers-reduced-motion: reduce) { .track { transition: none; } }
 
 .slide {
   width: 100%;
@@ -31,6 +32,8 @@
   justify-content: space-between;
   min-height: 260px;
   padding: clamp(1.75rem, 5vw, 3.5rem);
+  /* leave room for the arrows so they never sit on the heading */
+  padding-inline: max(76px, clamp(1.75rem, 5vw, 3.5rem));
   overflow: hidden;
 }
 
@@ -41,7 +44,7 @@
 }
 .badge {
   display: inline-block;
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -55,8 +58,16 @@
 .title {
   font-size: clamp(1.5rem, 4vw, 2.6rem);
   line-height: 1.15;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+html[dir="rtl"] .title { font-weight: 700; line-height: 1.35; }
+.desc {
+  font-size: clamp(0.92rem, 1.3vw, 1.05rem);
+  line-height: 1.6;
+  opacity: 0.9;
+  max-width: 34rem;
   margin-bottom: 1.4rem;
-  font-weight: 800;
 }
 .cta {
   background: var(--btn-primary-bg);
@@ -67,7 +78,7 @@
   -webkit-backdrop-filter: var(--btn-blur);
 
   display: inline-block;
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-weight: 600;
   font-size: 0.85rem;
   letter-spacing: 0.04em;
@@ -107,7 +118,6 @@ html[dir="rtl"] .decor span:nth-child(3) { right: auto; left: 12%; }
   border-radius: 50%;
   background: rgba(247, 245, 241, 0.9);
   color: var(--ink);
-  font-size: 1.6rem;
   line-height: 1;
   display: grid;
   place-items: center;
@@ -118,8 +128,11 @@ html[dir="rtl"] .decor span:nth-child(3) { right: auto; left: 12%; }
 .arrow:hover { background: var(--paper); transform: translateY(-50%) scale(1.08); }
 .prev { left: 14px; }
 .next { right: 14px; }
+.prev svg { transform: scaleX(-1); }
 html[dir="rtl"] .prev { left: auto; right: 14px; }
 html[dir="rtl"] .next { right: auto; left: 14px; }
+html[dir="rtl"] .prev svg { transform: none; }
+html[dir="rtl"] .next svg { transform: scaleX(-1); }
 
 /* Dots */
 .dots {
@@ -131,6 +144,7 @@ html[dir="rtl"] .next { right: auto; left: 14px; }
 .dot {
   width: 8px;
   height: 8px;
+  padding: 0;
   border-radius: 999px;
   background: var(--line);
   transition: width 0.3s, background 0.3s;
@@ -141,11 +155,10 @@ html[dir="rtl"] .next { right: auto; left: 14px; }
 }
 
 @media (max-width: 600px) {
-  .slideInner { min-height: 200px; padding: 1.5rem 1.35rem; }
-  .text { max-width: 78%; }
-  .arrow { width: 34px; height: 34px; font-size: 1.3rem; }
-  .prev { left: 8px; }
-  .next { right: 8px; }
+  .slideInner { min-height: 200px; padding: 1.5rem 1.35rem; padding-inline: 1.35rem; }
+  /* Touch devices swipe; arrows would sit on top of the copy. */
+  .arrow { display: none; }
+  .text { max-width: 100%; }
 }
 
 /* ── Image banner slides ── */

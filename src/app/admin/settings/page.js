@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { useLang } from "@/context/LangContext";
 import { useConfig, defaultConfig } from "@/context/ConfigContext";
 import adminStyles from "../admin.module.css";
+import { useToast } from "@/components/admin/Toast";
 import s from "./settings.module.css";
 
 export default function AdminSettings() {
   const { lang } = useLang();
   const { config, save, reset } = useConfig();
-  const [saved, setSaved] = useState(false);
+  const { toast } = useToast();
   const ar = lang === "ar";
   const T = (a, e) => (ar ? a : e);
 
@@ -24,7 +24,7 @@ export default function AdminSettings() {
     save({ ...config, effects: { ...effects, [key]: val } });
     flash();
   };
-  const flash = () => { setSaved(true); clearTimeout(window.__st); window.__st = setTimeout(() => setSaved(false), 1200); };
+  const flash = () => toast(T("تم الحفظ", "Saved"));
 
   const COLOR_FIELDS = [
     { key: "accent", label: T("اللون الأساسي (البيرجاندي)", "Primary accent (burgundy)") },
@@ -46,22 +46,13 @@ export default function AdminSettings() {
     { key: "parallax", label: T("تأثير Parallax", "Parallax effect") },
   ];
 
-  // Ad slides editor
-  const slides = config.adSlides || [];
-  const setSlide = (i, patch) => {
-    const next = slides.map((sl, idx) => (idx === i ? { ...sl, ...patch } : sl));
-    save({ ...config, adSlides: next });
-    flash();
-  };
-
   return (
     <>
       <div className={adminStyles.pageHead}>
         <h1 className={adminStyles.pageTitle}>{T("الإعدادات", "Settings")}</h1>
         <p className={adminStyles.pageSub}>
-          {T("ألوان الموقع، التأثيرات البصرية، والبانر المتحرك.", "Site colors, visual effects, and the ad banner.")}
+          {T("الألوان، التأثيرات، طرق الدفع، الخصائص، وعجلة الحظ. التغييرات هنا تُحفظ فورًا.", "Colours, effects, payment methods, features and the spin wheel. Changes here save instantly.")}
         </p>
-        {saved && <span className={s.savedFlash}>✓ {T("تم الحفظ", "Saved")}</span>}
       </div>
 
       <div className={s.grid}>
@@ -92,7 +83,7 @@ export default function AdminSettings() {
               </label>
             ))}
           </div>
-          <button className={s.resetColors} onClick={() => { save({ ...config, colors: defaultConfig.colors }); flash(); }}>
+          <button className={s.resetColors} onClick={() => { if (confirm(T("استرجاع كل الألوان الأصلية؟", "Reset all colours to default?"))) { save({ ...config, colors: defaultConfig.colors }); flash(); } }}>
             {T("↺ استرجاع الألوان الأصلية", "↺ Reset to default colors")}
           </button>
         </div>
@@ -151,34 +142,13 @@ export default function AdminSettings() {
 
         {/* ─── Cinematic media (hero + brand story) ─── */}
         <div className={`${adminStyles.card} ${s.fullWidth}`}>
-          <h3 className={s.secTitle}>{T("🎬 الميديا السينمائية", "🎬 Cinematic media")}</h3>
+          <h3 className={s.secTitle}>{T("🎬 صور إضافية", "🎬 Other media")}</h3>
           <p className={s.secNote}>
-            {T("صورة/فيديو الهيرو وقصة البراند. الصق رابط Drive أو رابط مباشر. الفيديو اختياري — الصورة بتشتغل كـ poster.",
-               "Hero and brand-story media. Paste a Drive link or a direct URL. Video is optional — the image acts as its poster.")}
+            {T("قصة البراند وخلفية صفحات الدخول. صور الهيرو والبانر والتصنيفات أصبحت في صفحة «الصفحة الرئيسية».",
+               "Brand story and sign-in background. Hero, banner and category images now live on the “Homepage” page.")}
           </p>
 
           <div className={s.slidesList}>
-            <div className={s.slideCard} style={{ borderInlineStart: "4px solid var(--burgundy)" }}>
-              <strong className={s.slideNum}>{T("الهيرو", "Hero")}</strong>
-              <div className={s.slideFields}>
-                <div className={s.sfRow}>
-                  <label>{T("صورة الهيرو", "Hero image")}</label>
-                  <input dir="ltr" value={config.hero?.image || ""} placeholder="https://drive.google.com/file/d/..."
-                    onChange={(e) => { save({ ...config, hero: { ...config.hero, image: e.target.value } }); flash(); }} />
-                </div>
-                <div className={s.sfRow}>
-                  <label>{T("فيديو الهيرو (اختياري)", "Hero video (optional)")}</label>
-                  <input dir="ltr" value={config.hero?.video || ""} placeholder="https://…/clip.mp4"
-                    onChange={(e) => { save({ ...config, hero: { ...config.hero, video: e.target.value } }); flash(); }} />
-                </div>
-                <div className={s.sfRow}>
-                  <label>{T("منتج الهيرو (slug — اختياري)", "Hero product (slug — optional)")}</label>
-                  <input dir="ltr" value={config.hero?.productSlug || ""} placeholder="khamrah"
-                    onChange={(e) => { save({ ...config, hero: { ...config.hero, productSlug: e.target.value } }); flash(); }} />
-                </div>
-              </div>
-            </div>
-
             <div className={s.slideCard} style={{ borderInlineStart: "4px solid var(--olive)" }}>
               <strong className={s.slideNum}>{T("خلفية صفحات الدخول/التسجيل", "Login / Register background")}</strong>
               <div className={s.slideFields}>
@@ -208,51 +178,21 @@ export default function AdminSettings() {
           </div>
         </div>
 
-        {/* ─── Category Cards ─── */}
+        {/* ─── Feature flags ─── */}
         <div className={`${adminStyles.card} ${s.fullWidth}`}>
-          <h3 className={s.secTitle}>{T("🗂️ خانات الصفحة الرئيسية", "🗂️ Homepage Category Cards")}</h3>
-          <p className={s.secNote}>{T("عدّل اسم وصورة كل خانة. الصق رابط صورة من Google Drive.", "Edit each card's name and image. Paste a Google Drive image link.")}</p>
-          <div className={s.slidesList}>
-            {(config.categories || []).map((cat, i) => (
-              <div key={cat.id} className={s.slideCard} style={{ borderInlineStart: `4px solid ${cat.color}` }}>
-                <div className={s.slideFields}>
-                  <div className={s.sfRow}>
-                    <label>{T("الاسم (ع)", "Label (AR)")}</label>
-                    <input dir="rtl" value={cat.label} onChange={(e) => {
-                      const cats = [...config.categories]; cats[i] = { ...cat, label: e.target.value };
-                      save({ ...config, categories: cats });
-                    }} />
-                  </div>
-                  <div className={s.sfRow}>
-                    <label>{T("الاسم (EN)", "Label (EN)")}</label>
-                    <input dir="ltr" value={cat.labelEn} onChange={(e) => {
-                      const cats = [...config.categories]; cats[i] = { ...cat, labelEn: e.target.value };
-                      save({ ...config, categories: cats });
-                    }} />
-                  </div>
-                  <div className={s.sfRow} style={{ gridColumn: "1 / -1" }}>
-                    <label>{T("رابط الصورة (Drive)", "Image link (Drive)")}</label>
-                    <input dir="ltr" value={cat.image} placeholder="https://drive.google.com/file/d/..." onChange={(e) => {
-                      const cats = [...config.categories]; cats[i] = { ...cat, image: e.target.value };
-                      save({ ...config, categories: cats });
-                    }} />
-                  </div>
-                  <div className={s.sfRow}>
-                    <label>{T("لون الخلفية", "Overlay color")}</label>
-                    <div className={s.colorInputWrap}>
-                      <input type="color" className={s.colorPicker} value={cat.color} onChange={(e) => {
-                        const cats = [...config.categories]; cats[i] = { ...cat, color: e.target.value };
-                        save({ ...config, categories: cats });
-                      }} />
-                      <input type="text" dir="ltr" className={s.colorHex} value={cat.color} onChange={(e) => {
-                        const cats = [...config.categories]; cats[i] = { ...cat, color: e.target.value };
-                        save({ ...config, categories: cats });
-                      }} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <h3 className={s.secTitle}>{T("🧩 الخصائص", "🧩 Features")}</h3>
+          <p className={s.secNote}>{T("تشغيل أو إيقاف أجزاء كاملة من الموقع بدون حذفها.", "Turn whole parts of the site on or off without deleting them.")}</p>
+          <div className={s.effectRow}>
+            <div>
+              <span className={s.effectLabel}>{T("عجلة الحظ", "Spin wheel")}</span>
+              <span className={s.effectDesc}>{T("موقوفة حاليًا. تفعيلها يُظهر زر العجلة في الصفحة الرئيسية بنفس الجوائز المحفوظة بالأسفل.", "Currently paused. Turning it on shows the wheel button on the homepage with the prizes saved below.")}</span>
+            </div>
+            <button
+              className={`${s.switch} ${config.features?.spinWheel ? s.switchOn : ""}`}
+              onClick={() => { save({ ...config, features: { ...(config.features || {}), spinWheel: !config.features?.spinWheel } }); flash(); }}
+              role="switch" aria-checked={!!config.features?.spinWheel}
+              aria-label={T("عجلة الحظ", "Spin wheel")}
+            ><span className={s.knob} /></button>
           </div>
         </div>
 
@@ -265,8 +205,8 @@ export default function AdminSettings() {
             <span className={s.effectLabel}>{T("تفعيل العجلة", "Enable wheel")}</span>
             <button
               className={`${s.switch} ${(config.wheel?.enabled !== false) ? s.switchOn : ""}`}
-              onClick={() => save({ ...config, wheel: { ...config.wheel, enabled: !(config.wheel?.enabled !== false) } })}
-              role="switch"
+              onClick={() => { save({ ...config, wheel: { ...config.wheel, enabled: !(config.wheel?.enabled !== false) } }); flash(); }}
+              role="switch" aria-checked={config.wheel?.enabled !== false}
             ><span className={s.knob} /></button>
           </div>
 
@@ -331,51 +271,6 @@ export default function AdminSettings() {
           </div>
         </div>
 
-        {/* ─── Ad Slides ─── */}
-        <div className={`${adminStyles.card} ${s.fullWidth}`}>
-          <h3 className={s.secTitle}>{T("🖼️ البانر المتحرك", "🖼️ Ad Banner Slides")}</h3>
-          <p className={s.secNote}>{T("عدّل محتوى كل شريحة في السلايدر.", "Edit the content of each banner slide.")}</p>
-          <div className={s.slidesList}>
-            {slides.map((sl, i) => (
-              <div key={sl.id} className={s.slideCard} style={{ borderInlineStart: `4px solid ${sl.bg}` }}>
-                <strong className={s.slideNum}>{T("شريحة", "Slide")} {i + 1}</strong>
-                <div className={s.slideFields}>
-                  <div className={s.sfRow}>
-                    <label>{T("العنوان (ع)", "Title (AR)")}</label>
-                    <input dir="rtl" value={sl.title} onChange={(e) => setSlide(i, { title: e.target.value })} />
-                  </div>
-                  <div className={s.sfRow}>
-                    <label>{T("العنوان (EN)", "Title (EN)")}</label>
-                    <input dir="ltr" value={sl.titleEn} onChange={(e) => setSlide(i, { titleEn: e.target.value })} />
-                  </div>
-                  <div className={s.sfRow}>
-                    <label>{T("الوصف (ع)", "Subtitle (AR)")}</label>
-                    <input dir="rtl" value={sl.subtitle} onChange={(e) => setSlide(i, { subtitle: e.target.value })} />
-                  </div>
-                  <div className={s.sfRow}>
-                    <label>{T("الوصف (EN)", "Subtitle (EN)")}</label>
-                    <input dir="ltr" value={sl.subtitleEn} onChange={(e) => setSlide(i, { subtitleEn: e.target.value })} />
-                  </div>
-                  <div className={s.sfRow}>
-                    <label>{T("نص الزر (ع)", "Button (AR)")}</label>
-                    <input dir="rtl" value={sl.cta} onChange={(e) => setSlide(i, { cta: e.target.value })} />
-                  </div>
-                  <div className={s.sfRow}>
-                    <label>{T("الرابط", "Link")}</label>
-                    <input dir="ltr" value={sl.href} onChange={(e) => setSlide(i, { href: e.target.value })} />
-                  </div>
-                  <div className={s.sfRow}>
-                    <label>{T("لون الخلفية", "Background")}</label>
-                    <div className={s.colorInputWrap}>
-                      <input type="color" className={s.colorPicker} value={sl.bg} onChange={(e) => setSlide(i, { bg: e.target.value })} />
-                      <input type="text" dir="ltr" className={s.colorHex} value={sl.bg} onChange={(e) => setSlide(i, { bg: e.target.value })} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </>
   );

@@ -93,7 +93,7 @@ html[dir="rtl"] .link { font-family: var(--font-ar); letter-spacing: 0.02em; fon
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -109,7 +109,7 @@ html[dir="rtl"] .link { font-family: var(--font-ar); letter-spacing: 0.02em; fon
 html[dir="rtl"] .langBtn { font-family: var(--font-display); }
 
 .mobileLang {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -133,7 +133,7 @@ html[dir="rtl"] .langBtn { font-family: var(--font-display); }
   right: -9px;
   background: var(--amber);
   color: var(--ink);
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.6rem;
   font-weight: 700;
   min-width: 16px;
@@ -174,7 +174,7 @@ html[dir="rtl"] .langBtn { font-family: var(--font-display); }
   background: var(--paper);
 }
 .mobileNav a {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;

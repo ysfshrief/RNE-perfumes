@@ -29,7 +29,7 @@
 }
 .tab {
   padding: 0.8rem 1.3rem;
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-weight: 600;
   font-size: 0.82rem;
   letter-spacing: 0.08em;
@@ -57,7 +57,7 @@
 .orderTop { display: flex; justify-content: space-between; align-items: flex-start; }
 .orderTop strong { font-family: var(--font-display); font-size: 1rem; }
 .orderDate { display: block; font-size: 0.78rem; color: var(--olive); margin-top: 0.2rem; }
-.status { font-family: var(--font-display); font-weight: 600; font-size: 0.82rem; }
+.status { font-family: var(--font-ui); font-weight: 600; font-size: 0.82rem; }
 .orderItems { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.88rem; color: var(--ink-dim); }
 .orderFoot {
   display: flex;
@@ -66,7 +66,7 @@
   padding-top: 0.9rem;
   border-top: 1px solid var(--line);
 }
-.orderTotal { font-family: var(--font-display); font-weight: 700; }
+.orderTotal { font-family: var(--font-price); font-weight: 700; }
 .orderBtn {
   background: var(--btn-primary-bg);
   color: var(--btn-primary-fg);
@@ -75,7 +75,7 @@
   backdrop-filter: var(--btn-blur);
   -webkit-backdrop-filter: var(--btn-blur);
 
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.78rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -90,7 +90,7 @@
   border-bottom: 1px solid var(--line);
 }
 .rowLabel {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;

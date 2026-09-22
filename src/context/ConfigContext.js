@@ -12,9 +12,21 @@ export const defaultConfig = {
   // normalizeImageUrl). Copy lives in the content/translation system so it
   // stays editable per language.
   hero: {
-    image: "/products/hero.jpg",   // poster / still
-    video: "",                     // optional Drive or direct video URL
+    image: "/products/hero.jpg",   // legacy single still (used when `images` is empty)
+    images: [],                    // ordered slideshow: [{ id, url, alt, enabled }]
+    interval: 7,                   // seconds per image (4–20)
+    overlay: 55,                   // text-legibility scrim strength, 20–90 (%)
+    ctaHref: "/shop",              // where the main hero button goes
+    video: "",                     // optional Drive or direct video URL (replaces the slideshow)
     productSlug: "",               // optional: pin a product's price + notes to the hero
+    showProduct: true,             // show the price tag + note pills
+  },
+
+  // Feature flags — switch whole features on/off without touching code.
+  features: {
+    // Spin-the-wheel is paused for now. The component, its admin settings and
+    // saved prizes are kept; flip this on from Admin → Settings to bring it back.
+    spinWheel: false,
   },
 
   // Auth screens (login / register) background — Drive link supported
@@ -74,9 +86,9 @@ export const defaultConfig = {
 
   // Advertising slider (Noon-style hero carousel)
   adSlides: [
-    { id: "s1", title: "خصومات الصيف", titleEn: "Summer Sale", subtitle: "خصم يصل إلى ٢٥٪ على عطور مختارة", subtitleEn: "Up to 25% off selected fragrances", cta: "تسوّق الآن", ctaEn: "Shop now", href: "/shop?offers=true", bg: "#2a1e3a", fg: "#f7f5f1" },
-    { id: "s2", title: "وصل حديثًا", titleEn: "New Arrivals", subtitle: "اكتشف أحدث تركيباتنا", subtitleEn: "Discover our newest compositions", cta: "اكتشف", ctaEn: "Explore", href: "/shop", bg: "#1a2a4a", fg: "#f7f5f1" },
-    { id: "s3", title: "الأكثر مبيعًا", titleEn: "Best Sellers", subtitle: "العطور المفضّلة لعملائنا", subtitleEn: "Our customers' favorites", cta: "شوف المجموعة", ctaEn: "View collection", href: "/shop", bg: "#3a2a1a", fg: "#f7f5f1" },
+    { id: "s1", enabled: true, title: "خصومات الصيف", titleEn: "Summer Sale", subtitle: "خصم يصل إلى ٢٥٪ على عطور مختارة", subtitleEn: "Up to 25% off selected fragrances", cta: "تسوّق الآن", ctaEn: "Shop now", href: "/shop?offers=true", bg: "#2a1e3a", fg: "#f7f5f1" },
+    { id: "s2", enabled: true, title: "وصل حديثًا", titleEn: "New Arrivals", subtitle: "اكتشف أحدث تركيباتنا", subtitleEn: "Discover our newest compositions", cta: "اكتشف", ctaEn: "Explore", href: "/shop", bg: "#1a2a4a", fg: "#f7f5f1" },
+    { id: "s3", enabled: true, title: "الأكثر مبيعًا", titleEn: "Best Sellers", subtitle: "العطور المفضّلة لعملائنا", subtitleEn: "Our customers' favorites", cta: "شوف المجموعة", ctaEn: "View collection", href: "/shop", bg: "#3a2a1a", fg: "#f7f5f1" },
   ],
 
   // Spin-the-wheel prizes (admin defines segments + weights)
@@ -117,21 +129,18 @@ function mergeConfig(base, saved) {
 
     if (Array.isArray(b)) {
       if (!Array.isArray(v)) continue;
-      // Fill each saved entry's gaps from the matching default entry.
-      out[key] = v.map((item, i) => {
-        const fallback = b.find((d) => d && item && d.id === item.id) || b[i] || {};
+      // Fill fields a saved entry never had (e.g. a slide saved before
+      // `titleEn` existed) from the default with the SAME id. Matching by
+      // index used to give admin-added slides another slide's defaults, and
+      // re-appending defaults made deleted slides come back.
+      out[key] = v.map((item) => {
         if (!item || typeof item !== "object") return item;
-        // Drop empty values so they fall back to the default instead of
-        // rendering as a blank slide.
-        const cleaned = Object.fromEntries(
-          Object.entries(item).filter(([, val]) => val !== "" && val !== null && val !== undefined),
+        const fallback = b.find((d) => d && d.id === item.id) || {};
+        const present = Object.fromEntries(
+          Object.entries(item).filter(([, val]) => val !== null && val !== undefined),
         );
-        return { ...fallback, ...cleaned };
+        return { ...fallback, ...present };
       });
-      // Keep defaults the saved copy never had (e.g. a newly added slide).
-      if (b.length > v.length && key === "adSlides") {
-        out[key] = [...out[key], ...b.slice(v.length)];
-      }
     } else if (b && typeof b === "object") {
       out[key] = { ...b, ...(typeof v === "object" ? v : {}) };
     } else {

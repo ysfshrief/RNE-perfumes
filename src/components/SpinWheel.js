@@ -60,7 +60,7 @@ export default function SpinWheel() {
       ctx.rotate(start + arc / 2);
       ctx.textAlign = "right";
       ctx.fillStyle = "#f7f5f1";
-      ctx.font = "600 15px 'Tajawal', system-ui, sans-serif";
+      ctx.font = "600 15px 'IBM Plex Sans Arabic', 'Jost', system-ui, sans-serif";
       ctx.fillText(label(seg), radius - 16, 6);
       ctx.restore();
     });
@@ -75,7 +75,9 @@ export default function SpinWheel() {
     ctx.stroke();
   }, [open, segments, lang]);
 
-  if (!wheel?.enabled || !segments.length) return null;
+  // Hidden unless the feature flag is on (Admin → Settings → Features).
+  // The implementation stays intact so it can be re-enabled any time.
+  if (!config.features?.spinWheel || !wheel?.enabled || !segments.length) return null;
 
   const weightedPick = () => {
     const total = segments.reduce((sum, s) => sum + (s.weight || 1), 0);

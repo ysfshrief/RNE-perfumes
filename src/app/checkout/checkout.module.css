@@ -32,7 +32,7 @@
 .field { display: flex; flex-direction: column; gap: 0.4rem; }
 .full { grid-column: 1 / -1; }
 .field label {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -68,7 +68,7 @@
 .payment:hover { border-color: var(--ink); }
 .payOn { border-color: var(--ink); background: var(--sand); }
 .payment input { grid-row: 1 / 3; accent-color: var(--accent-text); width: 18px; height: 18px; }
-.payLabel { font-family: var(--font-display); font-weight: 600; font-size: 0.95rem; }
+.payLabel { font-family: var(--font-ui); font-weight: 600; font-size: 0.95rem; }
 .payNote { font-size: 0.78rem; color: var(--olive); }
 .payHint { margin-top: 1rem; font-size: 0.78rem; color: var(--olive); font-style: italic; }
 
@@ -85,7 +85,7 @@
 .line { display: grid; grid-template-columns: auto 1fr auto; gap: 0.6rem; align-items: center; font-size: 0.85rem; }
 .lineDot { width: 28px; height: 34px; border-radius: 2px; }
 .lineName { color: var(--ink-dim); }
-.linePrice { font-family: var(--font-display); font-weight: 600; }
+.linePrice { font-family: var(--font-price); font-weight: 600; }
 
 .totals { display: flex; flex-direction: column; gap: 0.6rem; padding-block: 1rem; }
 .totals div { display: flex; justify-content: space-between; font-size: 0.88rem; color: var(--ink-dim); }
@@ -94,7 +94,7 @@
   justify-content: space-between;
   padding-block: 1rem;
   border-top: 1px solid var(--line);
-  font-family: var(--font-display);
+  font-family: var(--font-price);
   font-weight: 700;
   font-size: 1.25rem;
   margin-bottom: 1rem;

@@ -106,7 +106,7 @@ html[dir="rtl"] .drawer { box-shadow: 8px 0 30px rgba(0, 0, 0, 0.2); }
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--accent-text);
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
 }
 .hint { font-size: 0.78rem; color: var(--olive); line-height: 1.5; margin-top: -0.3rem; }
 .noteInline { font-size: 0.76rem; color: var(--olive); background: rgba(139,26,43,0.22); padding: 0.6rem 0.8rem; border-radius: var(--radius); }
@@ -214,7 +214,7 @@ html[dir="rtl"] .switchOn .knob { transform: translateX(-18px); }
   backdrop-filter: var(--btn-blur);
   -webkit-backdrop-filter: var(--btn-blur);
 
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-weight: 600;
   font-size: 0.85rem;
   letter-spacing: 0.05em;

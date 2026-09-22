@@ -41,7 +41,7 @@
 .itemInfo { display: flex; flex-direction: column; gap: 0.3rem; }
 .itemInfo h3 { font-size: 1.2rem; }
 .size { font-size: 0.82rem; color: var(--olive); }
-.itemPrice { font-family: var(--font-display); font-weight: 600; margin-top: 0.2rem; }
+.itemPrice { font-family: var(--font-price); font-weight: 600; margin-top: 0.2rem; }
 
 .itemControls {
   display: flex;
@@ -58,11 +58,11 @@
 .qty button {
   width: 34px; height: 34px;
   font-size: 1.1rem;
-  font-family: var(--font-display);
+  font-family: var(--font-price);
 }
 .qty button:disabled { opacity: 0.3; }
-.qty span { min-width: 32px; text-align: center; font-weight: 600; font-family: var(--font-display); }
-.lineTotal { font-family: var(--font-display); font-weight: 700; }
+.qty span { min-width: 32px; text-align: center; font-weight: 600; font-family: var(--font-price); }
+.lineTotal { font-family: var(--font-price); font-weight: 700; }
 .remove {
   font-size: 0.78rem;
   color: var(--danger);
@@ -99,7 +99,7 @@
   background: var(--ink);
   color: var(--on-ink);
   border-radius: var(--radius);
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-weight: 600;
   font-size: 0.78rem;
   text-transform: uppercase;
@@ -118,7 +118,7 @@
   align-items: center;
   padding-block: 1rem;
   border-top: 1px solid var(--line);
-  font-family: var(--font-display);
+  font-family: var(--font-price);
   font-weight: 700;
   font-size: 1.3rem;
 }

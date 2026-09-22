@@ -6,7 +6,7 @@
   padding: 0.85rem 1.3rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-weight: 600;
   font-size: 0.82rem;
   letter-spacing: 0.04em;

@@ -29,7 +29,7 @@
 
 .slotLabel {
   display: block;
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.1em;

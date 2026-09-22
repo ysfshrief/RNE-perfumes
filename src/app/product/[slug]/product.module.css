@@ -2,7 +2,7 @@
   padding-block: 1.4rem;
   font-size: 0.8rem;
   color: var(--olive);
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   letter-spacing: 0.04em;
 }
 .crumbs a:hover { color: var(--accent-text); }
@@ -27,7 +27,7 @@
   overflow: hidden;
 }
 .imgLabel {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-weight: 700;
   font-size: 1.6rem;
   letter-spacing: 0.12em;
@@ -49,7 +49,7 @@
 .infoMeta {
   display: flex;
   gap: 0.5rem;
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -67,7 +67,7 @@
 
 .block { margin-top: 1.8rem; }
 .block h4 {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -80,7 +80,7 @@
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--white);
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-weight: 600;
   font-size: 0.9rem;
   transition: all 0.2s;
@@ -113,7 +113,7 @@
 .qty button {
   width: 44px; height: 100%;
   font-size: 1.2rem;
-  font-family: var(--font-display);
+  font-family: var(--font-price);
   transition: background 0.2s;
 }
 .qty button:hover:not(:disabled) { background: var(--sand); }
@@ -121,7 +121,7 @@
 .qty span {
   min-width: 40px;
   text-align: center;
-  font-family: var(--font-display);
+  font-family: var(--font-price);
   font-weight: 600;
 }
 
@@ -147,7 +147,7 @@
   border-bottom: 1px solid var(--sand-deep);
 }
 .noteTier {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-weight: 700;
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -164,7 +164,7 @@
 }
 .ingredients { margin-top: 2rem; max-width: 640px; }
 .ingredients h4 {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -206,7 +206,7 @@
   margin-top: 0.4rem;
   font-size: 0.9rem;
   color: var(--olive);
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   letter-spacing: 0.02em;
 }
 .inspiredBy span { color: var(--accent-text); font-weight: 600; }

@@ -11,7 +11,7 @@
   backdrop-filter: var(--btn-blur);
   -webkit-backdrop-filter: var(--btn-blur);
 
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.76rem;
   font-weight: 600;
   padding: 0.45rem 0.9rem;
@@ -29,7 +29,7 @@
   padding: 1.4rem 1.1rem;
 }
 .expand h4 {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -41,7 +41,7 @@
 
 .statusBtns { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.3rem; }
 .statusBtn {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.74rem;
   font-weight: 600;
   padding: 0.4rem 0.8rem;

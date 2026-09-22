@@ -2,7 +2,7 @@
 .formTitle { font-size: 1.1rem; margin-bottom: 1rem; }
 .field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.9rem; }
 .field label {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
