@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useLang } from "@/context/LangContext";
 import { adminRequiresAuth, isDemoUnlocked, unlockDemo } from "@/lib/adminAccess";
+import { isFirebaseEnabled } from "@/lib/firebase";
 import styles from "./AdminGuard.module.css";
 
 /**
@@ -98,12 +99,14 @@ export default function AdminGuard({ children }) {
         />
         {err && <p role="alert" className={styles.err}>{T("الكود غير صحيح", "Incorrect code")}</p>}
         <button type="submit" className="btn btn--solid btn--full">{T("دخول", "Enter")}</button>
-        <p className={styles.muted}>
-          {T(
-            "وضع تجريبي: Firebase غير متصل، فالتعديلات تُحفظ في هذا المتصفح فقط.",
-            "Demo mode: Firebase is not connected, so edits are saved in this browser only.",
-          )}
-        </p>
+        {!isFirebaseEnabled && (
+          <p className={styles.muted}>
+            {T(
+              "وضع تجريبي: قاعدة البيانات غير متصلة، فالتعديلات تُحفظ في هذا المتصفح فقط.",
+              "Demo mode: no database connected, so edits are saved in this browser only.",
+            )}
+          </p>
+        )}
         <Link href="/" className={styles.back}>{T("← الرجوع للمتجر", "← Back to store")}</Link>
       </form>
     </div>

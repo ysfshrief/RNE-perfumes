@@ -14,7 +14,12 @@ import { isFirebaseEnabled } from "./firebase";
 
 const SESSION_KEY = "rne-admin-unlocked";
 
-export const adminRequiresAuth = isFirebaseEnabled;
+// TEMPORARY (owner's request): admin entry is the footer gate — tap the RNE
+// logo 3× and enter the code — even when Firebase is configured, while the
+// store moves to a new database. To restore account-based admin login, set
+// this back to `isFirebaseEnabled` (or wire the new backend's auth here).
+export const USE_FOOTER_CODE_GATE = true;
+export const adminRequiresAuth = USE_FOOTER_CODE_GATE ? false : isFirebaseEnabled;
 
 export function demoCode() {
   return process.env.NEXT_PUBLIC_ADMIN_DEMO_CODE || "000";
