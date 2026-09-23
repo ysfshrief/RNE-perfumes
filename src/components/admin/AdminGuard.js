@@ -2,31 +2,30 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
 import { useLang } from "@/context/LangContext";
-import { adminRequiresAuth, isDemoUnlocked, unlockDemo } from "@/lib/adminAccess";
-import { isFirebaseEnabled } from "@/lib/firebase";
+import { checkAdmin, unlockAdmin } from "@/lib/adminAccess";
+import { isRemote } from "@/lib/backend";
 import styles from "./AdminGuard.module.css";
 
 /**
  * Wraps every /admin route. Nothing inside the dashboard renders (and no
- * admin-only collection is subscribed to) until access is confirmed.
+ * admin-only data is requested) until access is confirmed.
  */
 export default function AdminGuard({ children }) {
-  const { user, isAdmin, ready } = useAuth();
   const { lang } = useLang();
   const T = (a, e) => (lang === "ar" ? a : e);
-  const [demoOk, setDemoOk] = useState(false);
-  const [checked, setChecked] = useState(false);
+  const [ok, setOk] = useState(null); // null = checking
   const [code, setCode] = useState("");
   const [err, setErr] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    setDemoOk(isDemoUnlocked());
-    setChecked(true);
+    let alive = true;
+    checkAdmin().then((v) => alive && setOk(v));
+    return () => { alive = false; };
   }, []);
 
-  if (!checked || (adminRequiresAuth && !ready)) {
+  if (ok === null) {
     return (
       <div className={styles.wrap} aria-busy="true">
         <div className={styles.spinner} aria-hidden="true" />
@@ -34,51 +33,18 @@ export default function AdminGuard({ children }) {
       </div>
     );
   }
+  if (ok) return children;
 
-  // ── Firebase mode: real authentication + admin claim ──
-  if (adminRequiresAuth) {
-    if (isAdmin) return children;
-    return (
-      <div className={styles.wrap}>
-        <div className={styles.box}>
-          <span className={styles.lock} aria-hidden="true">🔒</span>
-          <h1>{T("لوحة التحكم محمية", "Admin area")}</h1>
-          {!user ? (
-            <>
-              <p>{T("سجّل الدخول بحساب الأدمن للمتابعة.", "Sign in with an admin account to continue.")}</p>
-              <Link href="/login?next=/admin" className="btn btn--solid btn--full">{T("تسجيل الدخول", "Sign in")}</Link>
-            </>
-          ) : (
-            <>
-              <p>
-                {T(
-                  `الحساب ${user.email} ليس لديه صلاحية أدمن.`,
-                  `${user.email} does not have admin permission.`,
-                )}
-              </p>
-              <p className={styles.muted}>
-                {T(
-                  "لإضافة صلاحية: شغّل  node scripts/setAdmin.mjs <email>  ثم سجّل خروج ودخول.",
-                  "To grant access run  node scripts/setAdmin.mjs <email>  then sign out and back in.",
-                )}
-              </p>
-            </>
-          )}
-          <Link href="/" className={styles.back}>{T("← الرجوع للمتجر", "← Back to store")}</Link>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Demo/local mode: session code gate ──
-  if (demoOk) return children;
   return (
     <div className={styles.wrap}>
       <form
         className={styles.box}
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          if (unlockDemo(code)) setDemoOk(true);
+          setBusy(true);
+          const granted = await unlockAdmin(code);
+          setBusy(false);
+          if (granted) setOk(true);
           else setErr(true);
         }}
       >
@@ -98,8 +64,10 @@ export default function AdminGuard({ children }) {
           className={styles.input}
         />
         {err && <p role="alert" className={styles.err}>{T("الكود غير صحيح", "Incorrect code")}</p>}
-        <button type="submit" className="btn btn--solid btn--full">{T("دخول", "Enter")}</button>
-        {!isFirebaseEnabled && (
+        <button type="submit" className="btn btn--solid btn--full" disabled={busy}>
+          {busy ? "…" : T("دخول", "Enter")}
+        </button>
+        {!isRemote && (
           <p className={styles.muted}>
             {T(
               "وضع تجريبي: قاعدة البيانات غير متصلة، فالتعديلات تُحفظ في هذا المتصفح فقط.",

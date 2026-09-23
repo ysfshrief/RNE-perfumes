@@ -7,10 +7,11 @@ import { useLang } from "@/context/LangContext";
 import { useConfig } from "@/context/ConfigContext";
 import { useAuth } from "@/context/AuthContext";
 import { useProducts } from "@/context/ProductContext";
-import { addToCollection } from "@/lib/store";
+import { addToCollection, createOrder } from "@/lib/store";
+import { checkCoupon } from "@/lib/couponClient";
 import { computeTotals, validateCoupon, lineTotal, egp } from "@/lib/pricing";
 import { normalizeImageUrl, isImageUrl } from "@/lib/media";
-import { isFirebaseEnabled } from "@/lib/firebase";
+import { isRemote } from "@/lib/backend";
 
 // Egyptian mobile: 01XXXXXXXXX (11 digits), optionally written +20 / 0020.
 const normalizePhone = (v) => String(v || "").replace(/[\s-]/g, "").replace(/^(\+|00)20/, "0");
@@ -43,9 +44,9 @@ export default function CheckoutPage() {
   const [attempted, setAttempted] = useState(false);
   const [stockError, setStockError] = useState("");
   const signedIn = !!(authUser || state.user);
-  // With Firebase on, the security rules only accept orders from signed-in
-  // customers — a guest order would silently never reach the store.
-  const mustSignIn = isFirebaseEnabled && authReady && !authUser;
+  // Guest checkout is allowed; the server links the order to the account
+  // automatically when the customer is signed in.
+  const mustSignIn = false;
 
   // Prefill from the signed-in account once it is known.
   useEffect(() => {
@@ -83,19 +84,20 @@ export default function CheckoutPage() {
   const [couponError, setCouponError] = useState("");
   const [placing, setPlacing] = useState(false);
 
-  const applyCoupon = () => {
+  const couponMessage = (res) =>
+    res.reason === "minOrder"
+      ? t("cart.couponMinOrder", { n: egp(res.minOrder), cur })
+      : res.reason === "expired"
+      ? t("cart.couponExpired")
+      : t("cart.invalidCoupon");
+
+  const applyCoupon = async () => {
     setCouponError("");
-    const res = validateCoupon(couponInput, config.coupons, { subtotal: cartTotal });
+    const res = await checkCoupon(couponInput, config, cartTotal);
     if (!res.ok) {
       setAppliedCoupon(null);
       if (res.reason === "empty") return;
-      setCouponError(
-        res.reason === "minOrder"
-          ? t("cart.couponMinOrder", { n: egp(res.minOrder), cur })
-          : res.reason === "expired"
-          ? t("cart.couponExpired")
-          : t("cart.invalidCoupon")
-      );
+      setCouponError(couponMessage(res));
       return;
     }
     setAppliedCoupon(res.coupon);
@@ -113,8 +115,9 @@ export default function CheckoutPage() {
     let code = "";
     try { code = sessionStorage.getItem("rne-coupon") || ""; } catch (e) {}
     if (!code) return;
-    const res = validateCoupon(code, config.coupons, { subtotal: cartTotal });
-    if (res.ok) { setAppliedCoupon(res.coupon); setCouponInput(code); }
+    checkCoupon(code, config, cartTotal).then((res) => {
+      if (res.ok) { setAppliedCoupon(res.coupon); setCouponInput(code); }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -135,12 +138,48 @@ export default function CheckoutPage() {
     }
     setStockError("");
 
-    // The coupon could have expired or hit its limit since it was applied.
+    setPlacing(true);
+
+    if (isRemote) {
+      // The server prices the order from the database, takes the stock and
+      // counts the coupon in one transaction — nothing here is trusted.
+      try {
+        await createOrder({
+          customer: { ...form, phone: normalizePhone(form.phone) },
+          items: state.cart.map((it) => ({
+            id: it.id,
+            size: it.size,
+            qty: it.qty,
+            selectedScents: Array.isArray(it.selectedScents) ? it.selectedScents.map((sc) => sc.id) : null,
+          })),
+          couponCode: appliedCoupon?.code || null,
+          payment: pay,
+          note: form.note || "",
+        });
+      } catch (e) {
+        const code = e.data?.error;
+        const detail = e.data?.detail || {};
+        const item = state.cart.find((it) => it.id === detail.id);
+        const name = item ? (lang === "ar" ? item.nameAr || item.name : item.name) : detail.name || "";
+        if (code === "outOfStock" || code === "unavailable") setStockError(t("checkout.errStock", { name }));
+        else if (code === "invalidCoupon") { setAppliedCoupon(null); setCouponError(t("cart.invalidCoupon")); }
+        else setStockError(t("checkout.errGeneric"));
+        setPlacing(false);
+        return;
+      }
+      setPlaced(true);
+      setPlacing(false);
+      try { sessionStorage.removeItem("rne-coupon"); } catch (e) {}
+      dispatch({ type: "CLEAR_CART" });
+      window.scrollTo({ top: 0 });
+      return;
+    }
+
+    // ── Local demo mode (no database): same rules, kept in this browser ──
     if (appliedCoupon) {
       const again = validateCoupon(appliedCoupon.code, config.coupons, { subtotal: totals.subtotal });
-      if (!again.ok) { setAppliedCoupon(null); setCouponError(t("cart.invalidCoupon")); return; }
+      if (!again.ok) { setAppliedCoupon(null); setCouponError(t("cart.invalidCoupon")); setPlacing(false); return; }
     }
-    setPlacing(true);
     // Build the order record
     const order = {
       status: "New",

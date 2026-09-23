@@ -7,10 +7,9 @@ A premium, bilingual (Arabic/English, RTL) e-commerce storefront for **RNE
 Perfumes**, built with Next.js (App Router). Front-end prototype with mock data
 and a full admin dashboard. Ready to deploy to Vercel.
 
-> 🔥 **الربط بـ Firebase + بيئات Vercel:** اتبع دليل **`SETUP.md`** — المشروع
-> جاهز ومتوصّل، وبمجرد إضافة مفاتيح Firebase كل التعديلات هتتحفظ على السيرفر
-> وتظهر لكل الزوار. من غير مفاتيح، الموقع يشتغل عادي بتخزين محلي.
-> See **`SETUP.md`** for the full Firebase + Vercel guide.
+> 🗄️ **قاعدة البيانات: Neon (Postgres)** — اتبع **`SETUP.md`**: اربط Neon من Vercel
+> (بيضيف `DATABASE_URL`)، ضيف `AUTH_SECRET`، واعمل Redeploy. من غير قاعدة بيانات
+> الموقع بيشتغل وضع تجريبي (التخزين في المتصفح).
 
 ---
 
@@ -31,16 +30,11 @@ npm run build && npm start
 
 ## 🔑 الدخول للوحة الإدارة | Admin access
 
-- **مع Firebase (الإنتاج):** لوحة `/admin` تتطلب تسجيل الدخول بحساب عليه صلاحية
-  `admin` (تُضاف بـ `node scripts/setAdmin.mjs email@example.com`). قواعد Firestore
-  تمنع أي تعديل من غير الأدمن.
-- **بدون Firebase (وضع تجريبي):** اضغط ٣ مرات على لوجو RNE في الفوتر واكتب الكود
-  (`NEXT_PUBLIC_ADMIN_DEMO_CODE`، الافتراضي `000`). التعديلات تُحفظ في المتصفح فقط.
+اضغط **٣ مرات** على لوجو RNE في الفوتر، واكتب الكود (`ADMIN_CODE`، الافتراضي `000`).
+مع Neon الكود بيتفحص على السيرفر وكل عمليات الحفظ محمية بكوكي أدمن.
 
-> ⚠️ **لا ترفع أبدًا ملف مفتاح الخدمة (serviceAccountKey.json)** — الملف مضاف في `.gitignore`.
-
-With Firebase configured, `/admin` requires a signed-in user with the `admin`
-custom claim. Without Firebase (demo mode) a session code gate is used.
+Tap the RNE logo in the footer 3 times and enter the code (`ADMIN_CODE`, default `000`).
+With Neon the code is verified server-side and every admin write requires the admin cookie.
 
 ---
 
@@ -91,6 +85,10 @@ custom claim. Without Firebase (demo mode) a session code gate is used.
 ---
 
 ## ملاحظات للإنتاج | Production notes
+
+> (قديم) الملاحظات التالية كانت قبل ربط قاعدة البيانات — الآن التعديلات والطلبات
+> تُحفظ في Neon وتظهر لكل الزوار. المتبقي: ربط بوابة دفع إلكتروني.
+
 
 النسخة دي **front-end ببيانات تجريبية**. تعديلات الأدمن تُحفظ حاليًا في متصفح
 الأدمن (localStorage). قبل الإطلاق الحقيقي محتاج backend + قاعدة بيانات لحفظ

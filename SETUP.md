@@ -1,119 +1,71 @@
-# دليل الإعداد الكامل | Firebase + Vercel Setup Guide
+# دليل الإعداد | Setup guide (Neon + Vercel)
 
-المشروع **جاهز ومتوصّل بـ Firebase**. لو رفعته من غير مفاتيح Firebase، هيشتغل عادي
-بتخزين محلي (localStorage). أول ما تضيف المفاتيح، كل التعديلات (المنتجات، النصوص،
-السلايدر، العجلة) هتتحفظ في **Firestore** وتظهر لكل الزوار.
+الموقع شغال على قاعدة بيانات **Neon (Postgres)** من خلال API داخل المشروع نفسه
+(`src/app/api/*`). من غير قاعدة بيانات، الموقع بيشتغل «وضع تجريبي» والبيانات
+بتتحفظ في المتصفح بس.
 
-The app is **already wired to Firebase**. Without keys it runs on localStorage;
-add the keys and everything persists to Firestore for all visitors — no code
-changes required.
+The store runs on **Neon Postgres** through its own API routes. Without a
+database it runs in local demo mode (data stays in the browser).
 
 ---
 
-## الجزء الأول: Firebase
+## ١) ربط Neon على Vercel (مرة واحدة)
 
-### 1) إنشاء المشروع
-1. [console.firebase.google.com](https://console.firebase.google.com) → **Add project**.
-2. اسم المشروع: `rne-perfumes` → Continue → Create project.
+1. Vercel → المشروع `rne-perfumes` → **Storage** → **Create Database** → **Neon**
+   (أو اربط مشروع Neon موجود). Vercel هيضيف `DATABASE_URL` تلقائيًا لكل البيئات.
+2. **Settings → Environment Variables** وضيف:
+   | الاسم | القيمة |
+   |------|--------|
+   | `AUTH_SECRET` | أي نص عشوائي طويل (مثلًا ناتج `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`) |
+   | `ADMIN_CODE` | كود دخول الأدمن (الافتراضي `000` — يُفضّل تغييره) |
+3. **Redeploy**. الجداول بتتعمل لوحدها أول ما الموقع يشتغل.
+4. اتأكد: افتح `https://<الدومين>/api/health` → لازم يظهر `{"ok":true,"db":"connected"}`.
 
-### 2) تسجيل تطبيق ويب
-1. اضغط أيقونة الويب **`</>`** → nickname: `rne-web` → Register app.
-2. انسخ قيم `firebaseConfig` — هتحطها في Vercel و `.env.local`.
+> ⚠️ `DATABASE_URL` و`AUTH_SECRET` سريين — **ماتحطهمش** بـ `NEXT_PUBLIC_`.
 
-### 3) تفعيل الخدمات
-- **Firestore Database** → Create database → **Production mode** → region `eur3` (أوروبا، الأقرب لمصر).
-- **Authentication** → Get started → فعّل **Email/Password**.
-- **Storage** (اختياري لو هترفع صور على Firebase بدل درايف) → Get started.
+## ٢) الدخول للأدمن
 
-### 4) رفع قواعد الأمان (Security Rules)
-افتح **Firestore → Rules**، الصق محتوى ملف `firestore.rules` الموجود في المشروع،
-واضغط **Publish**. (أو عبر الـ CLI: `firebase deploy --only firestore:rules`)
+اضغط **٣ مرات** على لوجو RNE في الفوتر ← اكتب الكود (`ADMIN_CODE`، الافتراضي `000`).
+الكود بيتفحص على السيرفر، وبعدها المتصفح بياخد كوكي آمنة لمدة ١٢ ساعة.
 
-### 5) تعيين الأدمن
-1. حمّل مفتاح الخدمة: **Project settings → Service accounts → Generate new private key**
-   → احفظه باسم `serviceAccountKey.json` في جذر المشروع (الملف ده **متترفعش** على GitHub).
-2. المستخدم لازم يسجّل في الموقع مرة الأول (Email/Password).
-3. شغّل:
-   ```bash
-   node scripts/setAdmin.mjs your-admin@email.com
-   ```
-4. الأدمن يسجّل خروج ودخول تاني عشان الصلاحية تتفعّل.
+## ٣) (اختياري) نقل بيانات Firebase القديمة
 
-### 6) (اختياري) نقل البيانات الافتراضية لـ Firestore
+لو الموقع كان متوصّل بـ Firebase وفيه تعديلات أو طلبات:
+
 ```bash
-node scripts/seed.mjs
+npm i --no-save firebase-admin
+# ضع ملف مفتاح الخدمة باسم serviceAccountKey.json في جذر المشروع (مايترفعش على GitHub)
+DATABASE_URL="postgres://…" npm run migrate:firestore
 ```
-ده بيملأ `settings/config` بإعدادات السلايدر والعجلة. مش ضروري — التطبيق بيستخدم
-القيم الافتراضية لأي حاجة ناقصة.
+
+حسابات العملاء (كلمات المرور) مش بتتنقل من Firebase — العميل يعمل حساب جديد.
 
 ---
 
-## الجزء الثاني: Vercel
+## كيف يشتغل | How it works
 
-### 1) النشر
-1. ارفع المشروع على **GitHub**.
-2. [vercel.com](https://vercel.com) → **Add New → Project** → استورد الريبو → **Deploy**.
-   (Vercel هيقرأ `vercel.json` ويتعرّف على Next.js تلقائيًا.)
+| المكان | البيانات | في Neon |
+|--------|----------|---------|
+| المنتجات والمخزون | تعديلات الأدمن + المنتجات المضافة | `rne_documents` (key = `products`) |
+| الإعدادات | الهيرو، السلايدر، الكوبونات، الدفع… | `rne_documents` (key = `config`) |
+| النصوص | كل نصوص الموقع | `rne_documents` (key = `content`) |
+| الطلبات / العملاء | | `rne_records` |
+| حسابات العملاء | إيميل + كلمة مرور (scrypt) | `rne_users` |
 
-### 2) البيئات الثلاثة
-| البيئة | متى | الاستخدام |
-|--------|-----|-----------|
-| **Production** | push على `main` | الموقع الرسمي |
-| **Preview** | أي branch/PR تاني | تجربة قبل النشر |
-| **Development** | `vercel dev` محليًا | التطوير |
+- **الطلبات:** السيرفر بيحسب السعر والخصم والمخزون من قاعدة البيانات في transaction
+  واحدة (مفيش حد يقدر يغيّر السعر من المتصفح، ومفيش طلبين ياخدوا آخر زجاجة).
+- **الكوبونات:** أكوادها مش بتتبعت للمتصفح؛ التحقق بيحصل على السيرفر.
+- **التحديث:** الزوار بيشوفوا تعديلات الأدمن عند فتح الصفحة، وعند الرجوع للتاب، وكل ٣٠ ثانية.
 
-### 3) متغيرات البيئة
-**Project → Settings → Environment Variables**، أضف الآتي واختر **الثلاث بيئات**
-لكل واحد:
-
-```
-NEXT_PUBLIC_FIREBASE_API_KEY
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-NEXT_PUBLIC_FIREBASE_PROJECT_ID
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-NEXT_PUBLIC_FIREBASE_MSG_SENDER_ID
-NEXT_PUBLIC_FIREBASE_APP_ID
-```
-القيم من `firebaseConfig` اللي نسخته. بعد الإضافة → **Redeploy**.
-
-> **الأمان:** `NEXT_PUBLIC_*` بتظهر في المتصفح، وده عادي لمفاتيح Firebase العميل —
-> الحماية الحقيقية في `firestore.rules`. أي مفتاح **سري** (بوابة الدفع مثلًا)
-> حطّه **من غير** بادئة `NEXT_PUBLIC_`.
-
-### 4) الأفضل: مشروعين Firebase
-اعمل مشروع Firebase للـ **Production** وواحد للـ **Preview**، وحط مفاتيح كل واحد
-في البيئة المناسبة عشان التجارب ما تلمسش بيانات الموقع الرسمي.
-
----
+الملفات: `src/lib/server/*` (قاعدة البيانات، الجلسات، الطلبات)، `src/app/api/*`،
+`src/lib/store.js` (طبقة البيانات في المتصفح).
 
 ## التطوير المحلي | Local development
 
 ```bash
-cp .env.example .env.local      # واملأه بمفاتيح Firebase
+cp .env.example .env.local   # ضع DATABASE_URL لقاعدة Neon للتطوير
 npm install
 npm run dev
 ```
 
----
-
-## كيف يشتغل الربط | How the wiring works
-
-| المكان | البيانات | مستند Firestore |
-|--------|----------|-----------------|
-| صفحة «المحتوى» | نصوص الموقع (عربي/إنجليزي) | `settings/content` |
-| صفحة «المنتجات» | تعديلات المنتجات + روابط الصور | `settings/products` |
-| السلايدر + العجلة | إعدادات الموقع | `settings/config` |
-
-كل تعديل بيتكتب فورًا في Firestore و **بيظهر مباشرة (real-time)** لكل الزوار عبر
-`onSnapshot`. لو Firebase مش متصل، نفس الكود بيستخدم localStorage تلقائيًا.
-
-الملفات المسؤولة:
-- `src/lib/firebase.js` — تهيئة Firebase (بـ fallback آمن).
-- `src/lib/store.js` — طبقة تخزين موحّدة (Firestore أو localStorage).
-- `src/context/*.js` — بتستخدم الطبقة دي.
-
----
-
-## خطوات لاحقة مقترحة | Suggested next steps
-البنية جاهزة لتوسيعها: ربط تسجيل دخول العملاء بـ Firebase Auth، تسجيل الطلبات في
-`orders`, والتقييمات في `reviews` (القواعد جاهزة لكل ده في `firestore.rules`).
+للتجربة بدون Neon: `DATABASE_URL=pglite://memory` (Postgres داخل العملية — للاختبار فقط).

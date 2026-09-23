@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useShop } from "@/context/ShopContext";
 import { useLang } from "@/context/LangContext";
 import { useConfig } from "@/context/ConfigContext";
-import { computeTotals, validateCoupon, lineTotal, egp } from "@/lib/pricing";
+import { computeTotals, lineTotal, egp } from "@/lib/pricing";
+import { checkCoupon } from "@/lib/couponClient";
 import { normalizeImageUrl, isImageUrl } from "@/lib/media";
 import styles from "./cart.module.css";
 
@@ -26,8 +27,8 @@ export default function CartPage() {
     coupon,
   });
 
-  const applyCoupon = () => {
-    const res = validateCoupon(code, config.coupons, { subtotal: cartTotal });
+  const applyCoupon = async () => {
+    const res = await checkCoupon(code, config, cartTotal);
     if (!res.ok) {
       setCoupon(null);
       setErr(

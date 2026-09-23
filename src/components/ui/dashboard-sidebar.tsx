@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useLang } from "@/context/LangContext";
 import { useAuth } from "@/context/AuthContext";
-import { lockDemo } from "@/lib/adminAccess";
+import { lockAdmin } from "@/lib/adminAccess";
 import { useRouter } from "next/navigation";
 
 type NavItemData = {
@@ -73,12 +73,11 @@ export function DashboardSidebar({
   counts?: Record<string, number>;
 }) {
   const { t } = useLang();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
   const logout = async () => {
-    lockDemo();
-    await signOut();
+    await lockAdmin();
     router.push("/");
   };
 

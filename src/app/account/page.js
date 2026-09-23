@@ -23,8 +23,8 @@ export default function AccountPage() {
   const [openOrder, setOpenOrder] = useState(null);
 
   // Live subscription: a new order shows up without a refresh or re-login.
-  // Customers may only read their own orders (Firestore rules), so the
-  // query is scoped to their UID when signed in with Firebase.
+  // Customers may only read their own orders (server-checked), so the
+  // query is scoped to their account when signed in.
   const uid = authUser?.uid && authUser.uid !== "local" ? authUser.uid : null;
   useEffect(
     () => subscribeCollection("orders", setAllOrders, uid ? { where: ["userId", uid] } : {}),
@@ -33,7 +33,7 @@ export default function AccountPage() {
 
   // Only this customer's orders. Match on UID first; fall back to the
   // normalised email so orders placed before signing in are still claimed.
-  // Use the merged profile, not authUser alone: while Firebase auth is still
+  // Use the merged profile, not authUser alone: while the session is still
   // resolving (or offline) authUser is null, and keying off it hid the
   // customer's own orders behind an empty state.
   const myEmail = (authUser?.email || state.user?.email || "").trim().toLowerCase();
@@ -44,7 +44,7 @@ export default function AccountPage() {
     )
     .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
-  // Merge: identity from Firebase, extra profile details from the shop state.
+  // Merge: identity from the account, extra profile details from the shop state.
   const profile = authUser
     ? { ...(state.user || {}), name: state.user?.name || authUser.name, email: authUser.email }
     : state.user;

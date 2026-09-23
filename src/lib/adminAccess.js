@@ -1,43 +1,61 @@
-// Admin access policy — one place, so the footer trigger, the admin layout
-// and the login redirect all agree.
+// Admin access — one place, so the footer trigger, the admin layout and the
+// sidebar sign-out all agree.
 //
-//  • Firebase configured  → the ONLY way in is a signed-in user whose ID token
-//    carries the `admin: true` custom claim (set with scripts/setAdmin.mjs).
-//    Firestore rules enforce the same claim server-side, so the client guard
-//    is UX, and the rules are the real protection.
-//  • Firebase NOT configured (local/demo mode) → every edit lives only in this
-//    browser's localStorage, so a lightweight code gate is enough. The code
-//    comes from NEXT_PUBLIC_ADMIN_DEMO_CODE and falls back to the documented
-//    "000" so existing demo setups keep working.
+// Entry (owner's request, temporary): tap the RNE logo in the footer 3×,
+// then enter the code (default "000").
+//  • Remote mode (Neon): the code is checked by the SERVER (/api/admin/session,
+//    env ADMIN_CODE) which sets an httpOnly cookie. Every admin write is
+//    verified against that cookie, so the browser cannot fake it.
+//  • Local demo mode: compared in the browser (NEXT_PUBLIC_ADMIN_DEMO_CODE),
+//    since all data is local to that browser anyway.
 
-import { isFirebaseEnabled } from "./firebase";
+import { isRemote } from "./backend";
 
 const SESSION_KEY = "rne-admin-unlocked";
 
-// TEMPORARY (owner's request): admin entry is the footer gate — tap the RNE
-// logo 3× and enter the code — even when Firebase is configured, while the
-// store moves to a new database. To restore account-based admin login, set
-// this back to `isFirebaseEnabled` (or wire the new backend's auth here).
-export const USE_FOOTER_CODE_GATE = true;
-export const adminRequiresAuth = USE_FOOTER_CODE_GATE ? false : isFirebaseEnabled;
-
-export function demoCode() {
+function localCode() {
   return process.env.NEXT_PUBLIC_ADMIN_DEMO_CODE || "000";
 }
 
-export function isDemoUnlocked() {
-  if (typeof window === "undefined") return false;
-  try { return sessionStorage.getItem(SESSION_KEY) === "1"; } catch (e) { return false; }
-}
-
-export function unlockDemo(code) {
-  if (String(code).trim() !== demoCode()) return false;
+/** Try a code. Resolves true when admin access was granted. */
+export async function unlockAdmin(code) {
+  if (isRemote) {
+    try {
+      const res = await fetch("/api/admin/session", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: String(code).trim() }),
+      });
+      return res.ok;
+    } catch (e) {
+      return false;
+    }
+  }
+  if (String(code).trim() !== localCode()) return false;
   try { sessionStorage.setItem(SESSION_KEY, "1"); } catch (e) {}
   return true;
 }
 
-export function lockDemo() {
+/** Is this browser currently signed in as admin? */
+export async function checkAdmin() {
+  if (isRemote) {
+    try {
+      const res = await fetch("/api/admin/session", { credentials: "same-origin", cache: "no-store" });
+      const data = await res.json();
+      return !!data.admin;
+    } catch (e) {
+      return false;
+    }
+  }
+  try { return sessionStorage.getItem(SESSION_KEY) === "1"; } catch (e) { return false; }
+}
+
+export async function lockAdmin() {
   try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+  if (isRemote) {
+    try { await fetch("/api/admin/session", { method: "DELETE", credentials: "same-origin" }); } catch (e) {}
+  }
 }
 
 /** Only allow same-site relative redirects (blocks `//evil.com`, `https:`…). */

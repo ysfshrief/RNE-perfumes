@@ -66,7 +66,7 @@ export default function AdminHomepage() {
   };
 
   // Seed on mount, and re-seed when stored data arrives/changes (e.g. the
-  // Firestore copy loads after the page) — but never over unsaved edits.
+  // server copy loads after the page) — but never over unsaved edits.
   const snapshot = JSON.stringify({ h: config.hero, s: config.adSlides, c: config.categories, o: overrides });
   useEffect(() => {
     if (!draft || !dirty) reset();

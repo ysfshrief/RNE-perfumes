@@ -23,7 +23,7 @@ export function LangProvider({ children }) {
     setReady(true);
   }, []);
 
-  // Live subscription to text overrides (Firestore or local fallback)
+  // Live subscription to text overrides (database or local fallback)
   useEffect(() => {
     const unsub = subscribeDoc("content", { en: {}, ar: {} }, (data) => {
       setOverrides({ en: data?.en || {}, ar: data?.ar || {} });

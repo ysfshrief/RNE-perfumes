@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import styles from "./Toast.module.css";
 
 // Lightweight toast notifications for the admin. `toast(msg, "success" | "error" | "info")`.
@@ -18,6 +18,24 @@ export function ToastProvider({ children }) {
     setItems((list) => [...list.filter((t) => t.message !== message), { id, message, type }].slice(-4));
     setTimeout(() => dismiss(id), ms);
   }, [dismiss]);
+
+  // Server saves happen in the background; surface failures instead of
+  // letting an edit silently exist only in this browser.
+  useEffect(() => {
+    const onErr = (e) => {
+      const ar = document.documentElement.lang === "ar";
+      const status = e.detail?.status;
+      toast(
+        status === 403
+          ? (ar ? "انتهت جلسة الأدمن — ادخل من جديد ثم أعد الحفظ" : "Admin session expired — sign in again and re-save")
+          : (ar ? "تعذّر الحفظ على السيرفر — التعديل محفوظ مؤقتًا في هذا المتصفح" : "Couldn't save to the server — kept in this browser for now"),
+        "error",
+        6000
+      );
+    };
+    window.addEventListener("rne-sync-error", onErr);
+    return () => window.removeEventListener("rne-sync-error", onErr);
+  }, [toast]);
 
   return (
     <ToastContext.Provider value={{ toast }}>

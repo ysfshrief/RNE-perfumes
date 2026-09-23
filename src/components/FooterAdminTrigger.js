@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import LogoRNE from "./LogoRNE";
 import { useLang } from "@/context/LangContext";
-import { adminRequiresAuth, unlockDemo } from "@/lib/adminAccess";
+import { unlockAdmin } from "@/lib/adminAccess";
 import styles from "./FooterAdminTrigger.module.css";
 
 export default function FooterAdminTrigger() {
@@ -27,12 +27,6 @@ export default function FooterAdminTrigger() {
     const next = taps + 1;
     if (next >= 3) {
       setTaps(0);
-      // With real authentication the admin area does its own sign-in check,
-      // so there is no client-side code to type.
-      if (adminRequiresAuth) {
-        router.push("/admin");
-        return;
-      }
       setPrompt(true);
       setCode("");
       setError(false);
@@ -41,9 +35,9 @@ export default function FooterAdminTrigger() {
     }
   };
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    if (unlockDemo(code)) {
+    if (await unlockAdmin(code)) {
       setPrompt(false);
       router.push("/admin");
     } else {

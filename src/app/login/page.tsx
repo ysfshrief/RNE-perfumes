@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useShop } from "@/context/ShopContext";
-import { useAuth, AUTH_ERRORS } from "@/context/AuthContext";
+import { useAuth, AUTH_ERRORS, googleSignInAvailable } from "@/context/AuthContext";
 import { useLang } from "@/context/LangContext";
 import { useConfig } from "@/context/ConfigContext";
 import { normalizeImageUrl } from "@/context/ProductContext";
@@ -125,6 +125,7 @@ export default function LoginPage() {
           </form>
         </GlassCardContent>
 
+        {googleSignInAvailable && (
         <GlassCardFooter className="flex-col gap-2">
           <Button variant="ghost" className="w-full gap-2" onClick={googleSignIn} disabled={loading}>
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
@@ -136,6 +137,7 @@ export default function LoginPage() {
             {t("auth.google")}
           </Button>
         </GlassCardFooter>
+        )}
       </GlassCard>
     </div>
   );

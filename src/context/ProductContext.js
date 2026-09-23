@@ -1,14 +1,16 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
-import { products as baseProducts, testerCount } from "@/data/products";
+import { products as baseProducts } from "@/data/products";
+import { normalizeProduct, mergeOverride } from "@/lib/catalog";
+export { normalizeProduct } from "@/lib/catalog";
 import { productAr } from "@/data/productLocale";
 import { productImages } from "@/lib/media";
 import { writeDoc, subscribeDoc } from "@/lib/store";
 
 // Lets the admin edit product fields (names, prices, stock, images,
-// visibility, gender, season, fragrance family…). Persists to Firestore
-// (settings/products) when Firebase is configured, otherwise to localStorage.
+// visibility, gender, season, fragrance family…). Persists to the database
+// (document "products") when connected, otherwise to localStorage.
 //
 // Storage shape (unchanged, backward compatible):
 //   { [builtInProductId]: { ...override }, __custom__: [ ...adminCreatedProducts ] }
@@ -18,35 +20,6 @@ const STORE_KEY = "products"; // settings/products doc (or rne-products in LS)
 
 // Kept as a re-export so existing imports keep working.
 export { normalizeImageUrl } from "@/lib/media";
-
-/**
- * Bring any stored product (old or new format) to the current shape so the
- * rest of the app never has to special-case legacy data:
- *  - `images` is always an ordered array; `image` mirrors the first one
- *  - `season` is always an array, `gender` always set
- *  - the Test Package size label follows the configured tester count
- */
-export function normalizeProduct(p) {
-  if (!p) return p;
-  const images = productImages(p);
-  let sizes = Array.isArray(p.sizes) ? p.sizes : [];
-  if (p.isDiscoverySet) {
-    const n = testerCount(p);
-    sizes = sizes.map((s, i) =>
-      i === 0 && typeof s?.size === "string" && /^\s*\d+\s*[×x]/.test(s.size)
-        ? { ...s, size: s.size.replace(/^\s*\d+\s*[×x]\s*/, `${n} × `) }
-        : s
-    );
-  }
-  return {
-    ...p,
-    gender: p.gender || "Unisex",
-    season: Array.isArray(p.season) ? p.season : p.season ? [p.season] : [],
-    images,
-    image: images[0] || p.image || "",
-    sizes,
-  };
-}
 
 export function ProductProvider({ children }) {
   const [overrides, setOverrides] = useState({}); // { [id]: {...override} }
@@ -66,22 +39,7 @@ export function ProductProvider({ children }) {
     writeDoc(STORE_KEY, next);
   }, []);
 
-  const mergeProduct = useCallback((p) => {
-    const o = overrides[p.id];
-    if (!o) return normalizeProduct(p);
-    // An override saved with blank/zero prices would make the product show as
-    // "0 EGP". Fall back to the catalogue sizes rather than trusting it.
-    const validSizes =
-      Array.isArray(o.sizes) && o.sizes.some((s) => Number(s?.price) > 0)
-        ? o.sizes.filter((s) => Number(s?.price) > 0)
-        : p.sizes;
-    return normalizeProduct({
-      ...p,
-      ...o,
-      sizes: validSizes,
-      images: Array.isArray(o.images) && o.images.some(Boolean) ? o.images : p.images,
-    });
-  }, [overrides]);
+  const mergeProduct = useCallback((p) => mergeOverride(p, overrides), [overrides]);
 
   // Custom products added by the admin live under a reserved key `__custom__`.
   const customProducts = useMemo(
