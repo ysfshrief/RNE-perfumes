@@ -2,7 +2,7 @@
 .formTitle { font-size: 1.1rem; margin-bottom: 1rem; }
 .field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.9rem; }
 .field label {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -23,3 +23,6 @@
 }
 
 .limits { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.74rem; color: var(--ink-dim); }
+.err { font-size: 0.76rem; color: var(--danger); }
+.warn { font-size: 0.76rem; color: var(--amber-deep); }
+.field input[aria-invalid="true"] { border-color: var(--danger) !important; }

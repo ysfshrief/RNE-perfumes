@@ -1,23 +1,47 @@
 "use client";
 
-import { createContext, useContext, useEffect, useReducer, useRef } from "react";
+import { createContext, useContext, useEffect, useReducer, useState } from "react";
+import { productImages } from "@/lib/media";
+import { pName } from "@/data/productLocale";
 
 const ShopContext = createContext(null);
 
 const initialState = { cart: [], wishlist: [], user: null };
 
+/**
+ * Cart line key. Test Packages with different scent selections are
+ * different products for the customer, so the selection is part of the key —
+ * otherwise a second, different package silently merged into the first and
+ * its scents were lost.
+ */
+function lineKey(product, size, scents) {
+  const base = `${product.id}-${size.size}`;
+  if (!scents?.length) return base;
+  return `${base}-${scents.map((s) => s.id).sort().join(".")}`;
+}
+
 function reducer(state, action) {
   switch (action.type) {
-    case "HYDRATE":
-      return { ...state, ...action.payload };
+    case "HYDRATE": {
+      const p = action.payload || {};
+      return {
+        ...state,
+        cart: Array.isArray(p.cart) ? p.cart.filter((i) => i && i.key && Number(i.qty) > 0) : [],
+        wishlist: Array.isArray(p.wishlist) ? p.wishlist : [],
+        user: p.user || null,
+      };
+    }
     case "ADD_TO_CART": {
-      const { product, size, qty } = action.payload;
-      const key = `${product.id}-${size.size}`;
+      const { product, size, qty, selectedScents } = action.payload;
+      const stock = Number(size.stock) || 0;
+      if (stock <= 0) return state;
+      const scents = Array.isArray(selectedScents) && selectedScents.length ? selectedScents : null;
+      const key = lineKey(product, size, scents);
       const existing = state.cart.find((i) => i.key === key);
       let cart;
       if (existing) {
-        const nextQty = Math.min(existing.qty + qty, size.stock);
-        cart = state.cart.map((i) => (i.key === key ? { ...i, qty: nextQty } : i));
+        const nextQty = Math.min(existing.qty + qty, stock);
+        cart = state.cart.map((i) => (i.key === key ? { ...i, qty: nextQty, stock } : i));
       } else {
         cart = [
           ...state.cart,
@@ -26,11 +50,13 @@ function reducer(state, action) {
             id: product.id,
             slug: product.slug,
             name: product.name,
+            nameAr: pName(product, "ar"),
             size: size.size,
             price: size.price,
-            stock: size.stock,
-            qty: Math.min(qty, size.stock),
-            color: product.images[0],
+            stock,
+            qty: Math.min(qty, stock),
+            image: productImages(product)[0] || null,
+            selectedScents: scents,
           },
         ];
       }
@@ -66,32 +92,41 @@ function reducer(state, action) {
 
 export function ShopProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const hydrated = useRef(false);
+  const [hydrated, setHydrated] = useState(false);
 
-  // Hydrate from localStorage on mount
+  // Hydrate from localStorage on mount.
   useEffect(() => {
     try {
       const saved = localStorage.getItem("rne-shop");
       if (saved) dispatch({ type: "HYDRATE", payload: JSON.parse(saved) });
     } catch (e) {}
-    hydrated.current = true;
+    setHydrated(true);
   }, []);
 
-  // Persist on change — but never before hydration. The persist effect also
-  // runs on the first render, and without this guard it wrote the empty
-  // initial state over a saved cart/session before it had been read back.
+  // Persist on change — only after hydration has been applied, so the empty
+  // initial state can never overwrite a saved cart.
   useEffect(() => {
-    if (!hydrated.current) return;
+    if (!hydrated) return;
     try {
       localStorage.setItem("rne-shop", JSON.stringify(state));
     } catch (e) {}
-  }, [state]);
+  }, [state, hydrated]);
+
+  // Keep several tabs in sync (add in one tab → badge updates in the other).
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key !== "rne-shop" || !e.newValue) return;
+      try { dispatch({ type: "HYDRATE", payload: JSON.parse(e.newValue) }); } catch (err) {}
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   const cartCount = state.cart.reduce((n, i) => n + i.qty, 0);
   const cartTotal = state.cart.reduce((n, i) => n + i.qty * i.price, 0);
 
   return (
-    <ShopContext.Provider value={{ state, dispatch, cartCount, cartTotal }}>
+    <ShopContext.Provider value={{ state, dispatch, cartCount, cartTotal, hydrated }}>
       {children}
     </ShopContext.Provider>
   );

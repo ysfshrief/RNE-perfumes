@@ -15,8 +15,8 @@ export default function Header() {
 
   const nav = [
     { href: "/shop", label: t("nav.shop") },
-    { href: "/shop?category=Men", label: t("nav.men") },
-    { href: "/shop?category=Women", label: t("nav.women") },
+    { href: "/shop?gender=Men", label: t("nav.men") },
+    { href: "/shop?gender=Women", label: t("nav.women") },
     { href: "/about", label: t("nav.about") },
     { href: "/contact", label: t("nav.contact") },
   ];

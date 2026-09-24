@@ -27,9 +27,9 @@ export default function ProductRow({ eyebrow, title, lead, products, href = "/sh
             </h2>
             {lead && <p className={styles.lead}>{lead}</p>}
           </div>
-          <Link href={href} className={styles.all}>
+          <Link href={href} className="link-pill">
             <span>{t("common.viewAll")}</span>
-            <ArrowUpRight size={16} className={styles.allArrow} />
+            <ArrowUpRight size={16} className="link-pill__arrow" />
           </Link>
         </header>
 

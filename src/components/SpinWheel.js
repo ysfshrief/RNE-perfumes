@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useConfig } from "@/context/ConfigContext";
 import { useLang } from "@/context/LangContext";
 import styles from "./SpinWheel.module.css";
@@ -17,7 +17,7 @@ export default function SpinWheel() {
   const [alreadyPlayed, setAlreadyPlayed] = useState(false);
   const canvasRef = useRef(null);
 
-  const segments = wheel?.segments || [];
+  const segments = useMemo(() => wheel?.segments || [], [wheel?.segments]);
   const label = (s) => (lang === "ar" ? s.label : s.labelEn);
 
   // Check if already played this session
@@ -60,8 +60,8 @@ export default function SpinWheel() {
       ctx.rotate(start + arc / 2);
       ctx.textAlign = "right";
       ctx.fillStyle = "#f7f5f1";
-      ctx.font = "600 15px 'Tajawal', system-ui, sans-serif";
-      ctx.fillText(label(seg), radius - 16, 6);
+      ctx.font = "600 15px 'IBM Plex Sans Arabic', 'Jost', system-ui, sans-serif";
+      ctx.fillText(lang === "ar" ? seg.label : seg.labelEn, radius - 16, 6);
       ctx.restore();
     });
 
@@ -75,7 +75,9 @@ export default function SpinWheel() {
     ctx.stroke();
   }, [open, segments, lang]);
 
-  if (!wheel?.enabled || !segments.length) return null;
+  // Hidden unless the feature flag is on (Admin → Settings → Features).
+  // The implementation stays intact so it can be re-enabled any time.
+  if (!config.features?.spinWheel || !wheel?.enabled || !segments.length) return null;
 
   const weightedPick = () => {
     const total = segments.reduce((sum, s) => sum + (s.weight || 1), 0);

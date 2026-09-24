@@ -57,8 +57,8 @@ export const products = [
     rating: 4.7,
     reviewCount: 39,
     bestSeller: true,
-    image: "/products/scandal.jpg",
-    images: ["/products/scandal.jpg"],
+    image: "https://drive.google.com/file/d/14-BqsKCeJUIjdhC2-Rok1kXV_3smo_WD/view",
+    images: ["https://drive.google.com/file/d/14-BqsKCeJUIjdhC2-Rok1kXV_3smo_WD/view", "/products/scandal.jpg"],
   },
   {
     id: "rne-03",
@@ -138,8 +138,8 @@ export const products = [
     rating: 4.9,
     reviewCount: 63,
     bestSeller: true,
-    image: "/products/bleu-de-chanel.jpg",
-    images: ["/products/bleu-de-chanel.jpg"],
+    image: "https://drive.google.com/file/d/1cBnMAwHoUt0cO7hSoZsSpf80FvhFlH8Y/view",
+    images: ["https://drive.google.com/file/d/1cBnMAwHoUt0cO7hSoZsSpf80FvhFlH8Y/view", "/products/bleu-de-chanel.jpg"],
   },
   {
     id: "rne-06",
@@ -246,29 +246,173 @@ export const products = [
     rating: 4.8,
     reviewCount: 38,
     bestSeller: true,
-    image: "/products/erba-pura.jpg",
-    images: ["/products/erba-pura.jpg"],
+    image: "https://drive.google.com/file/d/16G1yUjUcqFKpSpMTz3V0nIoij15EYLeR/view",
+    images: ["https://drive.google.com/file/d/16G1yUjUcqFKpSpMTz3V0nIoij15EYLeR/view", "/products/erba-pura.jpg"],
+  },
+  // ── Added from the RNE Drive folders (2026-09). Names are RNE's own names
+  //    from the file titles; prices/stock follow the house tiers and should
+  //    be confirmed in Admin → Products.
+  {
+    id: "rne-10",
+    slug: "noxeon",
+    name: "Noxéon",
+    inspiredBy: "Afnan 9PM",
+    tagline: "Warm vanilla amber with apple and cinnamon",
+    description:
+      "A magnetic evening signature: crisp apple and cinnamon over lavender and orange blossom, settling into a sweet, long-lasting base of vanilla, tonka and amber. Made for nights out.",
+    gender: "Men",
+    season: ["Winter"],
+    families: ["warm"],
+    notes: {
+      top: ["Apple", "Cinnamon", "Lavender", "Bergamot"],
+      heart: ["Orange Blossom", "Lily of the Valley"],
+      base: ["Vanilla", "Tonka Bean", "Amber", "Patchouli"],
+    },
+    ingredients: "Alcohol Denat., Parfum (Fragrance), Aqua, Coumarin, Linalool.",
+    sizes: [
+      { size: "30ml", price: 700, oldPrice: null, stock: 10 },
+      { size: "50ml", price: 1050, oldPrice: null, stock: 10 },
+      { size: "100ml", price: 1580, oldPrice: null, stock: 6 },
+    ],
+    rating: 5,
+    reviewCount: 0,
+    bestSeller: false,
+    image: "https://drive.google.com/file/d/1ommak5I1x3wRjPO4TFGXMDA3KyntWhpI/view",
+    images: ["https://drive.google.com/file/d/1ommak5I1x3wRjPO4TFGXMDA3KyntWhpI/view"],
+  },
+  {
+    id: "rne-11",
+    slug: "duskero",
+    name: "Duskéro",
+    inspiredBy: "Nasomatto Black Afgano",
+    tagline: "Dark resinous woods with oud and incense",
+    description:
+      "Deep, smoky and intense: green resinous notes and incense wrapped around oud, tobacco and dark woods. A bold, long-lasting scent for cold nights.",
+    gender: "Unisex",
+    season: ["Winter"],
+    families: ["woody", "warm"],
+    notes: {
+      top: ["Green Notes", "Cannabis"],
+      heart: ["Resins", "Incense", "Coffee"],
+      base: ["Oud", "Tobacco", "Woody Notes"],
+    },
+    ingredients: "Alcohol Denat., Parfum (Fragrance), Aqua, Linalool.",
+    sizes: [
+      { size: "30ml", price: 760, oldPrice: null, stock: 10 },
+      { size: "50ml", price: 1120, oldPrice: null, stock: 10 },
+      { size: "100ml", price: 1680, oldPrice: null, stock: 6 },
+    ],
+    rating: 5,
+    reviewCount: 0,
+    bestSeller: false,
+    image: "https://drive.google.com/file/d/1A5z5xnEyHOP9dxUj2erp8zH_pskdG9-b/view",
+    images: ["https://drive.google.com/file/d/1A5z5xnEyHOP9dxUj2erp8zH_pskdG9-b/view"],
+  },
+  {
+    id: "rne-12",
+    slug: "viremont",
+    name: "Viremont",
+    inspiredBy: "Burberry Her",
+    tagline: "Juicy red berries over soft musk",
+    description:
+      "Playful and radiant: a burst of strawberry, raspberry and blackberry softened by violet and jasmine, resting on musk, vanilla and amber. Sweet, modern and easy to love.",
+    gender: "Women",
+    season: ["Summer", "Winter"],
+    families: ["floral", "warm"],
+    notes: {
+      top: ["Strawberry", "Raspberry", "Blackberry", "Mandarin"],
+      heart: ["Violet", "Jasmine"],
+      base: ["Musk", "Vanilla", "Amber", "Patchouli"],
+    },
+    ingredients: "Alcohol Denat., Parfum (Fragrance), Aqua, Limonene, Linalool.",
+    sizes: [
+      { size: "30ml", price: 720, oldPrice: null, stock: 10 },
+      { size: "50ml", price: 1080, oldPrice: null, stock: 10 },
+      { size: "100ml", price: 1620, oldPrice: null, stock: 6 },
+    ],
+    rating: 5,
+    reviewCount: 0,
+    bestSeller: false,
+    image: "https://drive.google.com/file/d/1vGPiZ3idd5BtTngbK6843N_VvPUnZJNo/view",
+    images: ["https://drive.google.com/file/d/1vGPiZ3idd5BtTngbK6843N_VvPUnZJNo/view"],
+  },
+  {
+    id: "rne-13",
+    slug: "rosaveline",
+    name: "Rosavéline",
+    inspiredBy: "Parfums de Marly Delina La Rosée",
+    tagline: "Fresh dewy rose with lychee and pear",
+    description:
+      "Light and luminous: juicy lychee and pear open onto a dewy Turkish rose and peony, finished with clean musk. A fresh floral for bright days.",
+    gender: "Women",
+    season: ["Summer"],
+    families: ["floral", "fresh"],
+    notes: {
+      top: ["Lychee", "Pear", "Bergamot"],
+      heart: ["Rose", "Peony"],
+      base: ["White Musk", "Vetiver"],
+    },
+    ingredients: "Alcohol Denat., Parfum (Fragrance), Aqua, Citronellol, Geraniol.",
+    sizes: [
+      { size: "30ml", price: 760, oldPrice: null, stock: 10 },
+      { size: "50ml", price: 1120, oldPrice: null, stock: 10 },
+      { size: "100ml", price: 1680, oldPrice: null, stock: 6 },
+    ],
+    rating: 5,
+    reviewCount: 0,
+    bestSeller: false,
+    image: "https://drive.google.com/file/d/1Rc7B9SxeE6a6PiYsTuHkTBWTuXpwsOm8/view",
+    images: ["https://drive.google.com/file/d/1Rc7B9SxeE6a6PiYsTuHkTBWTuXpwsOm8/view"],
+  },
+  {
+    id: "rne-14",
+    slug: "fleur-damour",
+    name: "Fleur d'Amour",
+    inspiredBy: "Victoria's Secret Bombshell",
+    tagline: "Bright fruity floral with peony and passion fruit",
+    description:
+      "Glamorous and sparkling: passion fruit, grapefruit and pineapple lead into peony and orchid over a soft musky vanilla base. Feminine and full of energy.",
+    gender: "Women",
+    season: ["Summer"],
+    families: ["floral", "fresh"],
+    notes: {
+      top: ["Passion Fruit", "Grapefruit", "Pineapple", "Strawberry"],
+      heart: ["Peony", "Orchid", "Jasmine"],
+      base: ["Musk", "Vanilla", "Woody Notes"],
+    },
+    ingredients: "Alcohol Denat., Parfum (Fragrance), Aqua, Limonene, Linalool.",
+    sizes: [
+      { size: "30ml", price: 700, oldPrice: null, stock: 10 },
+      { size: "50ml", price: 1050, oldPrice: null, stock: 10 },
+      { size: "100ml", price: 1580, oldPrice: null, stock: 6 },
+    ],
+    rating: 5,
+    reviewCount: 0,
+    bestSeller: false,
+    image: "https://drive.google.com/file/d/15EokeToDNQfvP_IzimIcRdT-sBIkXnud/view",
+    images: ["https://drive.google.com/file/d/15EokeToDNQfvP_IzimIcRdT-sBIkXnud/view"],
   },
   {
     id: "rne-discovery",
     slug: "discovery-set",
     name: "Test Package",
     inspiredBy: null,
-    tagline: "Choose 6 testers and find your signature",
+    // {n} is replaced with testerCount everywhere it is displayed.
+    tagline: "Choose {n} testers and find your signature",
     description:
-      "Can't decide? Try before you commit. Pick any 6 fragrances from our collection — each as a 5ml tester vial — and discover your perfect scent. One of each, no repeats.",
+      "Can't decide? Try before you commit. Pick any {n} fragrances from our collection — each as a 5ml tester vial — and discover your perfect scent. One of each, no repeats.",
     gender: "Unisex",
     season: ["Summer", "Winter"],
     notes: { top: [], heart: [], base: [] },
     ingredients: "",
     sizes: [
-      { size: "6 × 5ml", price: 350, oldPrice: null, stock: 50 },
+      { size: "5 × 5ml", price: 350, oldPrice: null, stock: 50 },
     ],
     rating: 4.9,
     reviewCount: 0,
     bestSeller: true,
     isDiscoverySet: true,
-    testerCount: 6,
+    testerCount: 5,       // single source of truth — admin-editable (Admin → Testers)
     maxPerScent: 1,
     image: "/products/test-package.jpg",
     images: ["/products/test-package.jpg"],
@@ -292,7 +436,20 @@ export function getMinPrice(product) {
 }
 
 export function isInStock(product) {
-  return product.sizes.some((s) => s.stock > 0);
+  return (product?.sizes || []).some((s) => Number(s.stock) > 0);
+}
+
+export const DEFAULT_TESTER_COUNT = 5;
+
+/** How many testers the package contains (admin-editable, 2–12). */
+export function testerCount(product) {
+  const n = Number(product?.testerCount);
+  return Number.isInteger(n) && n >= 2 && n <= 12 ? n : DEFAULT_TESTER_COUNT;
+}
+
+/** Number formatted for the UI language (Arabic-Indic digits in Arabic). */
+export function localNum(n, lang) {
+  return lang === "ar" ? Number(n).toLocaleString("ar-EG") : String(n);
 }
 
 // Helper: is this image value a real photo URL or local path vs a color placeholder?

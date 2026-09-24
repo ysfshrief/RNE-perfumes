@@ -31,7 +31,7 @@
   text-align: center;
   letter-spacing: 0.4em;
   background: var(--white);
-  font-family: var(--font-display);
+  font-family: var(--font-price);
 }
 .box input:focus { outline: none; border-color: var(--accent-text); }
 .inputError { border-color: var(--danger) !important; }
@@ -41,7 +41,7 @@
   flex: 1;
   padding: 0.7rem;
   border-radius: var(--radius);
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-weight: 600;
   font-size: 0.82rem;
   text-transform: uppercase;

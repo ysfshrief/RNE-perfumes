@@ -1,12 +1,13 @@
 "use client";
 
 import { useLang } from "@/context/LangContext";
-import { contact } from "@/data/brand";
+import { useBrand } from "@/lib/useBrand";
 import styles from "./LearnMore.module.css";
 
 // "Contact us for details" — opens WhatsApp chat.
 export default function LearnMore({ product }) {
   const { t, lang } = useLang();
+  const { contact } = useBrand();
 
   const msg =
     lang === "ar"

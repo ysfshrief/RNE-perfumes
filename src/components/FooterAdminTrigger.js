@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import LogoRNE from "./LogoRNE";
 import { useLang } from "@/context/LangContext";
+import { unlockAdmin } from "@/lib/adminAccess";
 import styles from "./FooterAdminTrigger.module.css";
 
 export default function FooterAdminTrigger() {
@@ -34,9 +35,9 @@ export default function FooterAdminTrigger() {
     }
   };
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    if (code === "000") {
+    if (await unlockAdmin(code)) {
       setPrompt(false);
       router.push("/admin");
     } else {

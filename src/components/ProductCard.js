@@ -26,10 +26,10 @@ export default function ProductCard({ product }) {
   const tags = productTags(product, lang, t);
 
   return (
-    <article className={styles.card}>
-      <Link href={`/product/${product.slug}`} className={styles.media} aria-label={pName(product, lang)}>
+    <article className={styles.card} data-lift>
+      <Link href={`/product/${product.slug}`} className={styles.media} aria-label={pName(product, lang)} data-zoom>
         <div className={styles.mediaInner}>
-          <ProductImage product={product} index={0} />
+          <ProductImage product={product} index={0} width={800} alt={pName(product, lang)} />
         </div>
 
         <div className={styles.badges}>
@@ -44,8 +44,10 @@ export default function ProductCard({ product }) {
           className={`${styles.wish} ${saved ? styles.wishOn : ""}`}
           aria-label={saved ? t("card.removeWishlist") : t("card.addWishlist")}
           aria-pressed={saved}
+          type="button"
           onClick={(e) => {
             e.preventDefault();
+            e.stopPropagation();
             dispatch({ type: "TOGGLE_WISHLIST", payload: product.id });
           }}
         >
@@ -60,7 +62,7 @@ export default function ProductCard({ product }) {
           picks up the bottle's own colours instead of being a flat grey. */}
       <div className={styles.bodyWrap}>
         <div className={styles.tintLayer} aria-hidden="true">
-          <ProductImage product={product} index={0} showLabel={false} />
+          <ProductImage product={product} index={0} showLabel={false} width={200} alt="" />
         </div>
         <div className={`glass ${styles.body}`}>
         {tags.length > 0 && (
@@ -93,7 +95,7 @@ export default function ProductCard({ product }) {
         <div className={styles.foot}>
           <span className={styles.priceWrap}>
             {product.sizes.length > 1 && <span className={styles.fromLabel}>{t("product.from")}</span>}
-            <span className={styles.price}>{minPrice} {t("common.currency")}</span>
+            <span className={`price ${styles.price}`}>{minPrice} {t("common.currency")}</span>
           </span>
           <Link href={`/product/${product.slug}`} className={styles.action} aria-label={`${t("common.view")} — ${pName(product, lang)}`}>
             <span>{t("common.view")}</span>

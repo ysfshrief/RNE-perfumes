@@ -1,14 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useShop } from "@/context/ShopContext";
 import { useLang } from "@/context/LangContext";
 import { useConfig } from "@/context/ConfigContext";
 import { useAuth } from "@/context/AuthContext";
 import { useProducts } from "@/context/ProductContext";
-import { addToCollection } from "@/lib/store";
+import { addToCollection, createOrder } from "@/lib/store";
+import { checkCoupon } from "@/lib/couponClient";
 import { computeTotals, validateCoupon, lineTotal, egp } from "@/lib/pricing";
+import { normalizeImageUrl, isImageUrl } from "@/lib/media";
+import { isRemote } from "@/lib/backend";
+
+// Egyptian mobile: 01XXXXXXXXX (11 digits), optionally written +20 / 0020.
+const normalizePhone = (v) => String(v || "").replace(/[\s-]/g, "").replace(/^(\+|00)20/, "0");
+const PHONE_OK = (v) => /^01[0125]\d{8}$/.test(normalizePhone(v));
+const EMAIL_OK = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v || "").trim());
 import styles from "./checkout.module.css";
 
 const GOV_KEYS = [
@@ -25,14 +33,27 @@ export default function CheckoutPage() {
   const { state, dispatch, cartTotal } = useShop();
   const { t, lang } = useLang();
   const { config, save: saveConfig } = useConfig();
-  const { user: authUser } = useAuth();
-  const { allProducts, updateProduct } = useProducts();
+  const { user: authUser, ready: authReady } = useAuth();
+  const { allProducts, updateProducts } = useProducts();
   const [pay, setPay] = useState("cod");
   const [placed, setPlaced] = useState(false);
   const [form, setForm] = useState({
     name: state.user?.name || "",
     phone: "", governorate: "", city: "", address: "", email: state.user?.email || "",
   });
+  const [attempted, setAttempted] = useState(false);
+  const [stockError, setStockError] = useState("");
+  const signedIn = !!(authUser || state.user);
+  // Guest checkout is allowed; the server links the order to the account
+  // automatically when the customer is signed in.
+  const mustSignIn = false;
+
+  // Prefill from the signed-in account once it is known.
+  useEffect(() => {
+    const u = authUser || state.user;
+    if (!u) return;
+    setForm((f) => ({ ...f, name: f.name || u.name || "", email: f.email || u.email || "" }));
+  }, [authUser, state.user]);
   const cur = t("common.currency");
 
   const enabledPayments = config.payments || {};
@@ -46,7 +67,16 @@ export default function CheckoutPage() {
   ].filter((p) => enabledPayments[p.id] !== false);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
-  const valid = form.name && form.phone && form.governorate && form.city && form.address && form.email;
+  const fieldErrors = {
+    name: !form.name.trim() ? t("checkout.errRequired") : "",
+    phone: !form.phone.trim() ? t("checkout.errRequired") : !PHONE_OK(form.phone) ? t("checkout.errPhone") : "",
+    governorate: !form.governorate ? t("checkout.errRequired") : "",
+    city: !form.city.trim() ? t("checkout.errRequired") : "",
+    address: form.address.trim().length < 8 ? t("checkout.errAddress") : "",
+    email: !form.email.trim() ? t("checkout.errRequired") : !EMAIL_OK(form.email) ? t("checkout.errEmail") : "",
+  };
+  const valid = Object.values(fieldErrors).every((e) => !e);
+  const showErr = (k) => (attempted ? fieldErrors[k] : "");
 
   // ---- Coupon / discount logic ----
   const [couponInput, setCouponInput] = useState("");
@@ -54,19 +84,20 @@ export default function CheckoutPage() {
   const [couponError, setCouponError] = useState("");
   const [placing, setPlacing] = useState(false);
 
-  const applyCoupon = () => {
+  const couponMessage = (res) =>
+    res.reason === "minOrder"
+      ? t("cart.couponMinOrder", { n: egp(res.minOrder), cur })
+      : res.reason === "expired"
+      ? t("cart.couponExpired")
+      : t("cart.invalidCoupon");
+
+  const applyCoupon = async () => {
     setCouponError("");
-    const res = validateCoupon(couponInput, config.coupons, { subtotal: cartTotal });
+    const res = await checkCoupon(couponInput, config, cartTotal);
     if (!res.ok) {
       setAppliedCoupon(null);
       if (res.reason === "empty") return;
-      setCouponError(
-        res.reason === "minOrder"
-          ? t("cart.couponMinOrder", { n: egp(res.minOrder), cur })
-          : res.reason === "expired"
-          ? t("cart.couponExpired")
-          : t("cart.invalidCoupon")
-      );
+      setCouponError(couponMessage(res));
       return;
     }
     setAppliedCoupon(res.coupon);
@@ -79,10 +110,76 @@ export default function CheckoutPage() {
   const discount = totals.discount;
   const finalTotal = totals.total;
 
+  // A coupon applied on the cart page carries over to checkout.
+  useEffect(() => {
+    let code = "";
+    try { code = sessionStorage.getItem("rne-coupon") || ""; } catch (e) {}
+    if (!code) return;
+    checkCoupon(code, config, cartTotal).then((res) => {
+      if (res.ok) { setAppliedCoupon(res.coupon); setCouponInput(code); }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const placeOrder = async () => {
+    setAttempted(true);
     // Guard against a double-click creating two identical orders.
-    if (!valid || placing) return;
+    if (!valid || placing || mustSignIn) return;
+
+    // Re-check stock against the live catalogue: the cart may be hours old.
+    const short = state.cart.find((it) => {
+      const p = allProducts.find((x) => x.id === it.id);
+      const sz = p?.sizes?.find((z) => z.size === it.size);
+      return !p || p.hidden || !sz || Number(sz.stock) < it.qty;
+    });
+    if (short) {
+      setStockError(t("checkout.errStock", { name: lang === "ar" ? short.nameAr || short.name : short.name }));
+      return;
+    }
+    setStockError("");
+
     setPlacing(true);
+
+    if (isRemote) {
+      // The server prices the order from the database, takes the stock and
+      // counts the coupon in one transaction — nothing here is trusted.
+      try {
+        await createOrder({
+          customer: { ...form, phone: normalizePhone(form.phone) },
+          items: state.cart.map((it) => ({
+            id: it.id,
+            size: it.size,
+            qty: it.qty,
+            selectedScents: Array.isArray(it.selectedScents) ? it.selectedScents.map((sc) => sc.id) : null,
+          })),
+          couponCode: appliedCoupon?.code || null,
+          payment: pay,
+          note: form.note || "",
+        });
+      } catch (e) {
+        const code = e.data?.error;
+        const detail = e.data?.detail || {};
+        const item = state.cart.find((it) => it.id === detail.id);
+        const name = item ? (lang === "ar" ? item.nameAr || item.name : item.name) : detail.name || "";
+        if (code === "outOfStock" || code === "unavailable") setStockError(t("checkout.errStock", { name }));
+        else if (code === "invalidCoupon") { setAppliedCoupon(null); setCouponError(t("cart.invalidCoupon")); }
+        else setStockError(t("checkout.errGeneric"));
+        setPlacing(false);
+        return;
+      }
+      setPlaced(true);
+      setPlacing(false);
+      try { sessionStorage.removeItem("rne-coupon"); } catch (e) {}
+      dispatch({ type: "CLEAR_CART" });
+      window.scrollTo({ top: 0 });
+      return;
+    }
+
+    // ── Local demo mode (no database): same rules, kept in this browser ──
+    if (appliedCoupon) {
+      const again = validateCoupon(appliedCoupon.code, config.coupons, { subtotal: totals.subtotal });
+      if (!again.ok) { setAppliedCoupon(null); setCouponError(t("cart.invalidCoupon")); setPlacing(false); return; }
+    }
     // Build the order record
     const order = {
       status: "New",
@@ -93,7 +190,7 @@ export default function CheckoutPage() {
       userEmail: (authUser?.email || form.email || "").trim().toLowerCase(),
       customer: {
         name: form.name,
-        phone: form.phone,
+        phone: normalizePhone(form.phone),
         email: form.email,
         governorate: form.governorate,
         city: form.city,
@@ -108,7 +205,13 @@ export default function CheckoutPage() {
         unitPrice: egp(it.price ?? it.size?.price),
         qty: it.qty,
         lineTotal: egp(lineTotal(it)),
-        selectedScents: it.selectedScents || it.product?._selectedScents || null,
+        // Names of the chosen testers (Test Package) — what the store packs.
+        selectedScents: Array.isArray(it.selectedScents) && it.selectedScents.length
+          ? it.selectedScents.map((sc) => sc.name)
+          : null,
+        selectedScentsAr: Array.isArray(it.selectedScents) && it.selectedScents.length
+          ? it.selectedScents.map((sc) => sc.nameAr || sc.name)
+          : null,
       })),
       subtotal: egp(totals.subtotal),
       discount: egp(totals.discount),
@@ -135,22 +238,25 @@ export default function CheckoutPage() {
       bucket[size] = (bucket[size] || 0) + (Number(it.qty) || 0);
       sold.set(pid, bucket);
     });
+    const stockPatches = {};
     sold.forEach((bySize, pid) => {
       const product = allProducts.find((p) => p.id === pid);
       if (!product) return;
-      const nextSizes = (product.sizes || []).map((sz) =>
-        bySize[sz.size]
-          ? { ...sz, stock: Math.max(0, (Number(sz.stock) || 0) - bySize[sz.size]) }
-          : sz,
-      );
-      updateProduct(pid, { sizes: nextSizes });
+      stockPatches[pid] = {
+        sizes: (product.sizes || []).map((sz) =>
+          bySize[sz.size]
+            ? { ...sz, stock: Math.max(0, (Number(sz.stock) || 0) - bySize[sz.size]) }
+            : sz,
+        ),
+      };
     });
+    updateProducts(stockPatches); // one write — see ProductContext.updateProducts
     // Also save/update the customer record
     await addToCollection("customers", {
       id: `cust_${form.email}`,
       name: form.name,
       email: form.email,
-      phone: form.phone,
+      phone: normalizePhone(form.phone),
       governorate: form.governorate,
       city: form.city,
       address: form.address,
@@ -169,6 +275,7 @@ export default function CheckoutPage() {
     // Cart is only cleared once the order actually exists.
     setPlaced(true);
     setPlacing(false);
+    try { sessionStorage.removeItem("rne-coupon"); } catch (e) {}
     dispatch({ type: "CLEAR_CART" });
     window.scrollTo({ top: 0 });
   };
@@ -204,10 +311,10 @@ export default function CheckoutPage() {
         <h1 className={styles.title}>{t("checkout.title")}</h1>
       </div>
 
-      {!state.user && (
-        <div className={styles.notice}>
-          {t("checkout.guestNotice")}{" "}
-          <Link href="/login">{t("checkout.signIn")}</Link> {t("checkout.or")}{" "}
+      {!signedIn && (
+        <div className={styles.notice} role={mustSignIn ? "alert" : undefined}>
+          {mustSignIn ? t("checkout.mustSignIn") : t("checkout.guestNotice")}{" "}
+          <Link href="/login?next=/checkout">{t("checkout.signIn")}</Link> {t("checkout.or")}{" "}
           <Link href="/register">{t("checkout.createOne")}</Link>.
         </div>
       )}
@@ -217,18 +324,19 @@ export default function CheckoutPage() {
           <section className={styles.card}>
             <h3>{t("checkout.delivery")}</h3>
             <div className={styles.grid2}>
-              <Field label={t("checkout.fullName")} value={form.name} onChange={set("name")} />
-              <Field label={t("checkout.phone")} value={form.phone} onChange={set("phone")} type="tel" />
+              <Field id="co-name" label={t("checkout.fullName")} value={form.name} onChange={set("name")} error={showErr("name")} autoComplete="name" />
+              <Field id="co-phone" label={t("checkout.phone")} value={form.phone} onChange={set("phone")} type="tel" error={showErr("phone")} autoComplete="tel" dir="ltr" placeholder="01XXXXXXXXX" inputMode="tel" />
               <div className={styles.field}>
-                <label>{t("checkout.governorate")}</label>
-                <select value={form.governorate} onChange={set("governorate")}>
+                <label htmlFor="co-gov">{t("checkout.governorate")}</label>
+                <select id="co-gov" value={form.governorate} onChange={set("governorate")} aria-invalid={!!showErr("governorate")}>
                   <option value="">{t("checkout.select")}</option>
                   {GOV_KEYS.map((g) => <option key={g} value={g}>{lang === "ar" ? GOV_AR[g] : g}</option>)}
                 </select>
+                {showErr("governorate") && <span className={styles.fieldError} role="alert">{showErr("governorate")}</span>}
               </div>
-              <Field label={t("checkout.city")} value={form.city} onChange={set("city")} />
-              <Field label={t("checkout.email")} value={form.email} onChange={set("email")} type="email" full />
-              <Field label={t("checkout.address")} value={form.address} onChange={set("address")} full textarea />
+              <Field id="co-city" label={t("checkout.city")} value={form.city} onChange={set("city")} error={showErr("city")} autoComplete="address-level2" />
+              <Field id="co-email" label={t("checkout.email")} value={form.email} onChange={set("email")} type="email" full error={showErr("email")} autoComplete="email" dir="ltr" />
+              <Field id="co-address" label={t("checkout.address")} value={form.address} onChange={set("address")} full textarea error={showErr("address")} autoComplete="street-address" />
             </div>
           </section>
 
@@ -250,13 +358,29 @@ export default function CheckoutPage() {
         <aside className={styles.summary}>
           <h3>{t("checkout.yourOrder")}</h3>
           <div className={styles.lines}>
-            {state.cart.map((i) => (
-              <div key={i.key} className={styles.line}>
-                <span className={styles.lineDot} style={{ background: i.color }} />
-                <span className={styles.lineName}>{i.name} · {i.size} × {i.qty}</span>
-                <span className={styles.linePrice}>{egp(lineTotal(i))} {cur}</span>
-              </div>
-            ))}
+            {state.cart.map((i) => {
+              const img = i.image || i.color;
+              return (
+                <div key={i.key} className={styles.line}>
+                  <span className={styles.lineThumb} aria-hidden="true">
+                    {isImageUrl(img) && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={normalizeImageUrl(img, 200)} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.visibility = "hidden"; }} />
+                    )}
+                  </span>
+                  <span className={styles.lineName}>
+                    <span className={styles.lineTitle}>{lang === "ar" ? i.nameAr || i.name : i.name}</span>
+                    <span className={styles.lineMeta}><bdi>{i.size}</bdi> · {lang === "ar" ? "الكمية" : "Qty"} {i.qty}</span>
+                    {i.selectedScents?.length > 0 && (
+                      <span className={styles.lineScents}>
+                        {i.selectedScents.map((sc) => (lang === "ar" ? sc.nameAr || sc.name : sc.name)).join("، ")}
+                      </span>
+                    )}
+                  </span>
+                  <span className={`price ${styles.linePrice}`}>{egp(lineTotal(i))} {cur}</span>
+                </div>
+              );
+            })}
           </div>
           <div className={styles.totals}>
             <div><span>{t("cart.subtotal")}</span><span>{egp(cartTotal)} {cur}</span></div>
@@ -293,25 +417,28 @@ export default function CheckoutPage() {
           <div className={styles.total}>
             <span>{t("cart.total")}</span><span>{egp(finalTotal)} {cur}</span>
           </div>
-          <button className="btn btn--solid btn--full" onClick={placeOrder} disabled={!valid || placing}>
-            {placing ? "…" : t("checkout.placeOrder")}
+          {stockError && <p className={styles.fieldError} role="alert">{stockError}</p>}
+          <button type="button" className="btn btn--solid btn--full" onClick={placeOrder} disabled={placing || mustSignIn} aria-busy={placing}>
+            {placing ? t("checkout.placing") : t("checkout.placeOrder")}
           </button>
-          {!valid && <p className={styles.fillNote}>{t("checkout.fillNote")}</p>}
+          {attempted && !valid && <p className={styles.fillNote} role="alert">{t("checkout.fillNote")}</p>}
         </aside>
       </div>
     </div>
   );
 }
 
-function Field({ label, value, onChange, type = "text", full, textarea }) {
+function Field({ id, label, value, onChange, type = "text", full, textarea, error, ...rest }) {
+  const errId = error ? `${id}-err` : undefined;
   return (
     <div className={`${styles.field} ${full ? styles.full : ""}`}>
-      <label>{label}</label>
+      <label htmlFor={id}>{label}</label>
       {textarea ? (
-        <textarea value={value} onChange={onChange} rows={3} />
+        <textarea id={id} value={value} onChange={onChange} rows={3} aria-invalid={!!error} aria-describedby={errId} {...rest} />
       ) : (
-        <input type={type} value={value} onChange={onChange} />
+        <input id={id} type={type} value={value} onChange={onChange} aria-invalid={!!error} aria-describedby={errId} {...rest} />
       )}
+      {error && <span id={errId} className={styles.fieldError} role="alert">{error}</span>}
     </div>
   );
 }

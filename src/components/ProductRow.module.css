@@ -16,36 +16,17 @@
   max-width: 34rem;
   margin-top: 0.8rem;
 }
-.all {
-  background: var(--btn-secondary-bg);
-  color: var(--btn-secondary-fg);
-  border: 1px solid var(--btn-secondary-border);
-  backdrop-filter: var(--btn-blur);
-  -webkit-backdrop-filter: var(--btn-blur);
-
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.78rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 0.6rem 1.1rem;
-  border-radius: var(--radius-pill);
-  white-space: nowrap;
-  transition: color 0.25s ease, border-color 0.25s ease;
-}
-.all:hover { color: var(--ink); border-color: var(--line-strong); }
-.allArrow { transition: transform 0.25s ease; }
-html[dir="rtl"] .allArrow { transform: scaleX(-1); }
-.all:hover .allArrow { transform: translate(2px, -2px); }
-html[dir="rtl"] .all:hover .allArrow { transform: scaleX(-1) translate(2px, -2px); }
-
+/* Explicit columns: auto-fill left an empty 4th track on wide screens, so
+   three cards filled only three quarters of the row. */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.5rem;
 }
-@media (max-width: 680px) {
-  .grid { grid-template-columns: 1fr; gap: 1.2rem; }
+@media (max-width: 1023px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; }
+}
+@media (max-width: 640px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
   .head { margin-bottom: 1.6rem; }
 }

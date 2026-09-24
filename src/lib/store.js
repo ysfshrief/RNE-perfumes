@@ -1,26 +1,19 @@
-// Unified data store. When Firebase is configured it reads/writes Firestore
-// documents; otherwise it falls back to localStorage. Every getter returns a
-// plain object, and subscribe() streams live updates (Firestore onSnapshot, or
-// a storage-event listener in fallback mode).
+// Unified data store used by every page and the admin.
 //
-// Collection layout in Firestore:
-//   settings/content   -> { en: {...}, ar: {...} }   (text overrides)
-//   settings/config    -> { learnMore, adSlides, wheel }
-//   settings/products  -> { [productId]: {...override} }
+// Two modes, same API:
+//   • Remote (NEXT_PUBLIC_BACKEND=neon): data lives in Neon Postgres behind
+//     the site's own /api routes. Reads are cached locally for an instant
+//     first paint, then refreshed from the server (on load, on window focus
+//     and on a gentle poll), so every visitor sees the admin's changes.
+//   • Local (no backend configured): everything is kept in this browser's
+//     localStorage — a demo mode for development.
 //
-// Using single documents keeps reads cheap and the whole prototype within the
-// Firestore free tier.
+// Documents: content | config | products        Collections: orders | customers
 
-import { isFirebaseEnabled, db } from "./firebase";
-
-let fs = null; // lazily-loaded firestore functions
-async function loadFirestore() {
-  if (fs) return fs;
-  fs = await import("firebase/firestore");
-  return fs;
-}
+import { isRemote } from "./backend";
 
 const LS_PREFIX = "rne-";
+const POLL_MS = 30_000;
 
 // ---- localStorage helpers ----
 function lsGet(key, fallback) {
@@ -32,24 +25,75 @@ function lsGet(key, fallback) {
     return fallback;
   }
 }
+function lsPut(key, value) {
+  try { localStorage.setItem(LS_PREFIX + key, JSON.stringify(value)); } catch (e) {}
+}
 function lsSet(key, value) {
   if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(LS_PREFIX + key, JSON.stringify(value));
-    // notify same-tab listeners
-    window.dispatchEvent(new CustomEvent("rne-store-change", { detail: { key } }));
-  } catch (e) {}
+  lsPut(key, value);
+  // notify same-tab listeners
+  window.dispatchEvent(new CustomEvent("rne-store-change", { detail: { key } }));
 }
 
-// ---- Public API ----
+/** Tell the UI (admin toasts) that a server write failed. */
+function syncError(what, status) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent("rne-sync-error", { detail: { what, status } }));
+}
 
-// Read a settings document once. `key` is one of: content | config | products
+async function api(path, { method = "GET", body } = {}) {
+  const res = await fetch(path, {
+    method,
+    credentials: "same-origin",
+    cache: "no-store",
+    headers: body ? { "Content-Type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  let data = null;
+  try { data = await res.json(); } catch (e) {}
+  if (!res.ok) throw Object.assign(new Error(data?.error || `HTTP ${res.status}`), { status: res.status, data });
+  return data;
+}
+
+/** Calls fn now, on window focus / tab show, and every POLL_MS while visible. */
+function keepFresh(fn) {
+  if (typeof window === "undefined") return () => {};
+  fn();
+  const onFocus = () => document.visibilityState !== "hidden" && fn();
+  window.addEventListener("focus", onFocus);
+  document.addEventListener("visibilitychange", onFocus);
+  const id = setInterval(() => document.visibilityState !== "hidden" && fn(), POLL_MS);
+  return () => {
+    clearInterval(id);
+    window.removeEventListener("focus", onFocus);
+    document.removeEventListener("visibilitychange", onFocus);
+  };
+}
+
+function listenLocal(lsKey, onChange) {
+  if (typeof window === "undefined") return () => {};
+  const handler = (e) => {
+    if (e.type === "storage" && e.key && e.key !== LS_PREFIX + lsKey) return;
+    if (e.type === "rne-store-change" && e.detail?.key !== lsKey) return;
+    onChange();
+  };
+  window.addEventListener("storage", handler);
+  window.addEventListener("rne-store-change", handler);
+  return () => {
+    window.removeEventListener("storage", handler);
+    window.removeEventListener("rne-store-change", handler);
+  };
+}
+
+// ============================================================
+// Documents
+// ============================================================
+
 export async function readDoc(key, fallback) {
-  if (isFirebaseEnabled && db) {
+  if (isRemote) {
     try {
-      const { doc, getDoc } = await loadFirestore();
-      const snap = await getDoc(doc(db, "settings", key));
-      return snap.exists() ? snap.data() : fallback;
+      const { data } = await api(`/api/store/doc/${key}`);
+      return data ?? fallback;
     } catch (e) {
       return lsGet(key, fallback);
     }
@@ -57,191 +101,127 @@ export async function readDoc(key, fallback) {
   return lsGet(key, fallback);
 }
 
-// Write (replace) a settings document.
-// Always updates the local cache + fires a same-tab event so the UI reflects
-// instantly, then syncs to Firestore in the background when enabled. This keeps
-// the admin (and this browser) responsive even if Firestore is slow/unreachable.
+// Local-first: the UI updates instantly, then the server is written in the
+// background. A version stamp (_v) stops a slower, older server copy from
+// overwriting a newer local edit when the next refresh arrives.
 export async function writeDoc(key, value) {
-  // Version stamp: if a Firestore write fails (e.g. security rules reject it),
-  // the next onSnapshot would push the *older* server copy back and silently
-  // undo the edit — a deleted coupon reappears, a new one vanishes. The stamp
-  // lets the subscriber ignore anything older than what we hold locally.
   const stamped = { ...value, _v: Date.now() };
-
-  // 1) Local-first: update cache and notify listeners immediately.
   lsSet(key, stamped);
-  value = stamped;
-
-  // 2) Sync to Firestore in the background (when enabled).
-  if (isFirebaseEnabled && db) {
-    loadFirestore()
-      .then(({ doc, setDoc }) => setDoc(doc(db, "settings", key), value, { merge: false }))
-      .catch((e) => console.warn("Firestore write failed (kept local copy):", e?.message));
+  if (isRemote) {
+    try {
+      await api(`/api/store/doc/${key}`, { method: "PUT", body: stamped });
+    } catch (e) {
+      console.warn(`Save ${key} failed:`, e.message);
+      syncError(key, e.status);
+      return false;
+    }
   }
   return true;
 }
 
-// Subscribe to live updates. Returns an unsubscribe function.
 export function subscribeDoc(key, fallback, callback) {
-  // Always seed from local cache first so the UI has data instantly.
   callback(lsGet(key, fallback));
+  const stopLocal = listenLocal(key, () => callback(lsGet(key, fallback)));
+  if (!isRemote) return stopLocal;
 
-  // Always listen for local changes (same-tab + cross-tab) so writes reflect
-  // immediately regardless of Firestore connectivity.
-  let localCleanup = () => {};
-  if (typeof window !== "undefined") {
-    const handler = (e) => {
-      if (e.type === "storage" && e.key && e.key !== LS_PREFIX + key) return;
-      if (e.type === "rne-store-change" && e.detail?.key !== key) return;
-      callback(lsGet(key, fallback));
-    };
-    window.addEventListener("storage", handler);
-    window.addEventListener("rne-store-change", handler);
-    localCleanup = () => {
-      window.removeEventListener("storage", handler);
-      window.removeEventListener("rne-store-change", handler);
-    };
-  }
-
-  // When Firebase is enabled, ALSO subscribe to Firestore for cross-device sync.
-  if (isFirebaseEnabled && db) {
-    let unsub = () => {};
-    let cancelled = false;
-    loadFirestore().then(({ doc, onSnapshot }) => {
-      if (cancelled) return;
-      unsub = onSnapshot(
-        doc(db, "settings", key),
-        (snap) => {
-          if (snap.exists()) {
-            const data = snap.data();
-            // Reject server copies older than the local one.
-            const localV = Number(lsGet(key, {})?._v || 0);
-            const remoteV = Number(data?._v || 0);
-            if (localV && remoteV < localV) return;
-            // keep local cache in sync (without re-firing our own event loop)
-            try { localStorage.setItem(LS_PREFIX + key, JSON.stringify(data)); } catch (e) {}
-            callback(data);
-          }
-        },
-        (err) => {
-          // eslint-disable-next-line no-console
-          console.warn("Firestore subscribe error (using local):", err?.message);
-        }
-      );
-    });
-    return () => { cancelled = true; unsub(); localCleanup(); };
-  }
-
-  return localCleanup;
+  let cancelled = false;
+  let last = null;
+  const stopPoll = keepFresh(async () => {
+    try {
+      const { data } = await api(`/api/store/doc/${key}`);
+      if (cancelled || !data) return;
+      const localV = Number(lsGet(key, {})?._v || 0);
+      const remoteV = Number(data._v || 0);
+      if (localV && remoteV < localV) return; // our newer edit is still syncing
+      const str = JSON.stringify(data);
+      if (str === last) return;
+      last = str;
+      lsPut(key, data);
+      callback(data);
+    } catch (e) {
+      /* offline or server down — keep showing the cached copy */
+    }
+  });
+  return () => { cancelled = true; stopPoll(); stopLocal(); };
 }
 
 // ============================================================
-// Collection helpers — for lists like orders, customers, discounts.
-// Each collection is stored as an array under a localStorage key, and (when
-// Firebase is enabled) as a Firestore collection with the same name.
+// Collections (orders, customers)
 // ============================================================
 
-// Add an item to a collection (generates an id + timestamp).
+// Local-mode add (the demo checkout). In remote mode orders go through
+// createOrder() so the server can price them.
 export async function addToCollection(collectionName, item) {
   const id = item.id || `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const record = { id, createdAt: new Date().toISOString(), ...item };
-
-  // Local-first
   const current = lsGet(`col:${collectionName}`, []);
-  const next = [record, ...current];
-  lsSet(`col:${collectionName}`, next);
-
-  // Firestore sync happens in the background. Awaiting it blocked the whole
-  // order flow whenever the network was slow or unreachable: the order was
-  // written locally, then everything after the await (stock decrement, coupon
-  // usage, cart clearing) silently never ran.
-  if (isFirebaseEnabled && db) {
-    loadFirestore()
-      .then(({ doc, setDoc }) => setDoc(doc(db, collectionName, id), record))
-      .catch((e) => console.warn(`Firestore add to ${collectionName} failed (kept local):`, e?.message));
-  }
+  lsSet(`col:${collectionName}`, [record, ...current.filter((r) => r.id !== id)]);
   return record;
 }
 
-// Update an item in a collection by id.
-export async function updateInCollection(collectionName, id, patch) {
-  const current = lsGet(`col:${collectionName}`, []);
-  const next = current.map((it) => (it.id === id ? { ...it, ...patch } : it));
-  lsSet(`col:${collectionName}`, next);
-
-  if (isFirebaseEnabled && db) {
-    loadFirestore()
-      .then(({ doc, setDoc }) => setDoc(doc(db, collectionName, id), patch, { merge: true }))
-      .catch((e) => console.warn(`Firestore update ${collectionName} failed:`, e?.message));
-  }
+/**
+ * Place an order. Remote: the server validates stock, prices and coupon and
+ * returns the stored order (or throws with `.data.error`, e.g. outOfStock).
+ */
+export async function createOrder(order) {
+  if (!isRemote) return addToCollection("orders", order);
+  const { order: saved } = await api("/api/orders", { method: "POST", body: order });
+  const current = lsGet("col:orders", []);
+  lsSet("col:orders", [saved, ...current.filter((r) => r.id !== saved.id)]);
+  return saved;
 }
 
-// Delete an item from a collection by id.
-export async function deleteFromCollection(collectionName, id) {
-  const current = lsGet(`col:${collectionName}`, []);
-  lsSet(`col:${collectionName}`, current.filter((it) => it.id !== id));
+export async function validateCouponRemote(code, subtotal) {
+  return api("/api/coupon", { method: "POST", body: { code, subtotal } });
+}
 
-  if (isFirebaseEnabled && db) {
+export async function updateInCollection(collectionName, id, patch) {
+  const current = lsGet(`col:${collectionName}`, []);
+  lsSet(`col:${collectionName}`, current.map((it) => (it.id === id ? { ...it, ...patch } : it)));
+  if (isRemote) {
     try {
-      const { doc, deleteDoc } = await loadFirestore();
-      await deleteDoc(doc(db, collectionName, id));
+      await api(`/api/store/col/${collectionName}/${encodeURIComponent(id)}`, { method: "PATCH", body: patch });
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn(`Firestore delete ${collectionName} failed:`, e?.message);
+      console.warn(`Update ${collectionName} failed:`, e.message);
+      syncError(collectionName, e.status);
     }
   }
 }
 
-// Subscribe to a whole collection (live). Returns unsubscribe.
-export function subscribeCollection(collectionName, callback) {
-  // seed from local
-  const seeded = lsGet(`col:${collectionName}`, []);
-  callback(seeded);
-
-  let localCleanup = () => {};
-  if (typeof window !== "undefined") {
-    const handler = (e) => {
-      if (e.type === "storage" && e.key && e.key !== `${LS_PREFIX}col:${collectionName}`) return;
-      if (e.type === "rne-store-change" && e.detail?.key !== `col:${collectionName}`) return;
-      callback(lsGet(`col:${collectionName}`, []));
-    };
-    window.addEventListener("storage", handler);
-    window.addEventListener("rne-store-change", handler);
-    localCleanup = () => {
-      window.removeEventListener("storage", handler);
-      window.removeEventListener("rne-store-change", handler);
-    };
+export async function deleteFromCollection(collectionName, id) {
+  const current = lsGet(`col:${collectionName}`, []);
+  lsSet(`col:${collectionName}`, current.filter((it) => it.id !== id));
+  if (isRemote) {
+    try {
+      await api(`/api/store/col/${collectionName}/${encodeURIComponent(id)}`, { method: "DELETE" });
+    } catch (e) {
+      syncError(collectionName, e.status);
+    }
   }
+}
 
-  if (isFirebaseEnabled && db) {
-    let unsub = () => {};
-    let cancelled = false;
-    loadFirestore().then(({ collection, onSnapshot, query, orderBy }) => {
+// `opts.where = ["userId", uid]` → only that customer's orders.
+export function subscribeCollection(collectionName, callback, opts = {}) {
+  const lsKey = `col:${collectionName}`;
+  callback(lsGet(lsKey, []));
+  const stopLocal = listenLocal(lsKey, () => callback(lsGet(lsKey, [])));
+  if (!isRemote) return stopLocal;
+
+  const mine = Array.isArray(opts.where) && collectionName === "orders";
+  let cancelled = false;
+  let last = null;
+  const stopPoll = keepFresh(async () => {
+    try {
+      const { items } = await api(mine ? "/api/orders/mine" : `/api/store/col/${collectionName}`);
       if (cancelled) return;
-      const handleSnap = (snap) => {
-        const items = snap.docs.map((d) => d.data());
-        // Never let an empty Firestore result wipe existing local data.
-        // (Empty can mean: offline cache, pending server fetch, or a genuinely
-        // empty collection — we can't tell reliably, so we keep local data.)
-        if (items.length === 0) {
-          const local = lsGet(`col:${collectionName}`, []);
-          if (local.length > 0) return; // keep what we have
-        }
-        try { localStorage.setItem(`${LS_PREFIX}col:${collectionName}`, JSON.stringify(items)); } catch (e) {}
-        callback(items);
-      };
-      try {
-        const q = query(collection(db, collectionName), orderBy("createdAt", "desc"));
-        unsub = onSnapshot(q, handleSnap, (err) => {
-          // eslint-disable-next-line no-console
-          console.warn(`Firestore subscribe ${collectionName} error:`, err?.message);
-        });
-      } catch (e) {
-        unsub = onSnapshot(collection(db, collectionName), handleSnap);
-      }
-    });
-    return () => { cancelled = true; unsub(); localCleanup(); };
-  }
-
-  return localCleanup;
+      const str = JSON.stringify(items);
+      if (str === last) return;
+      last = str;
+      if (!mine) lsPut(lsKey, items);
+      callback(items);
+    } catch (e) {
+      /* not an admin / offline — keep local view */
+    }
+  });
+  return () => { cancelled = true; stopPoll(); stopLocal(); };
 }

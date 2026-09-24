@@ -1,11 +1,12 @@
 "use client";
 
 import { useLang } from "@/context/LangContext";
-import { contact } from "@/data/brand";
+import { useBrand } from "@/lib/useBrand";
 import styles from "./WhatsApp.module.css";
 
 export default function WhatsApp() {
   const { t } = useLang();
+  const { contact } = useBrand();
   return (
     <a
       className={styles.wa}

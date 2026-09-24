@@ -4,10 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useShop } from "@/context/ShopContext";
-import { useAuth, AUTH_ERRORS } from "@/context/AuthContext";
+import { useAuth, AUTH_ERRORS, googleSignInAvailable } from "@/context/AuthContext";
 import { useLang } from "@/context/LangContext";
 import { useConfig } from "@/context/ConfigContext";
 import { normalizeImageUrl } from "@/context/ProductContext";
+import { safeNext } from "@/lib/adminAccess";
 import {
   GlassCard,
   GlassCardHeader,
@@ -34,6 +35,11 @@ export default function LoginPage() {
   const set = (k: "email" | "password") => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
+  // Where to go after signing in (e.g. /login?next=/admin). Read lazily from
+  // the URL so the page needs no Suspense boundary for useSearchParams.
+  const nextUrl = () =>
+    safeNext(typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") : null);
+
   const showError = (code?: string) => {
     const msg = code ? (AUTH_ERRORS as any)[code] : null;
     setError(
@@ -49,7 +55,7 @@ export default function LoginPage() {
     setLoading(false);
     if (res.ok) {
       dispatch({ type: "LOGIN", payload: { name: form.email.split("@")[0], email: form.email } });
-      router.push("/account");
+      router.push(nextUrl());
     } else showError(res.code);
   };
 
@@ -59,7 +65,7 @@ export default function LoginPage() {
     const res = await signInWithGoogle();
     if (res.redirecting) return;
     setLoading(false);
-    if (res.ok) router.push("/account");
+    if (res.ok) router.push(nextUrl());
     else showError(res.code);
   };
 
@@ -119,6 +125,7 @@ export default function LoginPage() {
           </form>
         </GlassCardContent>
 
+        {googleSignInAvailable && (
         <GlassCardFooter className="flex-col gap-2">
           <Button variant="ghost" className="w-full gap-2" onClick={googleSignIn} disabled={loading}>
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
@@ -130,6 +137,7 @@ export default function LoginPage() {
             {t("auth.google")}
           </Button>
         </GlassCardFooter>
+        )}
       </GlassCard>
     </div>
   );

@@ -6,7 +6,7 @@
 }
 .info { display: flex; flex-direction: column; gap: 1.6rem; }
 .infoItem h3 {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -24,7 +24,7 @@
 .form { display: flex; flex-direction: column; gap: 1.1rem; }
 .field { display: flex; flex-direction: column; gap: 0.4rem; }
 .field label {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -59,7 +59,7 @@
 
 .socialItem { margin-top: 0.5rem; }
 .socialItem h3 {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.1em;

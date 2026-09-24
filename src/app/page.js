@@ -11,46 +11,41 @@ import Hero from "@/components/Hero";
 import WhatsApp from "@/components/WhatsApp";
 import AdSlider from "@/components/AdSlider";
 import SpinWheel from "@/components/SpinWheel";
+import { ArrowUpRight } from "@/components/icons";
 import { useProducts, normalizeImageUrl } from "@/context/ProductContext";
 import { useLang } from "@/context/LangContext";
 import { useConfig } from "@/context/ConfigContext";
-import { familyKeys } from "@/data/productMeta";
+import { COLLECTIONS, collectionKeys } from "@/data/productMeta";
 import styles from "./home.module.css";
 
 export default function HomePage() {
   const { t, lang } = useLang();
   const { visibleProducts } = useProducts();
   const { config } = useConfig();
-  const products = visibleProducts.filter((p) => !p.isDiscoverySet);
+  const products = useMemo(() => visibleProducts.filter((p) => !p.isDiscoverySet), [visibleProducts]);
   const testPackage = visibleProducts.find((p) => p.isDiscoverySet);
   const featured = products.filter((p) => p.bestSeller).slice(0, 3);
   const fresh = products.slice(0, 4);
 
-  // Collections are derived from the live catalogue. A collection is only
-  // rendered when it actually has products, so no empty decorative sections.
+  // Collections come from the same model as the shop's "Collection" filter
+  // (Floral / Woody / Fresh / Warm), so a row and its "View all" link always
+  // show the same products. Rows need at least 2 products; max 3 rows.
   const collections = useMemo(() => {
-    const byFamily = (key) => products.filter((p) => familyKeys(p).includes(key));
-    const candidates = [
-      { key: "oud",    title: lang === "ar" ? "العود" : "Oud",    items: byFamily("oud") },
-      { key: "woody",  title: lang === "ar" ? "الأخشاب" : "Woody", items: byFamily("woody") },
-      { key: "floral", title: lang === "ar" ? "الزهور" : "Floral", items: byFamily("floral") },
-      { key: "fresh",  title: lang === "ar" ? "المنعش" : "Fresh",  items: [...byFamily("fresh"), ...byFamily("citrus")] },
-      { key: "summer", title: lang === "ar" ? "صيفي" : "Summer",  items: products.filter((p) => (p.season || []).includes("Summer")), category: "Summer" },
-      { key: "winter", title: lang === "ar" ? "شتوي" : "Winter",  items: products.filter((p) => (p.season || []).includes("Winter")), category: "Winter" },
-    ];
-    // De-duplicate items inside each collection, require at least 2 products,
-    // and cap the homepage at three collections so the page stays editorial.
-    return candidates
-      .map((c) => ({ ...c, items: [...new Map(c.items.map((p) => [p.id, p])).values()].slice(0, 3) }))
+    return COLLECTIONS
+      .map((c) => ({
+        key: c.key,
+        title: lang === "ar" ? c.ar : c.en,
+        items: products.filter((p) => collectionKeys(p).includes(c.key)).slice(0, 3),
+      }))
       .filter((c) => c.items.length >= 2)
       .slice(0, 3);
   }, [products, lang]);
 
   const cats = (config.categories || []).map((c) => ({
     label: lang === "ar" ? c.label : c.labelEn,
-    href: `/shop?category=${c.key}`,
+    href: `/shop?${["Men", "Women", "Unisex"].includes(c.key) ? "gender" : "season"}=${c.key}`,
     c: c.color,
-    img: c.image ? normalizeImageUrl(c.image) : null,
+    img: c.image ? normalizeImageUrl(c.image, 800) : null,
   }));
 
   return (
@@ -61,16 +56,20 @@ export default function HomePage() {
 
       <section className={styles.catStrip}>
         <div className="container">
-          <div className="rule">{t("home.theCollection")}</div>
+          <h2 className={`rule rule--lg ${styles.collectionRule}`}>{t("home.theCollection")}</h2>
           <div className={styles.cats}>
             {cats.map((cat) => (
-              <Link key={cat.href} href={cat.href} className={styles.cat} style={{ "--c": cat.c }}>
+              <Link key={cat.href} href={cat.href} className={styles.cat} style={{ "--c": cat.c }} data-zoom>
                 {cat.img && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={cat.img} alt="" className={styles.catImg} />
+                  <img src={cat.img} alt="" className={styles.catImg} loading="lazy" decoding="async"
+                    onError={(e) => { e.currentTarget.style.display = "none"; }} />
                 )}
-                <span className={styles.catLabel}>{cat.label}</span>
-                <span className={styles.catArrow}>→</span>
+                <span className={styles.catText}>
+                  <span className={styles.catLabel}>{cat.label}</span>
+                  <span className={styles.catCta}>{t("home.shopCat")}</span>
+                </span>
+                <span className={styles.catArrow} aria-hidden="true"><ArrowUpRight size={18} /></span>
               </Link>
             ))}
           </div>
@@ -100,7 +99,7 @@ export default function HomePage() {
           eyebrow={t("collection.label")}
           title={c.title}
           products={c.items}
-          href={`/shop?category=${c.category || ""}`}
+          href={`/shop?family=${c.key}`}
         />
       ))}
 
@@ -140,7 +139,10 @@ export default function HomePage() {
             <p className="eyebrow">{t("home.theRange")}</p>
             <h2 className={styles.sectionTitle}>{t("home.exploreEvery")}</h2>
           </div>
-          <Link href="/shop" className={styles.seeAll}>{t("common.viewAll")}</Link>
+          <Link href="/shop" className="link-pill">
+            <span>{t("common.viewAll")}</span>
+            <ArrowUpRight size={16} className="link-pill__arrow" />
+          </Link>
         </div>
         <div className={styles.grid4}>
           {fresh.map((p) => (

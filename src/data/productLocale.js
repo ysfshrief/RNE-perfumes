@@ -1,3 +1,5 @@
+import { testerCount, localNum } from "./products";
+
 // Arabic localized content for products, keyed by product id.
 
 export const productAr = {
@@ -59,10 +61,45 @@ export const productAr = {
   },
   "rne-discovery": {
     name: "تيست باكيدچ",
-    tagline: "اختار ٦ تيسترات واكتشف عطرك المفضّل",
+    tagline: "اختار {n} تيسترات واكتشف عطرك المفضّل",
     description:
-      "مش متأكد؟ جرّب قبل ما تشتري. اختار أي ٦ عطور من مجموعتنا — كل واحد كتيستر ٥ مل — واكتشف ريحتك المفضّلة. نوع واحد من كل عطر، بدون تكرار.",
+      "مش متأكد؟ جرّب قبل ما تشتري. اختار أي {n} عطور من مجموعتنا — كل واحد كتيستر ٥ مل — واكتشف ريحتك المفضّلة. نوع واحد من كل عطر، بدون تكرار.",
     ingredients: "",
+  },
+  "rne-10": {
+    name: "نوكسيون",
+    tagline: "عنبر وفانيليا دافئ مع التفاح والقرفة",
+    description:
+      "توقيع مسائي جذّاب: تفاح منعش وقرفة على خزامى وزهر البرتقال، يستقر على قاعدة حلوة وثابتة من الفانيليا والتونكا والعنبر. مصنوع للسهرات.",
+    ingredients: "كحول، عطر، ماء، كومارين، لينالول.",
+  },
+  "rne-11": {
+    name: "دوسكيرو",
+    tagline: "أخشاب داكنة راتنجية مع العود والبخور",
+    description:
+      "عميق ودخاني وقوي: نغمات خضراء راتنجية وبخور تلتف حول العود والتبغ والأخشاب الداكنة. عطر جريء وثابت لليالي الباردة.",
+    ingredients: "كحول، عطر، ماء، لينالول.",
+  },
+  "rne-12": {
+    name: "فيرمون",
+    tagline: "توت أحمر منعش على مسك ناعم",
+    description:
+      "مرِح ومشرق: انفجار من الفراولة والتوت والتوت الأسود يلطّفه البنفسج والياسمين، على قاعدة من المسك والفانيليا والعنبر. حلو وعصري وسهل الحب.",
+    ingredients: "كحول، عطر، ماء، ليمونين، لينالول.",
+  },
+  "rne-13": {
+    name: "روزافيلين",
+    tagline: "وردة ندية منعشة مع الليتشي والكمثرى",
+    description:
+      "خفيف ومضيء: ليتشي وكمثرى عصيرية تتفتح على وردة تركية ندية وبيوني، وتُختتم بمسك نظيف. عطر زهري منعش للأيام المشرقة.",
+    ingredients: "كحول، عطر، ماء، سيترونيلول، جيرانيول.",
+  },
+  "rne-14": {
+    name: "فلور دامور",
+    tagline: "زهري فاكهي مشرق مع البيوني وفاكهة الباشن",
+    description:
+      "ساحر ومتألق: فاكهة الباشن والجريب فروت والأناناس تقود إلى البيوني والأوركيد على قاعدة ناعمة من المسك والفانيليا. أنثوي ومليء بالطاقة.",
+    ingredients: "كحول، عطر، ماء، ليمونين، لينالول.",
   },
   "rne-09": {
     name: "إربا بورا",
@@ -95,22 +132,47 @@ export const noteMap = {
   "Lily of the Valley": "زنبق الوادي", "Green Tea": "شاي أخضر", "Galbanum": "جلبانوم",
   "Sicilian Orange": "برتقال صقلي", "Fruity Notes": "نغمات فواكه",
   "Madagascar Vanilla": "فانيليا مدغشقر", "Coumarin": "كومارين",
+  "Apple": "تفاح", "Orange Blossom": "زهر البرتقال", "Green Notes": "نغمات خضراء",
+  "Cannabis": "قنب", "Resins": "راتنجات", "Coffee": "قهوة", "Tobacco": "تبغ",
+  "Woody Notes": "نغمات خشبية", "Strawberry": "فراولة", "Raspberry": "توت",
+  "Blackberry": "توت أسود", "Violet": "بنفسج", "Lychee": "ليتشي", "Pear": "كمثرى",
+  "Passion Fruit": "فاكهة الباشن", "Pineapple": "أناناس", "Orchid": "أوركيد",
 };
 
 const genderMap = { Men: "رجالي", Women: "حريمي", Unisex: "للجنسين" };
 const seasonMap = { Summer: "صيفي", Winter: "شتوي" };
 
+// Localised product text. Order of precedence:
+//   1. admin-entered field on the product (nameAr / taglineAr / …)
+//   2. the built-in Arabic catalogue above
+//   3. the English value
+// "{n}" is filled with the tester count so the Test Package copy always
+// matches the configured number of testers.
+function fill(str, product, lang) {
+  if (typeof str !== "string" || !str.includes("{n}")) return str;
+  return str.split("{n}").join(localNum(testerCount(product), lang));
+}
+function localized(product, field, lang) {
+  if (!product) return "";
+  if (lang === "ar") {
+    const own = product[`${field}Ar`];
+    const v = (typeof own === "string" && own.trim()) ? own : productAr[product.id]?.[field] || product[field];
+    return fill(v, product, lang);
+  }
+  return fill(product[field], product, lang);
+}
+
 export function pName(product, lang) {
-  return lang === "ar" ? productAr[product.id]?.name || product.name : product.name;
+  return localized(product, "name", lang);
 }
 export function pTagline(product, lang) {
-  return lang === "ar" ? productAr[product.id]?.tagline || product.tagline : product.tagline;
+  return localized(product, "tagline", lang);
 }
 export function pDescription(product, lang) {
-  return lang === "ar" ? productAr[product.id]?.description || product.description : product.description;
+  return localized(product, "description", lang);
 }
 export function pIngredients(product, lang) {
-  return lang === "ar" ? productAr[product.id]?.ingredients || product.ingredients : product.ingredients;
+  return localized(product, "ingredients", lang);
 }
 export function tNote(note, lang) {
   return lang === "ar" ? noteMap[note] || note : note;

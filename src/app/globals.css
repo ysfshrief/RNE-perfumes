@@ -80,11 +80,40 @@
   --glass-blur: 20px;
   --glass-shadow: 0 10px 34px -14px rgba(22, 19, 15, 0.22);
 
-  /* Type */
-  --font-display: "Cormorant Garamond", Georgia, serif;
-  --font-body: "Jost", system-ui, sans-serif;
-  --font-ar: "Rubik", "Cairo", system-ui, sans-serif;
-  --font-ar-display: "Cairo", "Rubik", system-ui, sans-serif;
+  /* ── Typography system ───────────────────────────────
+     Four families, each with a job. Every stack carries BOTH scripts so an
+     Arabic word inside a Latin-styled element (or vice-versa) falls back to
+     the matching RNE face instead of a random system font.
+       display  → editorial headings, product names   (Cormorant / El Messiri)
+       body     → paragraphs, UI, buttons, labels     (Jost / IBM Plex Sans Arabic)
+       price    → every price & quantity, both langs  (Jost, lining tabular)
+     Components use the role tokens (--font-ui, --font-price, --fs-*),
+     never raw family names. */
+  --font-display: "Cormorant Garamond", "El Messiri", Georgia, serif;
+  --font-body: "Jost", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-ar: "IBM Plex Sans Arabic", "Jost", system-ui, sans-serif;
+  --font-ar-display: "El Messiri", "Cormorant Garamond", Georgia, serif;
+  --font-ui: var(--font-body);
+  --font-price: "Jost", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-heading: var(--font-display);
+
+  /* Type scale (fluid) */
+  --fs-display: clamp(2.8rem, 8vw, 6.5rem);
+  --fs-h1: clamp(2rem, 4.8vw, 3.4rem);
+  --fs-h2: clamp(1.6rem, 3.6vw, 2.6rem);
+  --fs-h3: clamp(1.2rem, 2.3vw, 1.55rem);
+  --fs-h4: clamp(1rem, 1.7vw, 1.15rem);
+  --fs-lead: clamp(1rem, 1.4vw, 1.12rem);
+  --fs-body: 1rem;
+  --fs-sm: 0.875rem;
+  --fs-xs: 0.75rem;
+  --fs-eyebrow: 0.72rem;
+  --fs-price: 1.2rem;
+  --fs-price-lg: clamp(1.5rem, 2.6vw, 1.9rem);
+  --lh-tight: 1.08;
+  --lh-heading: 1.18;
+  --lh-body: 1.65;
+  --tracking-eyebrow: 0.24em;
 
   /* Layout */
   --max: 1440px;
@@ -152,10 +181,10 @@ h1, h2, h3, h4 {
   gap: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.35em;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--olive);
-  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--ink);
+  font-family: var(--font-ui);
 }
 .rule::before,
 .rule::after {
@@ -163,9 +192,24 @@ h1, h2, h3, h4 {
   height: 1px;
   background: var(--ink);
   flex: 1;
+  opacity: 0.85;
 }
 .rule--short::before { flex: 0 0 40px; }
 .rule--short::after { flex: 0 0 40px; }
+/* Section-title variant (homepage "The Collection"): larger word, generous
+   breathing room, lines that stop short of the text so it reads as a crest. */
+.rule--lg {
+  gap: clamp(1rem, 2.5vw, 1.75rem);
+  font-family: var(--font-heading);
+  font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+  font-weight: 600;
+  letter-spacing: 0.32em;
+}
+html[dir="rtl"] .rule--lg {
+  font-family: var(--font-ar-display);
+  font-size: clamp(1.3rem, 2vw, 1.6rem);
+  letter-spacing: 0.02em;
+}
 
 /* Buttons */
 .btn {
@@ -173,7 +217,7 @@ h1, h2, h3, h4 {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-weight: 600;
   font-size: 0.82rem;
   letter-spacing: 0.14em;
@@ -192,7 +236,7 @@ h1, h2, h3, h4 {
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .eyebrow {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   text-transform: uppercase;
   letter-spacing: 0.3em;
   font-size: 0.7rem;
@@ -207,7 +251,7 @@ h1, h2, h3, h4 {
 
 .badge {
   display: inline-block;
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.16em;
@@ -219,9 +263,12 @@ h1, h2, h3, h4 {
 .badge--best { background: var(--amber); color: var(--pure-white); }
 .badge--out { background: var(--sand-deep); color: var(--ink-dim); }
 
+/* One price style everywhere (cards, product page, testers, cart). */
 .price {
-  font-family: var(--font-display);
-  font-weight: 700;
+  font-family: var(--font-price);
+  font-weight: 600;
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: 0.01em;
 }
 .price__old {
   color: var(--olive);
@@ -258,6 +305,13 @@ h1, h2, h3, h4 {
 /* ============================================
    RTL / Arabic support
    ============================================ */
+/* In RTL the role tokens resolve to the Arabic-first stacks, so every
+   component that uses --font-ui / --font-display is correct automatically. */
+html[dir="rtl"] {
+  --font-ui: var(--font-ar);
+  --font-heading: var(--font-ar-display);
+  --tracking-eyebrow: 0.04em;
+}
 html[dir="rtl"] body {
   font-family: var(--font-ar);
   letter-spacing: 0;
@@ -267,27 +321,24 @@ html[dir="rtl"] h2,
 html[dir="rtl"] h3,
 html[dir="rtl"] h4 {
   font-family: var(--font-ar-display);
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0;
-  line-height: 1.25;
+  line-height: 1.3;
 }
 html[dir="rtl"] .eyebrow,
-html[dir="rtl"] .rule,
+html[dir="rtl"] .rule:not(.rule--lg),
 html[dir="rtl"] .btn,
 html[dir="rtl"] .badge {
   font-family: var(--font-ar);
-  letter-spacing: 0.08em;
-}
-html[dir="rtl"] .price {
-  font-family: var(--font-ar);
-  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 /* Arabic body reads better with a touch more line-height */
 html[dir="rtl"] p { line-height: 1.85; }
 
-/* Latin brand mark should stay Syne even in RTL */
+/* Latin names (e.g. "inspired by" brands) inside Arabic text use the Latin
+   UI face — readable at small sizes, unlike the display serif. */
 html[dir="rtl"] .keep-latin {
-  font-family: var(--font-display) !important;
+  font-family: var(--font-body) !important;
 }
 
 /* Price line-through spacing flips */
@@ -296,8 +347,8 @@ html[dir="rtl"] .price__old {
   margin-right: 0.5rem;
 }
 
-/* Numerals: keep Latin digits for prices/quantities readability */
-.price, .qty span { font-feature-settings: "tnum"; }
+/* Numerals: lining, tabular digits for prices/quantities */
+.price, .qty span { font-variant-numeric: lining-nums tabular-nums; }
 
 /* ============================================
    Mobile-first polish
@@ -321,10 +372,11 @@ html[dir="rtl"] .price { text-align: inherit; }
 /* ============================================
    Premium responsive typography refinement
    ============================================ */
-h1 { font-size: clamp(1.9rem, 5.2vw, 3.4rem); line-height: 1.06; }
-h2 { font-size: clamp(1.5rem, 3.6vw, 2.4rem); line-height: 1.12; }
-h3 { font-size: clamp(1.15rem, 2.4vw, 1.5rem); line-height: 1.2; }
-h4 { font-size: clamp(0.95rem, 1.8vw, 1.1rem); }
+h1 { font-size: var(--fs-h1); line-height: var(--lh-tight); }
+h2 { font-size: var(--fs-h2); line-height: var(--lh-heading); }
+h3 { font-size: var(--fs-h3); line-height: 1.2; }
+h4 { font-size: var(--fs-h4); }
+html[dir="rtl"] h1 { line-height: 1.3; }
 
 body { font-size: 15.5px; }
 @media (min-width: 768px) { body { font-size: 16px; } }
@@ -337,9 +389,12 @@ body { font-size: 15.5px; }
 /* ============================================
    Global animations & transitions
    ============================================ */
+/* Ends at `transform: none` (not translateY(0)): a lingering transform turns
+   every section into the containing block for position:fixed children, so
+   overlays/lightboxes inside a section could not cover the page. */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: none; }
 }
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -355,7 +410,7 @@ body { font-size: 15.5px; }
 }
 
 /* Apply fade-up to main sections */
-section, .container > div {
+section {
   animation: fadeUp 0.6s ease both;
 }
 
@@ -364,18 +419,9 @@ a, button, input, select, textarea {
   transition: all 0.25s ease;
 }
 
-/* Card hover lift */
-article, [class*="card"] {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* Image hover scale */
-[class*="media"] img, [class*="thumb"] img {
-  transition: transform 0.4s ease;
-}
-[class*="media"]:hover img, [class*="thumb"]:hover img {
-  transform: scale(1.05);
-}
+/* Hover lift / image zoom are defined by each component (ProductCard,
+   category tiles, gallery). A global [class*="card"] / [class*="media"] rule
+   used to leak into the hero, the admin and the checkout panels. */
 
 /* Badge styling — burgundy */
 .badge {
@@ -406,14 +452,13 @@ article, [class*="card"] {
 .stars { color: var(--accent-text); }
 
 /* Price highlight */
-.price { color: var(--ink); font-weight: 700; }
+.price { color: var(--ink); }
 .price__old { color: var(--olive); text-decoration: line-through; }
 
 /* Eyebrow — burgundy accent */
 .eyebrow { color: var(--accent-text); }
 
-/* Rule line — use burgundy center dot */
-.rule::before { background: var(--burgundy); }
+/* Signature rule — both hairlines share the ink colour (brand request). */
 
 /* ============================================
    Disable effects via admin toggle classes
@@ -422,14 +467,13 @@ html.no-effects *, html.no-effects *::before, html.no-effects *::after {
   animation: none !important;
   transition: none !important;
 }
-html.no-fade section, html.no-fade .container > div {
+html.no-fade section {
   animation: none !important;
 }
-html.no-hover-lift article:hover, html.no-hover-lift [class*="card"]:hover {
+html.no-hover-lift article:hover, html.no-hover-lift [data-lift]:hover {
   transform: none !important;
-  box-shadow: none !important;
 }
-html.no-image-zoom [class*="media"]:hover img, html.no-image-zoom [class*="thumb"]:hover img {
+html.no-image-zoom [data-zoom] img, html.no-image-zoom [data-zoom] :is(img, [class*="mediaInner"]) {
   transform: none !important;
 }
 html.no-transitions *, html.no-transitions *::before, html.no-transitions *::after {
@@ -459,11 +503,6 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 3px rgba(139, 26, 43, 0.15) !important;
 }
 
-/* Card hover — elegant lift + shadow spread */
-article:hover, [class*="card"]:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 40px rgba(10, 10, 10, 0.1);
-}
 
 /* Button press effect */
 .btn:active, button:active {
@@ -485,10 +524,9 @@ article:hover, [class*="card"]:hover {
   animation: none;
 }
 
-/* Page transition feel */
-main {
-  animation: fadeIn 0.5s ease both;
-}
+/* (No animation on <main>: a filled opacity animation makes it a stacking
+   context, which trapped every drawer/overlay inside the page beneath the
+   sticky header. Sections already fade in individually.) */
 
 /* Smooth scroll behavior */
 html { scroll-behavior: smooth; }
@@ -573,14 +611,14 @@ html[lang="ar"] .editorial, html[dir="rtl"] .editorial {
 
 /* Section eyebrow on dark */
 .eyebrow {
-  font-family: var(--font-body);
-  font-size: 0.7rem;
+  font-family: var(--font-ui);
+  font-size: var(--fs-eyebrow);
   font-weight: 500;
-  letter-spacing: 0.24em;
+  letter-spacing: var(--tracking-eyebrow);
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--ink-dim);
 }
-html[dir="rtl"] .eyebrow { font-family: var(--font-ar); letter-spacing: 0.1em; }
+html[dir="rtl"] .eyebrow { font-size: 0.82rem; font-weight: 500; }
 
 /* ── Buttons on dark ─────────────────────────────────── */
 .btn--solid {
@@ -832,3 +870,32 @@ button.btn,
   box-shadow: none;
 }
 .btn--quiet:hover:not(:disabled) { background: var(--btn-quiet-bg-hover); color: var(--ink); }
+
+/* ═══════════════════════════════════════════════════════
+   "View all" link — one style for every section header.
+   Transparent with a hairline border (no white fill), ink on hover.
+   ═══════════════════════════════════════════════════════ */
+.link-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 42px;
+  padding: 0.55rem 1.15rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+html[dir="rtl"] .link-pill { letter-spacing: 0; font-size: 0.9rem; }
+.link-pill:hover { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
+.link-pill__arrow { transition: transform 0.25s ease; }
+html[dir="rtl"] .link-pill__arrow { transform: scaleX(-1); }
+.link-pill:hover .link-pill__arrow { transform: translate(2px, -2px); }
+html[dir="rtl"] .link-pill:hover .link-pill__arrow { transform: scaleX(-1) translate(2px, -2px); }
